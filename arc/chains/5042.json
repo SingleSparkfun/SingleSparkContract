@@ -1,0 +1,19 @@
+{
+  "chainId": 5042,
+  "name": "Arc",
+  "testnet": false,
+  "nativeCurrency": { "name": "USDC", "symbol": "USDC", "decimals": 18 },
+  "uniswapV4": {
+    "poolManager": "0x8366a39CC670B4001A1121B8F6A443A643e40951",
+    "positionManager": "0x6049c9a0e26405C0985f9E3685C87d0aE917f82B",
+    "quoter": "0x8Dc178eFB8111BB0973Dd9d722ebeFF267c98F94",
+    "stateView": "0xF3334192D15450CdD385c8B70e03f9A6bD9E673b",
+    "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3"
+  },
+  "economics": {
+    "halfSupplyCost": "10000000000000000000000",
+    "minLaunchTick": -160100,
+    "minBuyback": "5000000000000000000",
+    "keeperGas": { "trigger": "2e18", "buffer": "1e18", "maxTopup": "0.25e18", "minTopup": "0.01e18", "dailyLimit": "2e18" }
+  }
+}

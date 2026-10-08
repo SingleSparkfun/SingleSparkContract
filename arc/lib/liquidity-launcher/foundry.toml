@@ -1,0 +1,30 @@
+[profile.default]
+optimizer_runs = 200
+src = "src"
+out = "out"
+libs = ["lib"]
+bytecode_hash = "none"
+fs_permissions = [
+  { access = "read", path = "script/" }
+]
+ffi = true
+# Suppress third-party deprecated memory-safe-assembly NatSpec warnings from dependencies.
+ignored_error_codes = [2424]
+
+auto_detect_solc = true
+
+[profile.default.fuzz]
+runs = 1000
+
+# Named profiles do not inherit [profile.default]: mirror the settings that change build
+# output, so CI bytecode (and thus CREATE2 addresses and gas snapshots) matches local builds.
+[profile.ci]
+bytecode_hash = "none"
+
+[profile.ci.fuzz]
+runs = 2500
+
+[lint]
+lint_on_build = false
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

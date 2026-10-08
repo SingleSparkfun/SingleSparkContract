@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+out/
+cache/
+
+arc/data/
+solana/target/
+.data/

@@ -1,0 +1,19 @@
+{
+  "chainId": 31337,
+  "name": "ETH-like (synthetic, local tests only)",
+  "testnet": true,
+  "nativeCurrency": { "name": "Ether", "symbol": "ETH", "decimals": 18 },
+  "uniswapV4": {
+    "poolManager": null,
+    "positionManager": null,
+    "quoter": null,
+    "stateView": null,
+    "permit2": null
+  },
+  "economics": {
+    "halfSupplyCost": "3.7e18",
+    "minLaunchTick": -81075,
+    "minBuyback": "0.00185e18",
+    "keeperGas": { "trigger": "0.00074e18", "buffer": "0.00037e18", "maxTopup": "0.0000925e18", "minTopup": "0.0000037e18", "dailyLimit": "0.00074e18" }
+  }
+}
