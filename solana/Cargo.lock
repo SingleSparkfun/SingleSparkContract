@@ -1081,9 +1081,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 
 [[package]]
+name = "singlespark-dao"
+version = "0.1.0"
+dependencies = [
+ "borsh 1.8.1",
+ "solana-curve25519",
+ "solana-program",
+ "spl-token",
+ "spl-token-2022",
+]
+
+[[package]]
 name = "singlespark-pump-fixture"
 version = "0.1.0"
 dependencies = [
+ "solana-program",
+ "spl-token",
+ "spl-token-2022",
+]
+
+[[package]]
+name = "singlespark-revenue"
+version = "0.1.0"
+dependencies = [
+ "borsh 1.8.1",
+ "solana-curve25519",
  "solana-program",
  "spl-token",
  "spl-token-2022",
@@ -1098,6 +1120,14 @@ dependencies = [
  "solana-program",
  "spl-token",
  "spl-token-2022",
+]
+
+[[package]]
+name = "singlespark-timelock"
+version = "0.1.0"
+dependencies = [
+ "borsh 1.8.1",
+ "solana-program",
 ]
 
 [[package]]

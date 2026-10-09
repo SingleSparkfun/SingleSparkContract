@@ -7,6 +7,8 @@
   "scripts": {
     "test": "node --test tests/client.test.mjs",
     "test:local": "node tests/local.mjs",
+    "test:split": "SINGLESPARK_SOLANA_SPLIT=1 node tests/local.mjs",
+    "build:split": "cargo build-sbf --manifest-path Cargo.toml --workspace --sbf-out-dir target/deploy-split --arch v3 -- --locked",
     "export:backend": "node export-client.mjs",
     "check:backend": "node export-client.mjs --check"
   },

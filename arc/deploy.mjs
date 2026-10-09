@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createPublicClient, createWalletClient, defineChain, http, parseUnits, formatUnits, parseEventLogs, getAddress, keccak256, zeroAddress, encodeDeployData, encodeFunctionData, parseTransaction, recoverTransactionAddress, getCreate2Address, toHex, concatHex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { stringify, persist } from './runtime.mjs';
-import { arcAbi } from '../../SingleSparkFront/front/web3/arcAbi.ts';
+import { arcAbi } from '../../SingleSparkFront/front/chains/evm/arcAbi.ts';
 import { loadChainProfile, keeperGasArgument, profileSummary } from './chains/profile.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));

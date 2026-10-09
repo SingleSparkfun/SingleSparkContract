@@ -67,7 +67,7 @@ async function serveBackend(env) {
   assert((await client.getCode({address:env.ARC_ARGUS_PLATFORM_TOKEN}))?.length>2,'Saved fork state is missing; do not reuse its database');
   writeFileSync(resolve(serveDir,'runtime.env'),Object.entries(env).filter(([k])=>k.startsWith('ARC_')).map(([k,v])=>`${k}=${v}`).join('\n')+'\n',{mode:0o600});
   writeFileSync(resolve(serveDir,'frontend.json'),JSON.stringify({url:'http://127.0.0.1:8092',chainId:31338,keyId:'argus-local-fork',signer:privateKeyToAccount(env.ARC_CONFIG_SIGNING_KEY).address}));
-  const frontendEnv='.env.arc.local';
+  const frontendEnv='SingleSparkFront/.env.arc.local';
   let frontend=existsSync(frontendEnv)?readFileSync(frontendEnv,'utf8'):'';
   const set=(key,update,fallback)=>{
     const line=frontend.split('\n').find(line=>line.startsWith(`${key}=`));
@@ -108,7 +108,7 @@ try{
   for(const l of [a,b].filter(Boolean))await send(custody,route,router.abi,'register',[l.token,trader.address]);
   mark('single custody and governance binding',{custody:custody.address,router:route,platformVault:vault});
   if(serve||independent){
-    const dbUrl=new URL(readFileSync('SingleSparkContract/arc/.env.postgres.local','utf8').split('\n').find(l=>l.startsWith('ARC_TEST_DATABASE_URL=')).slice('ARC_TEST_DATABASE_URL='.length));
+    const dbUrl=new URL(readFileSync('SingleSparkBackend/.env.postgres.local','utf8').split('\n').find(l=>l.startsWith('ARC_TEST_DATABASE_URL=')).slice('ARC_TEST_DATABASE_URL='.length));
     assert(dbUrl.pathname.endsWith('_test'));
     const env={...Object.fromEntries(Object.entries(process.env).filter(([k])=>!k.startsWith('ARC_'))),
       ARC_CHAIN_ID:'31338',ARC_CHAIN_NAME:'Argus Local Fork',ARC_NATIVE_NAME:'Test USDC',ARC_NATIVE_SYMBOL:'USDC',ARC_NATIVE_DECIMALS:'18',ARC_TESTNET:'true',
@@ -174,7 +174,7 @@ try{
   await send(trader,treasury,project.abi,'withdrawStake',[1n]);mark('project governance approved exact payout',{treasury,proposalTx:proposed.transactionHash,testFundingUsdc6:'300000000'});
   mark('receipt totals',{revenues});
   // The real Rust signer and PostgreSQL ledger now replay these actual receipts and execute their own budgets.
-  const dbUrl=new URL(readFileSync('SingleSparkContract/arc/.env.postgres.local','utf8').split('\n').find(l=>l.startsWith('ARC_TEST_DATABASE_URL=')).slice('ARC_TEST_DATABASE_URL='.length));
+  const dbUrl=new URL(readFileSync('SingleSparkBackend/.env.postgres.local','utf8').split('\n').find(l=>l.startsWith('ARC_TEST_DATABASE_URL=')).slice('ARC_TEST_DATABASE_URL='.length));
   assert(dbUrl.pathname.endsWith('_test'));
   const schema=`test_argus_${Date.now()}`;
   const pgEnv={...process.env,PGPASSWORD:decodeURIComponent(dbUrl.password)};

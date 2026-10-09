@@ -57,12 +57,24 @@ pub struct Project {
     pub burned: u64,
     pub platform_burned: u64,
     pub recipients_paid: u64,
+    pub timelock: Pubkey,
+    pub paused: u8,
+    /// Zero means the original immutable allocation; overrides affect future credits only.
+    pub weights: [u16; 5],
+    pub policy_revision: u64,
 }
 impl Project {
     pub fn reserved(&self) -> Result<u64> {
         self.balances
             .iter()
             .try_fold(self.bounty, |a, b| add(a, *b))
+    }
+    pub fn sync(&mut self, available: u64, source: u8) -> Result<()> {
+        let income = sub(available, self.reserved()?)?;
+        if income > 0 {
+            self.credit(income, source)?;
+        }
+        self.conserve()
     }
     pub fn work(&self) -> Result<u64> {
         add(
@@ -86,21 +98,25 @@ impl Project {
         } else {
             amount
         };
-        let shares = [
-            ratio(base, if self.platform { 94 } else { 83 }, 100)?,
-            if self.platform {
-                0
-            } else {
-                ratio(base, 7, 100)?
-            },
-            ratio(base, 5, 100)?,
-            if self.platform {
-                0
-            } else {
-                ratio(base, 4, 100)?
-            },
-            if source == 1 { base / 100 } else { 0 },
-        ];
+        let weights = if self.weights == [0; 5] {
+            [
+                if self.platform { 9400 } else { 8300 },
+                if self.platform { 0 } else { 700 },
+                500,
+                if self.platform { 0 } else { 400 },
+                if source == 1 { 100 } else { 0 },
+            ]
+        } else {
+            self.weights
+        };
+        require(
+            weights.iter().map(|n| *n as u32).sum::<u32>()
+                == if source == 1 { 10000 } else { 9900 },
+        )?;
+        let mut shares = [0u64; 5];
+        for (part, weight) in shares.iter_mut().zip(weights) {
+            *part = ratio(base, weight as u64, 10000)?;
+        }
         let allocated = shares.iter().try_fold(bounty, |a, b| add(a, *b))?;
         for (i, value) in shares.into_iter().enumerate() {
             self.balances[i] = add(self.balances[i], value)?;
@@ -121,6 +137,14 @@ impl Project {
     pub fn conserve(&self) -> Result<()> {
         require(add(add(self.reserved()?, self.spent)?, self.bounty_paid)? == self.received)
     }
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug)]
+pub struct PluginGate {
+    pub config: Pubkey,
+    pub timelock: Pubkey,
+    pub paused: u8,
+    pub revision: u64,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug)]
@@ -169,6 +193,22 @@ pub struct Vote {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn sync_credits_only_unbooked_income_and_preserves_old_budgets() {
+        let mut p = Project::default();
+        p.sync(10_000, 0).unwrap();
+        p.sync(10_000, 0).unwrap();
+        assert_eq!(p.received, 10_000);
+        assert_eq!(p.bounty, 100);
+        assert!(p.sync(9_999, 0).is_err());
+        p.weights = [7900, 700, 500, 800, 0];
+        p.sync(20_000, 0).unwrap();
+        assert_eq!(p.balances, [16200, 1400, 1000, 1200, 0]);
+        p.paused = 3;
+        p.sync(20_000, 0).unwrap();
+        assert_eq!(p.received, 20_000);
+        p.conserve().unwrap();
+    }
     #[test]
     fn allocation_and_completion_conserve_lamports() {
         for source in [0, 1] {

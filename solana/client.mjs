@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import { PublicKey, TransactionInstruction, SystemProgram, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { PublicKey, TransactionInstruction, SystemProgram, TransactionMessage, VersionedTransaction, SYSVAR_RENT_PUBKEY, SYSVAR_CLOCK_PUBKEY } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, NATIVE_MINT, getAssociatedTokenAddressSync,
-  createAssociatedTokenAccountIdempotentInstruction, createCloseAccountInstruction } from '@solana/spl-token';
+  ASSOCIATED_TOKEN_PROGRAM_ID, createAssociatedTokenAccountIdempotentInstruction } from '@solana/spl-token';
 
 export const PUMP = new PublicKey('6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P');
 export const AMM = new PublicKey('pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA');
@@ -14,11 +14,11 @@ const bool = value => { assert(typeof value === 'boolean'); return byte(Number(v
 const meta = (pubkey, isWritable = false, isSigner = false) => ({ pubkey: pk(pubkey), isWritable, isSigner });
 export const derive = (program, ...seeds) => PublicKey.findProgramAddressSync(seeds, pk(program))[0];
 export const configAddress = (program, authority) => derive(program, Buffer.from('config'), key(authority));
+export const vaultAddress = (program, config, mint) => derive(program, Buffer.from('hook-vault'), key(config), key(mint));
 export const projectAddress = (program, hook) => derive(program, Buffer.from('project'), key(hook));
 export const governanceAddress = (program, config) => derive(program, Buffer.from('dao'), key(config));
 export const roundAddress = (program, governance, number) => derive(program, Buffer.from('round'), key(governance), u64(number));
 export const voteAddress = (program, round, voter) => derive(program, Buffer.from('vote'), key(round), key(voter));
-export const paidAddress = (program, project, recipient) => derive(program, Buffer.from('paid'), key(project), key(recipient));
 export const curveAddress = mint => derive(PUMP, Buffer.from('bonding-curve'), key(mint));
 export const tokenAddress = (mint, owner, tokenProgram = TOKEN_PROGRAM_ID) => getAssociatedTokenAddressSync(pk(mint), pk(owner), true, pk(tokenProgram));
 const ix = (program, tag, keys, ...data) => new TransactionInstruction({ programId: pk(program), keys, data: Buffer.concat([byte(tag), ...data]) });
@@ -29,7 +29,7 @@ export function buildTransaction({ payer, blockhash, instructions, lookupTables 
   assert(tx.serialize().length <= 1232, 'Transaction too large: use a verified lookup table or split the batch');
   return tx;
 }
-const base = ({ program, payer, config, hook }) => [meta(payer, true, true), meta(config), meta(projectAddress(program, hook), true), meta(hook, true, true), meta(SystemProgram.programId)];
+const base = ({ program, payer, config, hook }) => [meta(payer, true, true), meta(config), meta(projectAddress(program, hook), true), meta(hook, true), meta(SystemProgram.programId)];
 const createAta = (payer, mint, owner, tokenProgram = TOKEN_PROGRAM_ID) => createAssociatedTokenAccountIdempotentInstruction(pk(payer), tokenAddress(mint, owner, tokenProgram), pk(owner), pk(mint), pk(tokenProgram));
 
 // Preserve fixed account positions and append each CPI's additional accounts only once.
@@ -45,6 +45,8 @@ function wrap(program, tag, keys, data, instructions) {
     ...instruction.keys.map(m => Buffer.concat([byte(index(m)), bool(m.isSigner), bool(m.isWritable)])),
     u32(instruction.data.length), instruction.data,
   ]));
+  // Inner CPI signer privileges belong to the PDA, never the transaction's signature list.
+  keys.forEach(m => { if (m.pubkey.equals(keys[3].pubkey)) m.isSigner = false; });
   return ix(program, tag, keys, ...data, u32(steps.length), ...steps);
 }
 export function initializeConfig(v) {
@@ -54,36 +56,36 @@ export function initializeConfig(v) {
 }
 export function initializeProject(v) {
   return ix(v.program, 1, [meta(v.payer, true, true), meta(v.authority, false, true), meta(v.config), meta(projectAddress(v.program, v.hook), true),
-    meta(v.hook, false, true), meta(v.mint), meta(curveAddress(v.mint)), meta(SystemProgram.programId)], bool(v.buyback), bool(v.distribution), key(v.reserveRecipient));
+    meta(v.hook, true), meta(v.mint), meta(curveAddress(v.mint)), meta(SystemProgram.programId),
+    meta(programDataAddress(v.program)), meta(v.timelock), meta(programDataAddress(v.timelock)), meta(v.program), meta(pluginGateAddress(v.program,v.config),true)],
+    bool(v.buyback), bool(v.distribution), key(v.reserveRecipient), key(v.timelock));
 }
 export function collectRevenue(v) {
   assert(v.instructions.length > 0 && v.instructions.length <= 2 && v.instructions.every(i => [PUMP, AMM].some(p => p.equals(i.programId))));
   const wrapped = tokenAddress(NATIVE_MINT, v.hook);
   const inner = wrap(v.program, 2, [...base(v), meta(v.mint), meta(curveAddress(v.mint)), meta(wrapped, true)], [u64(v.nonce)], v.instructions);
-  return [createAta(v.payer, NATIVE_MINT, v.hook), inner, createCloseAccountInstruction(wrapped, pk(v.hook), pk(v.hook))];
+  return vaultOperation(v, inner);
 }
 export function buyAndExecute(v) {
   assert([0, 1, 2].includes(v.kind));
   const wrapped = tokenAddress(NATIVE_MINT, v.hook);
-  // The official SDK's ATA/close helpers stay outside the guarded buy; only these CPIs are allowed inside.
+  // The user funds ATA setup; the program handles unwrapping and burns under its own checks.
   assert(v.instructions.every(i => [PUMP, AMM, SystemProgram.programId, TOKEN_PROGRAM_ID].some(p => p.equals(i.programId))));
   const inner = wrap(v.program, 3, [...base(v), meta(v.targetMint, true), meta(tokenAddress(v.targetMint, v.hook, v.tokenProgram), true),
     meta(v.tokenProgram), meta(wrapped, true), meta(curveAddress(v.targetMint), true)],
     [u64(v.nonce), byte(v.kind), u64(v.maxDebit), u64(v.minTokens), u64(v.minReward), u64(v.sponsorRent), u64(v.deadline)], v.instructions);
-  return [createAta(v.payer, NATIVE_MINT, v.hook), createAta(v.payer, v.targetMint, v.hook, v.tokenProgram), inner,
-    createCloseAccountInstruction(wrapped, pk(v.hook), pk(v.hook))];
+  return [createAta(v.payer, v.targetMint, v.hook, v.tokenProgram), ...vaultOperation(v, inner)];
 }
 export function distribute(v) {
   assert(v.recipients.length > 0 && v.recipients.length <= 4 && new Set(v.recipients.map(r => pk(r).toBase58())).size === v.recipients.length);
-  const project = projectAddress(v.program, v.hook);
-  return [...v.recipients.map(r => createAta(v.payer, v.mint, r, v.tokenProgram)), ix(v.program, 4, [...base(v), meta(v.mint),
+  return [...v.recipients.map(r => createAta(v.payer, v.mint, r, v.tokenProgram)), ...vaultOperation(v, ix(v.program, 6, [...base(v), meta(v.mint),
     meta(tokenAddress(v.mint, v.hook, v.tokenProgram), true), meta(v.tokenProgram), ...v.recipients.flatMap(r => [meta(r),
-      meta(tokenAddress(v.mint, r, v.tokenProgram), true), meta(paidAddress(v.program, project, r), true)])],
-    u64(v.nonce), u64(v.minReward), u64(v.deadline))];
+      meta(tokenAddress(v.mint, r, v.tokenProgram), true)])],
+    u64(v.nonce), u64(v.minReward), u64(v.deadline)))];
 }
 export function withdrawReserve(v) {
   assert([3, 4].includes(v.bucket));
-  return ix(v.program, 5, [...base(v), meta(v.recipient, true, true)], u64(v.nonce), byte(v.bucket), u64(v.amount));
+  return vaultOperation(v, ix(v.program, 5, [...base(v), meta(v.recipient, true, true)], u64(v.nonce), byte(v.bucket), u64(v.amount)));
 }
 export function initializeGovernance(v) {
   assert([0, 1].includes(v.releaseBasis), 'Choose the release basis explicitly');
@@ -127,9 +129,10 @@ export function decodeState(info, program, expectedTag) {
   const wide = () => { const value = read(16); return value.readBigUInt64LE() + (value.readBigUInt64LE(8) << 64n); };
   let result;
   if (data[0] === 1) result = { authority: p(), platform: p(), bountySource: b(), minimum: n(), maximum: n() };
-  else if (data[0] === 2) result = { config: p(), mint: p(), hook: p(), reserveRecipient: p(), buyback: boolean(), distribution: boolean(), platform: boolean(),
+  else if (data[0] === 7) result = { config: p(), mint: p(), hook: p(), reserveRecipient: p(), buyback: boolean(), distribution: boolean(), platform: boolean(),
     nonce: n(), received: n(), balances: Array.from({ length: 5 }, n), bounty: n(), bountyPaid: n(), spent: n(), rewardTokens: n(), rewardCost: n(),
-    burned: n(), platformBurned: n(), recipientsPaid: n() };
+    burned: n(), platformBurned: n(), recipientsPaid: n(), timelock: p(), paused: b(), weights: Array.from({ length: 5 }, () => read(2).readUInt16LE()), policyRevision: n() };
+  else if (data[0] === 8) result = { config: p(), timelock: p(), paused: b(), revision: n() };
   else if (data[0] === 16) result = { config: p(), mint: p(), team: p(), tokenProgram: p(), initial: n(), remaining: n(), genesis: read(8).readBigInt64LE(),
     releaseBasis: b(), quorum: n(), weightCapSeconds: read(4).readUInt32LE(), nextRound: n(), active: boolean() };
   else if (data[0] === 17) result = { governance: p(), number: n(), end: read(8).readBigInt64LE(), pot: n(), yes: wide(), no: wide(), yesStake: n(), noStake: n(),
@@ -148,4 +151,60 @@ export function voteReward(round, vote) {
   if (total === 0n) return 0n;
   if (round.outcome !== 0 && vote.weight === round.weightRemaining) return round.rewardRemaining;
   return (round.pot - round.pot * 90n / 100n) * vote.weight / total;
+}
+
+function vaultOperation(v, instruction) {
+  assert(vaultAddress(v.program, v.config, v.mint).equals(pk(v.hook)), 'Unexpected vault PDA');
+  instruction.keys.push(meta(v.authority, false, true), meta(tokenAddress(NATIVE_MINT, v.hook), true),
+    meta(NATIVE_MINT), meta(TOKEN_PROGRAM_ID), meta(ASSOCIATED_TOKEN_PROGRAM_ID), meta(pluginGateAddress(v.program,v.config)));
+  return [createAta(v.payer, NATIVE_MINT, v.hook), instruction];
+}
+
+export const pluginGateAddress = (program, config) => derive(program, Buffer.from('plugins'), key(config));
+export const UPGRADE_LOADER = new PublicKey('BPFLoaderUpgradeab1e11111111111111111111111');
+export const UPGRADE_DELAY_SECONDS = 172800;
+export const programDataAddress = program => derive(UPGRADE_LOADER, key(program));
+export const timelockAddress = (timelock, program) => derive(timelock, Buffer.from('upgrade'), key(program));
+export function initializeTimelock(v) {
+  return ix(v.timelock, 0, [meta(v.admin, true, true), meta(timelockAddress(v.timelock, v.program), true),
+    meta(v.program), meta(programDataAddress(v.program), true), meta(v.timelock), meta(programDataAddress(v.timelock)),
+    meta(SystemProgram.programId), meta(UPGRADE_LOADER)]);
+}
+export function pluginParameters(v) {
+  assert(v.weights.length === 5 && v.weights.every(n => Number.isInteger(n) && n >= 0 && n <= 10000));
+  assert([9900, 10000].includes(v.weights.reduce((a,b) => a+b,0)) && Number.isInteger(v.paused) && v.paused >= 0 && v.paused <= 3);
+  const weights = Buffer.alloc(10); v.weights.forEach((n,i) => weights.writeUInt16LE(n,i*2));
+  return Buffer.concat([bool(v.buyback), bool(v.distribution), weights, byte(v.paused)]);
+}
+export function pausePlugins(v) {
+  assert(Number.isInteger(v.mask) && v.mask > 0 && v.mask <= 3);
+  return ix(v.program, 7, [meta(v.authority, false, true), meta(v.config), meta(projectAddress(v.program,v.hook),true)], byte(v.mask));
+}
+export function pauseAllPlugins(v) {
+  assert(Number.isInteger(v.mask) && v.mask > 0 && v.mask <= 3);
+  return ix(v.program,9,[meta(v.authority,false,true),meta(v.config),meta(pluginGateAddress(v.program,v.config),true)],byte(v.mask));
+}
+export function scheduleGlobalResume(v) {
+  assert(Number.isInteger(v.mask) && v.mask > 0 && v.mask <= 3);
+  return lockOperation({ ...v, buffer: pluginGateAddress(v.program,v.config) },5,byte(v.mask));
+}
+export function scheduleUpgrade(v) { return lockOperation(v, 1); }
+export function schedulePlugins(v) { return lockOperation(v, 4, pluginParameters(v.change)); }
+export function cancelScheduled(v) { return lockOperation(v, 2); }
+export function executeScheduled(v) { return lockOperation(v, 3); }
+function lockOperation(v, tag, data = Buffer.alloc(0)) {
+  const keys = [meta(v.admin,true,tag !== 3), meta(timelockAddress(v.timelock,v.program),true),
+    meta(v.program,tag === 3), meta(programDataAddress(v.program),tag === 3), meta(v.buffer,true), meta(UPGRADE_LOADER)];
+  if (tag === 4 || tag === 5 || tag === 3 && v.config) keys.push(meta(v.config));
+  else if (tag === 3) keys.push(meta(SYSVAR_RENT_PUBKEY),meta(SYSVAR_CLOCK_PUBKEY));
+  if (tag === 3 && v.hook) { assert(v.config); keys.push(meta(v.hook),meta(tokenAddress(NATIVE_MINT,v.hook))); }
+  return ix(v.timelock,tag,keys,data);
+}
+export function decodeTimelock(info, timelock, program) {
+  assert(info?.owner.equals(pk(timelock)) && info.data.length === 190, 'Invalid timelock state');
+  const d = info.data;
+  const result = { program: new PublicKey(d.subarray(0,32)).toBase58(), admin: new PublicKey(d.subarray(32,64)).toBase58(),
+    buffer: new PublicKey(d.subarray(64,96)).toBase58(), digest: d.subarray(96,128).toString('hex'),
+    executableAt: d.readBigInt64LE(128), action: d[136], config: new PublicKey(d.subarray(137,169)).toBase58(), parameters: d.subarray(169,182), policyRevision: d.readBigUInt64LE(182) };
+  assert(result.program === pk(program).toBase58() && result.action <= 2, 'Timelock program mismatch'); return result;
 }

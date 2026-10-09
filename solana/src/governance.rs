@@ -5,7 +5,10 @@ use solana_program::{
     program_error::ProgramError, pubkey::Pubkey, sysvar::Sysvar,
 };
 
-pub const DAY: i64 = 86_400;
+#[cfg(not(feature = "devnet-ten-minute-rounds"))]
+pub const ROUND_SECONDS: i64 = 86_400;
+#[cfg(feature = "devnet-ten-minute-rounds")]
+pub const ROUND_SECONDS: i64 = 600;
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct InitArgs {
     pub team: Pubkey,
@@ -74,7 +77,7 @@ fn initialize(program: &Pubkey, a: &[AccountInfo], v: InitArgs) -> Result<()> {
             && v.team != c.platform
             && v.release_basis <= 1
             && v.weight_cap_seconds > 0
-            && v.weight_cap_seconds <= DAY as u32,
+            && v.weight_cap_seconds <= ROUND_SECONDS as u32,
     )?;
     let m = mint(&a[3])?;
     require(
@@ -123,7 +126,7 @@ fn open(program: &Pubkey, a: &[AccountInfo]) -> Result<()> {
     asset(&g, &a[5], &a[6])?;
     let now = Clock::get()?.unix_timestamp;
     require(now >= g.genesis && !g.active && g.remaining > 0)?;
-    let number = ((now - g.genesis) / DAY) as u64;
+    let number = ((now - g.genesis) / ROUND_SECONDS) as u64;
     require(number >= g.next_round && vault(&a[3], a[1].key, &g)? >= g.remaining)?;
     vault(&a[4], a[2].key, &g)?;
     let base = if g.release_basis == 0 {
@@ -137,7 +140,7 @@ fn open(program: &Pubkey, a: &[AccountInfo]) -> Result<()> {
         .checked_add(
             i64::try_from(number + 1)
                 .map_err(|_| ProgramError::ArithmeticOverflow)?
-                .checked_mul(DAY)
+                .checked_mul(ROUND_SECONDS)
                 .ok_or(ProgramError::ArithmeticOverflow)?,
         )
         .ok_or(ProgramError::ArithmeticOverflow)?;
@@ -184,7 +187,7 @@ fn vote(program: &Pubkey, a: &[AccountInfo], v: VoteArgs) -> Result<()> {
             && add(r.number, 1)? == g.next_round
             && r.outcome == 0
             && now < r.end
-            && now >= r.end - DAY,
+            && now >= r.end - ROUND_SECONDS,
     )?;
     vault(&a[5], a[2].key, &g)?;
     token(&a[4], &g.mint, a[0].key, &g.token_program)?;

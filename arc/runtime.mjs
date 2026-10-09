@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, renameSync, mkdirSync, openSync, fsyncSync
 import { resolve } from 'node:path';
 import { createPublicClient, createWalletClient, defineChain, http, encodeFunctionData, keccak256, zeroAddress, parseUnits } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { arcAbi, quoterAbi, positionManagerAbi } from '../../SingleSparkFront/front/web3/arcAbi.ts';
+import { arcAbi, quoterAbi, positionManagerAbi } from '../../SingleSparkFront/front/chains/evm/arcAbi.ts';
 
 export const stringify = (value) => JSON.stringify(value, (_, v) => typeof v === 'bigint' ? v.toString() : v);
 

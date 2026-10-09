@@ -4,8 +4,8 @@ import { Keypair, TransactionInstruction, AddressLookupTableAccount, SystemProgr
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import * as sdk from '../client.mjs';
 
-const [program, payer, authority, hook, mint, team] = Array.from({length:6},()=>Keypair.generate().publicKey);
-const config = sdk.configAddress(program,authority);
+const [program, payer, authority, unused, mint, team] = Array.from({length:6},()=>Keypair.generate().publicKey);
+const config = sdk.configAddress(program,authority), hook = sdk.vaultAddress(program,config,mint);
 
 test('financial choices must be explicit; numbers retain all lamports',()=>{
   const v={program,payer,authority,platformMint:mint,minimum:1n,maximum:1_000_000_000n};
@@ -17,19 +17,21 @@ test('financial choices must be explicit; numbers retain all lamports',()=>{
   assert.throws(()=>sdk.initializeGovernance({program,authority,config,mint,team,tokenProgram:TOKEN_PROGRAM_ID,quorum:1n,weightCapSeconds:86400}));
 });
 
-test('config, Hook, round, voter and recipient identities are isolated in PDA seeds',()=>{
+test('config, Hook, round and voter identities are isolated; payouts omit permanent recipient records',()=>{
   assert(!sdk.projectAddress(program,hook).equals(sdk.projectAddress(program,payer)));
   const dao=sdk.governanceAddress(program,config);
   assert(!sdk.roundAddress(program,dao,0n).equals(sdk.roundAddress(program,dao,1n)));
   const round=sdk.roundAddress(program,dao,0n);
   assert(!sdk.voteAddress(program,round,payer).equals(sdk.voteAddress(program,round,authority)));
-  assert(!sdk.paidAddress(program,round,payer).equals(sdk.paidAddress(program,round,authority)));
-  assert.throws(()=>sdk.distribute({program,payer,config,hook,mint,tokenProgram:TOKEN_PROGRAM_ID,nonce:0n,minReward:0n,deadline:1n,recipients:[team,team]}));
+  const payout=sdk.distribute({program,payer,authority,config,hook,mint,tokenProgram:TOKEN_PROGRAM_ID,nonce:0n,minReward:0n,deadline:1n,recipients:[team,authority]}).at(-1);
+  assert.equal(payout.data[0],6);
+  assert.equal(payout.keys.length,18);
+  assert.throws(()=>sdk.distribute({program,payer,authority,config,hook,mint,tokenProgram:TOKEN_PROGRAM_ID,nonce:0n,minReward:0n,deadline:1n,recipients:[team,team]}));
 });
 
-test('v0 transactions retain the user fee payer and Hook signer with a lookup table',()=>{
+test('v0 transactions retain the user fee payer and policy signer with a lookup table',()=>{
   const addresses=Array.from({length:38},()=>Keypair.generate().publicKey);
-  const instruction=new TransactionInstruction({programId:program,keys:[{pubkey:hook,isSigner:true,isWritable:true},
+  const instruction=new TransactionInstruction({programId:program,keys:[{pubkey:authority,isSigner:true,isWritable:true},
     ...addresses.map(pubkey=>({pubkey,isSigner:false,isWritable:false}))],data:Buffer.alloc(100)});
   const input={payer,blockhash:Keypair.generate().publicKey.toBase58(),instructions:[instruction]};
   assert.throws(()=>sdk.buildTransaction(input));
@@ -38,7 +40,7 @@ test('v0 transactions retain the user fee payer and Hook signer with a lookup ta
   const tx=sdk.buildTransaction({...input,lookupTables:[table]});
   assert.equal(tx.message.header.numRequiredSignatures,2);
   assert(tx.message.staticAccountKeys[0].equals(payer));
-  assert(tx.message.staticAccountKeys[1].equals(hook));
+  assert(tx.message.staticAccountKeys[1].equals(authority));
   assert(tx.serialize().length<=1232);
 });
 

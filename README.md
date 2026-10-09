@@ -1,11 +1,12 @@
 # SingleSpark Doc
 
-From the first spark to a community. Understand what SingleSpark stands for, how the platform token is designed, and how plugins put trading activity to work.
+From the first spark to a community. See where project funds are held, how shared on-chain plugins use them, and how to verify the results.
 
 ## Contents
 
 - [Platform philosophy](#platform-philosophy)
 - [Platform token economics](#platform-token-economics)
+- [Project vaults & shared plugins](#project-vaults--shared-plugins)
 - [Plugin playbook](#plugin-playbook)
 - [Multi-chain plugin model](#multi-chain-plugin-model)
 - [Transparency & participation](#transparency--participation)
@@ -69,15 +70,46 @@ Governance is not live. The proposed daily release rate is 0.1%; its calculation
 
 [Explore the DAO model](https://singlespark.fun/dao)
 
+## Project vaults & shared plugins
+
+A vault holds funds; a plugin defines an action. Projects keep separate balances, allocations and execution records even when they use the same plugin code.
+
+```mermaid
+flowchart LR
+    I[Project income] --> V[Project vault]
+    V --> B[Plugin budgets]
+    B --> R[Confirmed actions]
+    P[Shared Solana revenue program] -. enforces .-> V
+    P -. enforces .-> B
+```
+
+### Solana · PDA vault + shared program
+
+Each project has its own PDA vault for SOL, WSOL and distribution tokens. Buyback & burn and distribution run in one shared on-chain revenue program. Sharing the program does not share project balances or budgets.
+
+A Solana PDA has no private key. Only the revenue program that derives it can authorize vault movement. The backend approves bounded strategies; Claim users sign and pay for execution. A shared program is not a shared fund pool.
+
+Initial selections apply when registration confirms. Later plugin changes, weight changes, reactivation and program upgrades require a 48-hour timelock. Local or global emergency pauses take effect immediately and preserve funds.
+
+A global pause covers current and future vaults under the same program configuration. Other configurations and chains remain separate. The DAO uses its own program and vaults.
+
+### EVM · vault contracts
+
+The EVM vault model holds project funds in smart contracts, with spending governed by the deployed contract and its permissions. Vault addresses, assets and execution rules belong to that network and deployment.
+
+Existing EVM integrations also include custody-wallet revenue paths and separate treasury vaults. A treasury vault does not mean all plugin funds are held there. Check the deployment’s actual funds address; no automatic migration is implied.
+
+Contract details and deployment boundaries: [Solana programs](solana/README.md).
+
 ## Plugin playbook
 
-Plugins connect a project’s trading revenue to repeatable actions. Choose the available plugins at launch, then follow their budgets and confirmed results on the token page.
+Plugins use the budgets assigned to a project’s vault. On Solana, projects select the built-in actions of the shared revenue program; launching a token does not deploy a new plugin contract. Follow current plugin status and confirmed results on the token page.
 
 ### Buyback & burn
 
 Turn trading revenue into buybacks that permanently remove tokens from circulation.
 
-1. A configured share of trading fees or creator revenue accumulates in the buyback budget.
+1. Income received by the project funds its own buyback budget according to the configured allocation.
 2. When the deployment’s budget, price and execution conditions are met, that budget buys tokens.
 3. Purchased tokens are burned. Confirmed amounts and transactions appear on the meme’s page.
 
@@ -85,13 +117,13 @@ Turn trading revenue into buybacks that permanently remove tokens from circulati
 
 Share a portion of trading revenue with eligible wallets through token distributions.
 
-1. A configured share of trading fees or creator revenue funds the token distribution budget.
+1. Income received by the project funds its own token distribution budget according to the configured allocation.
 2. The deployment selects eligible wallets and waits for enough tokens and gas to execute.
 3. Tokens are sent to eligible wallets. Eligibility, payout amounts and timing follow the launch’s rules.
 
 ### Choose your project’s combination
 
-Buyback & burn focuses on removing tokens from supply. Distribution sends project tokens to eligible wallets. Where supported, both can run together with separate budgets. Review the available combination and whether choices are fixed before launching.
+Buyback & burn removes tokens from supply. Distribution sends project tokens to eligible wallets. Both can use separate budgets. On Solana, pausing a plugin preserves its funds; later policy changes apply after the timelock and do not redistribute existing budgets.
 
 Plugin availability is shown for each chain and launch platform. A listed platform may still be a preview; enabling a plugin does not mean a buyback or distribution has already executed.
 
@@ -105,9 +137,9 @@ The selected launch platform sets its native launch and trading fees. Review tho
 
 ### Revenue & plugin budgets
 
-Trading fees or creator revenue fund the project’s configured plugin budgets. Allocations apply to revenue actually received after the launch platform’s own charges, not to the full trade amount.
+Trading fees or creator revenue fund the project’s configured plugin budgets. Fee allocations apply to revenue actually received after the launch platform’s own charges, not to the full trade amount.
 
-The token page shows the project’s allocation, available balances and execution records. No collected revenue means no new plugin funding.
+On Solana, successful execution books available vault income above reserved budgets, excluding rent. This includes externally collected fees and voluntary deposits; allocated income alone does not prove that every deposit came from trading fees.
 
 ```mermaid
 flowchart LR
@@ -121,23 +153,23 @@ flowchart LR
 
 ### 1. Fund separate budgets
 
-Revenue is recorded for the project on its selected chain. Buyback and distribution budgets stay separate and follow the project’s configured allocation.
+Received income is allocated within the project’s vault. Buyback, distribution and other configured budgets stay separate; one project cannot spend another project’s funds.
 
 ### 2. Execute when ready
 
-Each plugin checks its funding, market conditions and network costs before acting. Distribution also needs eligible recipients and enough tokens. A budget or countdown is not a guarantee of execution.
+Execution checks plugin permissions, pause gates, funding and market limits. Distribution also needs eligible recipients and enough tokens. Solana Claim users review and sign each transaction; a funded budget does not execute itself.
 
 ### 3. Verify the result
 
-Buybacks purchase tokens for burning; distributions transfer tokens to eligible wallets. Follow confirmed amounts, recipients and transaction links on the token page.
+Buybacks purchase tokens for burning; distributions transfer tokens to eligible wallets. Follow confirmed amounts, recipient counts and transaction links on the token page.
 
-The plugin model is shared across chains; balances, budgets and transactions stay on their project’s chain. Funds are not automatically pooled or bridged between networks. Allocation percentages, eligibility and execution limits follow the selected project’s rules.
+The product model is shared across chains; contract code, balances and transactions stay on their own network. Funds are not automatically pooled or bridged between networks. Public launches are restricted to ARC / Argus; other networks are coming soon; an EVM vault description or catalog entry does not enable public execution.
 
 ## Transparency & participation
 
 Use the token page and public activity records to check what a project has actually done. Keep the following distinctions in mind when exploring the platform.
 
-- Check the chain, launch platform, token address and enabled plugins. Existing deployments retain their configured rules.
+- Check the chain, token, project vault, shared program or contract, and current plugin status. On Solana, local and global pauses both affect execution. Existing deployments retain their own custody and upgrade rules.
 - A budget or countdown is not a completed transaction. Burns and distributions appear as confirmed activity only after execution; open the transaction to verify it.
 - DAO participation will open when its Solana governance is available. Until then, the displayed model describes the plan, with no live staking or voting.
 

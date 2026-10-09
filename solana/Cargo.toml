@@ -9,7 +9,7 @@ publish = false
 crate-type = ["cdylib", "lib"]
 
 [workspace]
-members = ["tests/pump-fixture"]
+members = ["tests/pump-fixture", "programs/dao", "programs/revenue", "programs/timelock"]
 default-members = ["."]
 
 [dependencies]
@@ -21,6 +21,7 @@ spl-token-2022 = { version = "=8.0.1", features = ["no-entrypoint"] }
 
 [features]
 no-entrypoint = []
+devnet-ten-minute-rounds = []
 
 [profile.release]
 overflow-checks = true
