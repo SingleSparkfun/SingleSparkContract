@@ -117,9 +117,10 @@ export function withdrawVote(v) {
     meta(tokenAddress(v.mint, round, v.tokenProgram), true), meta(tokenAddress(v.mint, v.voter, v.tokenProgram), true), meta(v.mint), meta(v.tokenProgram)]);
 }
 
-export function decodeState(info, program) {
+export function decodeState(info, program, expectedTag) {
   assert(info && info.owner.equals(pk(program)), 'Unexpected state owner');
   const data = Buffer.from(info.data); let offset = 1;
+  if (expectedTag !== undefined) assert.equal(data[0], expectedTag, 'Unexpected SingleSpark account type');
   const read = size => { assert(offset + size <= data.length); const result = data.subarray(offset, offset + size); offset += size; return result; };
   const p = () => new PublicKey(read(32)).toBase58(), n = () => read(8).readBigUInt64LE(), b = () => read(1)[0];
   const boolean = () => { const value = b(); assert(value <= 1); return value === 1; };
@@ -137,4 +138,14 @@ export function decodeState(info, program) {
   else if (data[0] === 3) result = { nonce: n() };
   else throw Error('Unknown SingleSpark account version');
   assert.equal(offset, data.length, 'Unexpected state length'); return result;
+}
+
+// Mirrors governance.rs, including the final winner's rounding dust. No floating-point token math.
+export function voteReward(round, vote) {
+  if (!vote || vote.withdrawn || vote.stake === 0n) return 0n;
+  if (round.outcome === 3 || (round.outcome === 1 && !vote.support) || (round.outcome === 2 && vote.support)) return 0n;
+  const total = vote.support ? round.yes : round.no;
+  if (total === 0n) return 0n;
+  if (round.outcome !== 0 && vote.weight === round.weightRemaining) return round.rewardRemaining;
+  return (round.pot - round.pot * 90n / 100n) * vote.weight / total;
 }

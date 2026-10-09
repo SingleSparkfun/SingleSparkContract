@@ -5,16 +5,18 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
 import { once } from 'node:events';
-import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction, SystemProgram, ComputeBudgetProgram } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, Transaction, VersionedTransaction, TransactionInstruction, SystemProgram, ComputeBudgetProgram } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, NATIVE_MINT, MintLayout, AccountLayout,
   createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, createSyncNativeInstruction, getMint, getAccount } from '@solana/spl-token';
 import * as sdk from '../client.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+// Optional, explicit workspace integration; standalone contract tests have no backend dependency.
+const runtime = process.env.SINGLESPARK_SOLANA_RUNTIME ? await import(pathToFileURL(resolve(root, process.env.SINGLESPARK_SOLANA_RUNTIME))) : null;
 const binary = process.env.SOLANA_TEST_VALIDATOR ?? 'solana-test-validator';
 const temporary = await mkdtemp(join(tmpdir(), 'ss-sol-'));
 const program = Keypair.generate().publicKey;
@@ -110,6 +112,34 @@ async function send(instructions, signers = [payer]) {
   }
   throw Error('Local transaction confirmation timed out');
 }
+async function finalized() {
+  const slot = await conn.getSlot('confirmed');
+  for (let i=0;i<400;i++) {
+    if (await conn.getSlot('finalized') >= slot) return;
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  throw Error('Finalization timed out');
+}
+const runtimeInput = (who=payer) => ({ program: String(program), config: String(config), platformMint: String(platform), payer: String(who.publicKey), maxGas:'20000000', minProfit:'1' });
+async function submitPrepared(prepared, signers, input) {
+  const tx=VersionedTransaction.deserialize(Buffer.from(prepared.transaction,'base64')); tx.sign(signers);
+  const transaction=Buffer.from(tx.serialize()).toString('base64');
+  const signed=await runtime.executeProgram({...input,action:'program-validate',prepared,transaction});
+  const call={...input,action:'program-reconcile',prepared,...signed,broadcast:true};
+  await runtime.executeProgram(call,conn);
+  for(let i=0;i<400;i++) {
+    const result=await runtime.executeProgram(call,conn);
+    if(result.status==='confirmed') { assertions++; return result; }
+    assert(!['failed','expired'].includes(result.status),JSON.stringify(result));
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  throw Error('Runtime transaction finalization timed out');
+}
+async function governanceAction(operation, who=payer, fields={}) {
+  await finalized(); const input={...runtimeInput(who),action:'dao-prepare',operation,...fields};
+  const preview=await runtime.executeProgram(input,conn); assert.equal(preview.kind,operation);
+  return submitPrepared(preview,[who],input);
+}
 async function fails(instructions, signers = [payer, hook]) {
   await assert.rejects(() => send(instructions, signers)); assertions++;
 }
@@ -152,7 +182,10 @@ try {
   await start(fixtures, 'execution');
   await send([sdk.initializeConfig({program,payer:payer.publicKey,authority:authority.publicKey,platformMint:platform,bountySource:0,minimum:1n,maximum:1_000_000_000n})],[payer,authority]);
   const registration = sdk.initializeProject({...v,authority:authority.publicKey,reserveRecipient:reserve.publicKey,buyback:true,distribution:true});
-  await send([registration],[payer,authority,hook]);
+  if(runtime) {
+    await finalized(); const input={...runtimeInput(authority),action:'claim-register',mint:String(mint),hook:String(hook.publicKey),reserveRecipient:String(reserve.publicKey),plugins:{buyback:true,distribution:true}};
+    const preview=await runtime.executeProgram(input,conn); await submitPrepared(preview,[authority,hook],input);
+  } else await send([registration],[payer,authority,hook]);
   await fails([registration],[payer,authority,hook]);
   const wrapped = sdk.tokenAddress(NATIVE_MINT,hook.publicKey);
   const keys = [hook.publicKey,wrapped,feeVault,wrapped,NATIVE_MINT,TOKEN_PROGRAM_ID,SystemProgram.programId,SystemProgram.programId,SystemProgram.programId,sdk.PUMP]
@@ -162,7 +195,15 @@ try {
   check((await state(project)).balances,[83_000_000n,7_000_000n,5_000_000n,4_000_000n,0n]);
   check((await state(project)).bounty,1_000_000n);
   const first = await buy(0,41_500_000n,100_000_000n);
-  await send(first,[payer,hook]); check((await state(project)).burned,100_000_000n);
+  if(runtime) {
+    await finalized(); const input={...runtimeInput(),hook:String(hook.publicKey)};
+    const preview=await runtime.prepareTransaction(conn,input,first,{kind:'own',project:String(project),nonce:'1'},sim=>{
+      // Parse the actual SBF settlement event; no estimated reward is substituted.
+      const lines=sim.logs.filter(l=>l.startsWith('Program data: '));
+      return Buffer.from(lines.at(-1).split(' ').at(-1),'base64').readBigUInt64LE();
+    });
+    const receipt=await submitPrepared(preview,[payer,hook],input);check(receipt.bought,'100000000');
+  } else await send(first,[payer,hook]); check((await state(project)).burned,100_000_000n);
   await fails(first); // Same nonce, different transaction signature.
   const stable = await state(project), hookBalance = await conn.getBalance(hook.publicKey), oldSupply = (await getMint(conn,mint)).supply;
   await fails(await buy(0,41_500_001n,1n));
@@ -226,7 +267,8 @@ try {
   const noVotes = await snapshot(); expire(noVotes,round);
   await send([createAssociatedTokenAccountIdempotentInstruction(payer.publicKey,sdk.tokenAddress(platform,voter.publicKey,TOKEN_2022_PROGRAM_ID),voter.publicKey,platform,TOKEN_2022_PROGRAM_ID),
     createTransferCheckedInstruction(sdk.tokenAddress(platform,authority.publicKey,TOKEN_2022_PROGRAM_ID),platform,sdk.tokenAddress(platform,voter.publicKey,TOKEN_2022_PROGRAM_ID),authority.publicKey,100_000_000n,6,[],TOKEN_2022_PROGRAM_ID)], [payer,authority]);
-  await send([sdk.stakeVote({...gv,voter:voter.publicKey,amount:100_000_000n,support:true})],[voter]);
+  if(runtime) await governanceAction('vote',voter,{amount:'100000000',support:true});
+  else await send([sdk.stakeVote({...gv,voter:voter.publicKey,amount:100_000_000n,support:true})],[voter]);
   check((await state(sdk.voteAddress(program,round,voter.publicKey))).stake,100_000_000n);
   await fails([sdk.stakeVote({...gv,voter:voter.publicKey,amount:1n,support:false})],[voter]);
   await fails([sdk.withdrawVote({...gv,voter:voter.publicKey})],[voter]);
@@ -234,9 +276,14 @@ try {
   const voted = await snapshot(); expire(voted,round);
   await start(voted,'settlement');
   const pot = (await state(round)).pot;
-  await send(sdk.settleRound(gv)); check((await state(round)).outcome,1);
+  if(runtime) await governanceAction('settle'); else await send(sdk.settleRound(gv)); check((await state(round)).outcome,1);
   check(await balance(platform,team.publicKey,TOKEN_2022_PROGRAM_ID),pot*90n/100n);
-  await send([sdk.withdrawVote({...gv,voter:voter.publicKey})],[voter]);
+  if(runtime) {
+    const view=await runtime.executeProgram({...runtimeInput(voter),action:'dao-view'},conn);
+    check(view.history[0].claimable,true); check(view.history[0].estimatedReward,String(pot-pot*90n/100n));
+    await governanceAction('withdraw',voter,{round:'0'});
+    const claimed=await runtime.executeProgram({...runtimeInput(voter),action:'dao-view'},conn);check(claimed.history[0].claimable,false);
+  } else await send([sdk.withdrawVote({...gv,voter:voter.publicKey})],[voter]);
   check(await balance(platform,voter.publicKey,TOKEN_2022_PROGRAM_ID),100_000_000n+pot-pot*90n/100n);
   await fails([sdk.withdrawVote({...gv,voter:voter.publicKey})],[voter]);
   await fails(sdk.settleRound(gv),[payer]);

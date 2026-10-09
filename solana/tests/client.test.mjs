@@ -44,9 +44,21 @@ test('v0 transactions retain the user fee payer and Hook signer with a lookup ta
 
 test('account decoding rejects wrong owners, trailing bytes and unrecognized versions',()=>{
   const data=Buffer.concat([Buffer.from([1]),authority.toBuffer(),mint.toBuffer(),Buffer.from([0]),sdk.u64(1n),sdk.u64(100n)]);
-  assert.equal(sdk.decodeState({owner:program,data},program).maximum,100n);
+  assert.equal(sdk.decodeState({owner:program,data},program,1).maximum,100n);
+  assert.throws(()=>sdk.decodeState({owner:program,data},program,2));
   assert.throws(()=>sdk.decodeState({owner:SystemProgram.programId,data},program));
   assert.throws(()=>sdk.decodeState({owner:program,data:Buffer.concat([data,Buffer.alloc(1)])},program));
   assert.throws(()=>sdk.decodeState({owner:program,data:Buffer.from([255])},program));
   assert.throws(()=>sdk.decodeState({owner:program,data:Buffer.from([1])},program));
+});
+
+
+test('reward previews preserve the final winner dust and never reward losers or duplicate withdrawals',()=>{
+  const r={pot:101n,yes:3n,no:1n,outcome:1,rewardRemaining:8n,weightRemaining:2n};
+  const v={stake:1n,weight:1n,support:true,withdrawn:false};
+  assert.equal(sdk.voteReward(r,v),3n);
+  assert.equal(sdk.voteReward(r,{...v,weight:2n}),8n);
+  assert.equal(sdk.voteReward(r,{...v,support:false}),0n);
+  assert.equal(sdk.voteReward(r,{...v,withdrawn:true}),0n);
+  assert.equal(sdk.voteReward({...r,outcome:3},v),0n);
 });
