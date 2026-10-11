@@ -11,7 +11,7 @@ import { createServer } from 'node:net';
 import { once } from 'node:events';
 import { Connection, Keypair, PublicKey, SYSVAR_CLOCK_PUBKEY, Transaction, VersionedTransaction, TransactionInstruction, SystemProgram, ComputeBudgetProgram } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, NATIVE_MINT, MintLayout, AccountLayout,
-  createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, createSyncNativeInstruction, getMint, getAccount } from '@solana/spl-token';
+  createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, createSyncNativeInstruction, createRevokeInstruction, getMint, getAccount } from '@solana/spl-token';
 import * as sdk from '../client.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -234,6 +234,8 @@ try {
     {pubkey:sdk.programDataAddress(timelock),isWritable:true,isSigner:false}, {pubkey:authority.publicKey,isWritable:false,isSigner:true}] });
   await fails([sdk.initializeTimelock(lockValues)],[payer,authority]);
   await send([finalizeController],[payer,authority]);
+  const controllerSlot = await conn.getSlot();
+  while (await conn.getSlot() <= controllerSlot) await new Promise(resolve => setTimeout(resolve,100));
   await send([sdk.initializeTimelock(lockValues)],[payer,authority]);
   await fails([sdk.initializeTimelock(lockValues)],[payer,authority]);
   check((await conn.getAccountInfo(sdk.programDataAddress(program))).data.subarray(13,45),lock.toBuffer());
@@ -490,6 +492,32 @@ try {
   await fails([sdk.withdrawVote({...gv,voter:voter.publicKey})],[voter]);
   await fails(sdk.settleRound(gv),[payer]);
   check((await daoState(round)).rewardRemaining,0n);
+  await fails(sdk.claimTeam({...gv,payer:team.publicKey,independentTeamClaims:true}),[team]); // Legacy payment has no entitlement.
+
+  const blockedTeam = structuredClone(voted);
+  const teamAta = sdk.tokenAddress(platform,team.publicKey,TOKEN_2022_PROGRAM_ID);
+  const tokenFixture = structuredClone(blockedTeam.get(String(sdk.tokenAddress(platform,voter.publicKey,TOKEN_2022_PROGRAM_ID))));
+  const tokenBytes = Buffer.from(tokenFixture.account.data[0],'base64');
+  const tokenValues = AccountLayout.decode(tokenBytes);
+  AccountLayout.encode({...tokenValues,owner:team.publicKey,amount:0n,delegateOption:1,delegate:payer.publicKey,delegatedAmount:1n},tokenBytes);
+  tokenFixture.pubkey=String(teamAta); tokenFixture.account.data[0]=tokenBytes.toString('base64'); blockedTeam.set(String(teamAta),tokenFixture);
+  await start(blockedTeam,'independent-team-claim');
+  await fails(sdk.settleRound(gv),[payer]);
+  await send(sdk.settleRound({...gv,independentTeamClaims:true}));
+  check((await daoState(round)).outcome,1);
+  const entitlement = sdk.teamClaimAddress(daoProgram,round);
+  check((await daoState(entitlement)).amount,pot*90n/100n);
+  await send([sdk.withdrawVote({...gv,voter:voter.publicKey})],[voter]);
+  check(await balance(platform,voter.publicKey,TOKEN_2022_PROGRAM_ID),100_000_000n+pot-pot*90n/100n);
+  await fails(sdk.claimTeam({...gv,payer:team.publicKey,independentTeamClaims:true}),[team]);
+  check((await daoState(entitlement)).claimed,false);
+  await send([createRevokeInstruction(teamAta,team.publicKey,[],TOKEN_2022_PROGRAM_ID)],[team]);
+  if(runtime) await governanceAction('claimTeam',team,{round:'0',independentTeamClaims:true});
+  else await send(sdk.claimTeam({...gv,payer:team.publicKey,independentTeamClaims:true}),[team]);
+  check(await balance(platform,team.publicKey,TOKEN_2022_PROGRAM_ID),pot*90n/100n);
+  check((await daoState(entitlement)).claimed,true);
+  await fails(sdk.claimTeam({...gv,payer:team.publicKey,independentTeamClaims:true}),[team]);
+  await fails(sdk.settleRound({...gv,independentTeamClaims:true}),[payer]);
 
   const rejected = structuredClone(voted);
   const r = rejected.get(round.toBase58()), rd=Buffer.from(r.account.data[0],'base64');

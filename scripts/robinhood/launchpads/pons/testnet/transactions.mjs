@@ -20,9 +20,10 @@ export function requireTestnet(config, chainId) {
   assert.equal(chainId, 46630, 'RPC chain mismatch');
 }
 
-export async function context({ walletPath, rpc, storageDir, local = false, broadcast = false, deploymentName, artifacts }) {
+export async function context({ walletPath, rpc, storageDir, local = false, broadcast = false, deploymentName, artifacts, deploymentId = '' }) {
   assert(!deploymentName || ['vault-launch', 'gameplay'].includes(deploymentName), 'Unknown deployment journal');
   assert.equal(Boolean(deploymentName), Boolean(artifacts), 'A separate deployment must pin its own artifacts');
+  assert(!deploymentId || deploymentName && /^[a-z0-9][a-z0-9-]{0,63}$/.test(deploymentId), 'Invalid testnet deployment ID');
   const config = readJson(resolve(root, 'chains/robinhood/deployments/testnet/pons/config.json'));
   rpc ??= config.rpc;
   const url = new URL(rpc);
@@ -44,12 +45,13 @@ export async function context({ walletPath, rpc, storageDir, local = false, broa
   const wallet = createWalletClient({ chain, account, transport });
   requireTestnet(config, await client.getChainId());
   if (deploymentName) storageDir = resolve(storageDir, deploymentName);
+  if (deploymentId) storageDir = resolve(storageDir, 'redeployments', deploymentId);
   const build = artifacts ?? readJson(resolve(data, 'build.json'));
   const identity = hash({ chainId: chain.id, local, config, build, deployer: account.address });
   const journalPath = resolve(storageDir, 'transactions.json');
   const journal = existsSync(journalPath) ? readJson(journalPath) : { identity, steps: {} };
   assert.equal(journal.identity, identity, 'Build/config/wallet changed; preserve this journal and create a reviewed deployment');
-  const reportPath = local ? resolve(storageDir, 'deployment.json') : resolve(root, `chains/robinhood/deployments/testnet/pons/${deploymentName ?? 'deployment'}.json`);
+  const reportPath = local ? resolve(storageDir, 'deployment.json') : resolve(root, `chains/robinhood/deployments/testnet/pons/${deploymentName ?? 'deployment'}${deploymentId ? `-${deploymentId}` : ''}.json`);
   const report = existsSync(reportPath) ? readJson(reportPath) : { identity, status: 'prepared', chainId: 46630, local,
     independentDeployment: true, officialPonsDeployment: false, deployer: account.address, addresses: {}, codeHashes: {}, transactions: {}, testnetDifferences: config.testnetDifferences };
   assert.equal(report.identity, identity, 'Deployment report belongs to another build');

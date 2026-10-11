@@ -190,6 +190,14 @@ pub struct Vote {
     pub withdrawn: bool,
 }
 
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug)]
+pub struct TeamClaim {
+    pub round: Pubkey,
+    pub team: Pubkey,
+    pub amount: u64,
+    pub claimed: bool,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

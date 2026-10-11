@@ -12,6 +12,13 @@ export const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../.
 export const dir = resolve(root, 'data/argus-public-testnet');
 export const v2dir = resolve(root, 'data/argus-public-testnet-v2');
 export const claimDir = resolve(root, 'data/argus-public-testnet-claim');
+export function deploymentId() {
+  const index = process.argv.indexOf('--deployment-id');
+  if (index < 0) return '';
+  const id = process.argv[index + 1];
+  assert(typeof id === 'string' && /^[a-z0-9][a-z0-9-]{0,63}$/.test(id), 'Invalid testnet deployment ID');
+  return id;
+}
 export const json = value => JSON.stringify(value, (_, v) => typeof v === 'bigint' ? String(v) : v, 2);
 export const hash = value => createHash('sha256').update(typeof value === 'string' ? value : JSON.stringify(value)).digest('hex');
 const sortedSources = sources => Object.fromEntries(Object.entries(sources).sort(([a], [b]) => a.localeCompare(b)));
@@ -48,7 +55,9 @@ export function maskLinks(code, references) {
 }
 export async function build({ version = 1 } = {}) {
   assert([1, 2, 3].includes(version));
-  const outputDir = version === 3 ? claimDir : version === 2 ? v2dir : dir;
+  const baseDir = version === 3 ? claimDir : version === 2 ? v2dir : dir;
+  const id = deploymentId();
+  const outputDir = id ? resolve(baseDir, 'redeployments', id) : baseDir;
   mkdirSync(outputDir, { recursive: true, mode: 0o700 });
   const manifest = JSON.parse(readFileSync(new URL('./sources.json', import.meta.url)));
   const wallets = JSON.parse(readFileSync(resolve(dir, 'wallets.json')));

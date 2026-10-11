@@ -11,7 +11,7 @@
     "test:pons:vault": "forge test --root chains/robinhood",
     "deploy:pons:vault": "node scripts/robinhood/launchpads/pons/testnet/deploy-vault.mjs",
     "check:architecture": "node --test --test-concurrency=1 architecture.test.mjs",
-    "test:tools": "node --test --test-concurrency=1 scripts/arc/shared/*.test.mjs scripts/robinhood/launchpads/pons/testnet/*.test.mjs"
+    "test:tools": "node --test --test-concurrency=1 scripts/arc/shared/*.test.mjs scripts/arc/launchpads/argus/testnet/*.test.mjs scripts/robinhood/launchpads/pons/testnet/*.test.mjs"
   },
   "dependencies": {
     "viem": "2.57.3"

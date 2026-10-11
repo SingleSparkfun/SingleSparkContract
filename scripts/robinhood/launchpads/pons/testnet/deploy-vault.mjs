@@ -19,7 +19,10 @@ const artifacts = Object.fromEntries(names.map(name => {
 const roles = readJson(resolve(root, 'chains/robinhood/deployments/testnet/pons/vault-config.json'));
 assert.equal(roles.chainId, 46630);
 artifacts.roles = roles;
-const c = await context({ walletPath, broadcast: process.argv.includes('--broadcast'), deploymentName: 'vault-launch', artifacts });
+const deploymentIndex = process.argv.indexOf('--deployment-id');
+const deploymentId = deploymentIndex < 0 ? '' : process.argv[deploymentIndex + 1];
+assert(deploymentIndex < 0 || typeof deploymentId === 'string' && deploymentId.length > 0, 'Pass a testnet deployment ID');
+const c = await context({ walletPath, broadcast: process.argv.includes('--broadcast'), deploymentName: 'vault-launch', artifacts, deploymentId });
 const source = foundation.report.addresses.factory;
 if (!c.broadcast) {
   console.log(json({ chainId: 46630, roles, source, journal: c.journalPath, status: 'prepared', maximumCostWei: c.config.maximumTotalCostWei }));

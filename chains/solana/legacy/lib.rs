@@ -27,7 +27,7 @@ pub fn process_instruction(
         .ok_or(solana_program::program_error::ProgramError::InvalidInstructionData)?;
     match tag {
         0..=10 => revenue::process(program, accounts, *tag, data),
-        16..=20 => governance::process(program, accounts, *tag, data),
+        16..=22 => governance::process(program, accounts, *tag, data),
         _ => Err(solana_program::program_error::ProgramError::InvalidInstructionData),
     }
 }

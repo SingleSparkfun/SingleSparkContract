@@ -54,6 +54,21 @@ test('account decoding rejects wrong owners, trailing bytes and unrecognized ver
   assert.throws(()=>sdk.decodeState({owner:program,data:Buffer.from([1])},program));
 });
 
+test('independent settlement omits team accounts and team claims bind the fixed recipient and round',()=>{
+  const v={program,payer,team,config,mint,number:0n,tokenProgram:TOKEN_PROGRAM_ID};
+  assert.equal(sdk.settleRound(v).at(-1).data[0],19);
+  const settlement=sdk.settleRound({...v,independentTeamClaims:true});
+  assert.equal(settlement.length,1); assert.equal(settlement[0].data[0],22);
+  assert(!settlement[0].keys.some(k=>k.pubkey.equals(sdk.tokenAddress(mint,team))));
+  assert.throws(()=>sdk.claimTeam({...v,payer:team}));
+  assert.throws(()=>sdk.claimTeam({...v,independentTeamClaims:true}));
+  const claim=sdk.claimTeam({...v,payer:team,independentTeamClaims:true}).at(-1);
+  assert.equal(claim.data[0],21); assert(claim.keys[0].pubkey.equals(team));
+  assert(claim.keys[3].pubkey.equals(sdk.teamClaimAddress(program,sdk.roundAddress(program,sdk.governanceAddress(program,config),0n))));
+  const data=Buffer.concat([Buffer.from([19]),claim.keys[2].pubkey.toBuffer(),team.toBuffer(),sdk.u64(90n),Buffer.from([0])]);
+  assert.equal(sdk.decodeState({owner:program,data},program,19).amount,90n);
+});
+
 
 test('reward previews preserve the final winner dust and never reward losers or duplicate withdrawals',()=>{
   const r={pot:101n,yes:3n,no:1n,outcome:1,rewardRemaining:8n,weightRemaining:2n};

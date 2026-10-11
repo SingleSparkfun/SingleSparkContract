@@ -14,6 +14,7 @@ const lockPath=resolve(c.storageDir,'run.lock'),lock=openSync(lockPath,'wx',0o60
 const {client,read,call,a,accounts}=c, {factory,router,platformToken}=c.report.addresses;
 const va=a.implementation.abi,fa=a.factory.abi,ra=a.router.abi;
 const weights=[2984,2983,2983,0,1000,50];
+const donation=process.argv.includes('--small-budget') ? 1000000n : 6250000n;
 const same=(a,b)=>assert.equal(a.toLowerCase(),b.toLowerCase());
 const event=(receipt,name)=>parseEventLogs({abi:va,eventName:name,logs:receipt.logs}).find(e=>e.address.toLowerCase()===c.report.projects[0].vault.toLowerCase());
 const deny=async(address,abi,functionName,args,role='deployer')=>assert.rejects(
@@ -54,10 +55,10 @@ try {
     const expected=[net/3n,net/3n,net-2n*(net/3n),0n,platformFee,claimFee];
     assert.deepEqual((await read(vault,va,'ledger',[],collect.blockNumber))[0],expected.slice(0,5));
     assert.equal(await read(vault,va,'claimBudget',[],collect.blockNumber),expected[5]);
-    await call('labelled-test-donation','deployer',QUOTE,erc20Abi,'transfer',[vault,6250000n]);
+    await call('labelled-test-donation','deployer',QUOTE,erc20Abi,'transfer',[vault,donation]);
     const sync=await call('account-donation','deployer',vault,va,'sync',[]);
     assert.equal(await read(projects[1].vault,va,'received',[],sync.blockNumber),0n,'Separate project funds');
-    c.report.organicFeeUSDC6=String(organic);c.report.labelledTestDonationUSDC6='6250000';c.save();
+    c.report.organicFeeUSDC6=String(organic);c.report.labelledTestDonationUSDC6=String(donation);c.save();
     const emptyHash=keccak256(encodeAbiParameters([{type:'address[]'}],[[]]));
     async function claim(label,bucket,recipients=[]) {
       return call(label,'deployer',vault,va,'claim',async()=>{

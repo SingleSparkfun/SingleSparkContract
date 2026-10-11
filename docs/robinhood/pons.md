@@ -12,6 +12,8 @@ The first independent Vault retains the 48-hour delay and unallocated-income rul
 
 Verification: `npm run test:pons:vault`. Deployment and reentrancy verification: `npm run deploy:pons:vault -- --wallet <testnet-wallet.json> --broadcast`. New journals stay in `chains/robinhood/data/pons/testnet/vault-launch/`; public records go to `chains/robinhood/deployments/testnet/pons/vault-launch.json`, preserving earlier base-Pons rehearsal records.
 
+For another isolated Vault deployment, add `--deployment-id security-20261011` to the same command. Its journal lives under `vault-launch/redeployments/security-20261011/`; its public report is `vault-launch-security-20261011.json`. The verified upstream Pons contracts are reused. Existing application pins, project funds and signed recovery records remain bound to their original contracts until a separate compatible rollout.
+
 Platform-token plan (2026-10-11): issue SingleSpark's platform token on Robinhood through Pons, with new custody/gameplay integration owned by Robinhood/Pons. Historical ARC platform-token records retain original addresses, funds and recovery. SSPTEST is an old acceptance token; the new platform test token is independently issued SingleSpark / SPARK. Addresses and actual acceptance status appear below. Cloud testnet availability was requested; mainnet issuance is not authorized.
 
 ## Base Pons build

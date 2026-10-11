@@ -96,6 +96,8 @@ Acceptance creates two separate Vaults and checks actual trade fees, 83/7/5/4/1 
 
 Public addresses, successful receipts, source provenance and acceptance results are in `chains/arc/deployments/testnet/argus/argus-public-testnet.json`. Status becomes `passed` only after actual on-chain acceptance.
 
+Repeat deployments use `--deployment-id <lowercase-id>` on the testnet build, deploy and acceptance commands. This selects a separate build/journal directory and public report, preserving historical signatures and deployments. The 2026-10-11 deployment uses `security-20261011`: `build.mjs --claim`, `deploy-claim.mjs --broadcast` and `verify-claim.mjs --small-budget --broadcast`, each with that deployment ID. Small-budget acceptance labels a 1 test-USDC donation instead of 6.25; it retains all 100 distribution recipients. Application pins are a separate rollout; deploying a factory does not migrate existing Vaults or funds.
+
 ## V2 three plugins and platform-token switching
 
 V2 has three independently enabled plugins. New frontend projects default to platform-token buyback (7%); creators select own-token buyback (83%) and distribution (5%). Disabled buckets retain their funds; community 4% and operations 1% remain. V1 selections and signed transactions retain original semantics and cannot reuse V2 masks in place.

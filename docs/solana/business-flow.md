@@ -126,7 +126,7 @@ Existing economics remain: lock 30% of original supply; release 0.1% per period 
 
 Current code uses 24-hour windows from initialization. Opening late does not restart a full 24 hours, and missed dates do not accumulate releases. Show actual on-chain deadlines and remaining time. A 600-second build is for isolated testing only.
 
-Current settlement depends on a usable team recipient account and may block voter principal returns. The proposed supplement separates public settlement from personal team claims:
+New DAO builds separate public settlement from personal team claims. Instruction 22 settles without a team recipient; instruction 21 claims the fixed team's entitlement:
 
 | Stage | Completion and fund changes |
 | --- | --- |
@@ -137,7 +137,7 @@ Current settlement depends on a usable team recipient account and may block vote
 
 Unclaimed shares remain reserved for their original round and cannot fund later rounds, other team withdrawals or other voters. Winning rewards remain weighted, with the last winning claimant receiving rounding remainder. Personal claim failures cannot reverse the result or affect others' principal.
 
-This requires governance-instruction, entitlement-state and compatibility design; moving one account check does not complete it. Existing immutable programs do not change when new code ships. Historical locks/rounds must retain their original settlement, query and withdrawal entrypoints.
+Entitlements use a program-owned `team-claim` PDA derived from the round and are created only by instruction 22. Instruction 19 preserves the original direct payment ABI; already-paid legacy rounds cannot create or claim a second entitlement. Backend `SOLANA_DAO_INDEPENDENT_TEAM_CLAIMS=true` requires separate, verified DAO pins; it defaults to false. Existing immutable programs do not change when new code ships. Historical locks/rounds retain their original program, settlement, query and withdrawal entrypoints.
 
 ## Recovery and user-visible states
 

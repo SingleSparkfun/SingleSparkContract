@@ -56,8 +56,23 @@ pub fn process(program: &Pubkey, a: &[AccountInfo], tag: u8, data: &[u8]) -> Pro
         16 => initialize(program, a, args(data)?),
         17 if data.is_empty() => open(program, a),
         18 => vote(program, a, args(data)?),
-        19 if data.is_empty() => settle(program, a),
+        19 if data.is_empty() => settle(program, a, None),
         20 if data.is_empty() => withdraw(program, a),
+        21 if data.is_empty() => claim_team(program, a),
+        22 if data.is_empty() => {
+            require(a.len() == 9)?;
+            signer(&a[0])?;
+            let core = [
+                a[1].clone(),
+                a[2].clone(),
+                a[3].clone(),
+                a[4].clone(),
+                a[0].clone(),
+                a[6].clone(),
+                a[7].clone(),
+            ];
+            settle(program, &core, Some((&a[0], &a[5], &a[8])))
+        }
         _ => Err(ProgramError::InvalidInstructionData),
     }
 }
@@ -232,7 +247,11 @@ fn vote(program: &Pubkey, a: &[AccountInfo], v: VoteArgs) -> Result<()> {
     save(&a[3], 18, &p)
 }
 
-fn settle(program: &Pubkey, a: &[AccountInfo]) -> Result<()> {
+fn settle<'a>(
+    program: &Pubkey,
+    a: &[AccountInfo<'a>],
+    claim: Option<(&AccountInfo<'a>, &AccountInfo<'a>, &AccountInfo<'a>)>,
+) -> Result<()> {
     require(a.len() == 7)?;
     let (mut g, _) = governance(program, &a[0])?;
     let (mut r, bump) = round(program, &a[1], a[0].key)?;
@@ -247,8 +266,6 @@ fn settle(program: &Pubkey, a: &[AccountInfo]) -> Result<()> {
         vault(&a[2], a[0].key, &g)? >= g.remaining
             && vault(&a[3], a[1].key, &g)? >= add(r.pot, add(r.yes_stake, r.no_stake)?)?,
     )?;
-    require(a[4].key == &ata(&g.team, &g.mint, &g.token_program))?;
-    token(&a[4], &g.mint, &g.team, &g.token_program)?;
     let seeds: &[&[u8]] = &[
         b"round",
         a[0].key.as_ref(),
@@ -270,8 +287,28 @@ fn settle(program: &Pubkey, a: &[AccountInfo]) -> Result<()> {
         r.outcome = if r.yes > r.no { 1 } else { 2 };
         r.reward_remaining = sub(r.pot, share)?;
         r.weight_remaining = if r.outcome == 1 { r.yes } else { r.no };
-        if r.outcome == 1 {
-            transfer_tokens(&a[3], &a[4], &a[5], &a[1], &a[6], share, seeds)?;
+        if r.outcome == 1 && share > 0 {
+            if let Some((payer, entitlement, system)) = claim {
+                // Only this settlement creates a claim; legacy rounds already paid the team.
+                create(
+                    program,
+                    payer,
+                    entitlement,
+                    system,
+                    &[b"team-claim", a[1].key.as_ref()],
+                    19,
+                    &TeamClaim {
+                        round: *a[1].key,
+                        team: g.team,
+                        amount: share,
+                        claimed: false,
+                    },
+                )?;
+            } else {
+                require(a[4].key == &ata(&g.team, &g.mint, &g.token_program))?;
+                token(&a[4], &g.mint, &g.team, &g.token_program)?;
+                transfer_tokens(&a[3], &a[4], &a[5], &a[1], &a[6], share, seeds)?;
+            }
         } else if share > 0 {
             burn(&a[3], &a[5], &a[1], &a[6], share, seeds)?;
         }
@@ -287,6 +324,44 @@ fn settle(program: &Pubkey, a: &[AccountInfo]) -> Result<()> {
         &r.pot.to_le_bytes(),
     ]);
     Ok(())
+}
+
+fn claim_team(program: &Pubkey, a: &[AccountInfo]) -> Result<()> {
+    require(a.len() == 8)?;
+    signer(&a[0])?;
+    let (g, _) = governance(program, &a[1])?;
+    let (r, bump) = round(program, &a[2], a[1].key)?;
+    let mut claim: TeamClaim = load(program, &a[3], 19)?;
+    pda(program, &a[3], &[b"team-claim", a[2].key.as_ref()])?;
+    require(
+        g.team == *a[0].key
+            && claim.team == g.team
+            && claim.round == *a[2].key
+            && r.outcome == 1
+            && !claim.claimed
+            && claim.amount == ratio(r.pot, 90, 100)?
+            && claim.amount > 0,
+    )?;
+    asset(&g, &a[6], &a[7])?;
+    require(vault(&a[4], a[2].key, &g)? >= claim.amount)?;
+    require(a[5].key == &ata(&g.team, &g.mint, &g.token_program))?;
+    token(&a[5], &g.mint, &g.team, &g.token_program)?;
+    claim.claimed = true;
+    save(&a[3], 19, &claim)?;
+    transfer_tokens(
+        &a[4],
+        &a[5],
+        &a[6],
+        &a[2],
+        &a[7],
+        claim.amount,
+        &[
+            b"round",
+            a[1].key.as_ref(),
+            &r.number.to_le_bytes(),
+            &[bump],
+        ],
+    )
 }
 
 fn withdraw(program: &Pubkey, a: &[AccountInfo]) -> Result<()> {

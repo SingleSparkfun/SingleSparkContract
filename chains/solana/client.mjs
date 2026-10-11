@@ -19,6 +19,7 @@ export const projectAddress = (program, hook) => derive(program, Buffer.from('pr
 export const governanceAddress = (program, config) => derive(program, Buffer.from('dao'), key(config));
 export const roundAddress = (program, governance, number) => derive(program, Buffer.from('round'), key(governance), u64(number));
 export const voteAddress = (program, round, voter) => derive(program, Buffer.from('vote'), key(round), key(voter));
+export const teamClaimAddress = (program, round) => derive(program, Buffer.from('team-claim'), key(round));
 export const curveAddress = mint => derive(PUMP, Buffer.from('bonding-curve'), key(mint));
 export const tokenAddress = (mint, owner, tokenProgram = TOKEN_PROGRAM_ID) => getAssociatedTokenAddressSync(pk(mint), pk(owner), true, pk(tokenProgram));
 const ix = (program, tag, keys, ...data) => new TransactionInstruction({ programId: pk(program), keys, data: Buffer.concat([byte(tag), ...data]) });
@@ -109,9 +110,20 @@ export function stakeVote(v) {
 }
 export function settleRound(v) {
   const dao = governanceAddress(v.program, v.config), round = roundAddress(v.program, dao, v.number);
+  if (v.independentTeamClaims === true) return [ix(v.program, 22, [meta(v.payer, true, true), meta(dao, true), meta(round, true),
+    meta(tokenAddress(v.mint, dao, v.tokenProgram), true), meta(tokenAddress(v.mint, round, v.tokenProgram), true),
+    meta(teamClaimAddress(v.program, round), true), meta(v.mint, true), meta(v.tokenProgram), meta(SystemProgram.programId)])];
   return [createAta(v.payer, v.mint, v.team, v.tokenProgram), ix(v.program, 19, [meta(dao, true), meta(round, true),
     meta(tokenAddress(v.mint, dao, v.tokenProgram), true), meta(tokenAddress(v.mint, round, v.tokenProgram), true),
     meta(tokenAddress(v.mint, v.team, v.tokenProgram), true), meta(v.mint, true), meta(v.tokenProgram)])];
+}
+export function claimTeam(v) {
+  assert(v.independentTeamClaims === true, 'Independent team claims require a verified DAO deployment');
+  assert(pk(v.payer).equals(pk(v.team)), 'Only the fixed team can claim');
+  const dao = governanceAddress(v.program, v.config), round = roundAddress(v.program, dao, v.number);
+  return [createAta(v.payer, v.mint, v.team, v.tokenProgram), ix(v.program, 21, [meta(v.team, false, true), meta(dao), meta(round),
+    meta(teamClaimAddress(v.program, round), true), meta(tokenAddress(v.mint, round, v.tokenProgram), true),
+    meta(tokenAddress(v.mint, v.team, v.tokenProgram), true), meta(v.mint), meta(v.tokenProgram)])];
 }
 export function withdrawVote(v) {
   const dao = governanceAddress(v.program, v.config), round = roundAddress(v.program, dao, v.number);
@@ -138,6 +150,7 @@ export function decodeState(info, program, expectedTag) {
   else if (data[0] === 17) result = { governance: p(), number: n(), end: read(8).readBigInt64LE(), pot: n(), yes: wide(), no: wide(), yesStake: n(), noStake: n(),
     outcome: b(), rewardRemaining: n(), weightRemaining: wide() };
   else if (data[0] === 18) result = { round: p(), voter: p(), support: boolean(), stake: n(), weight: wide(), withdrawn: boolean() };
+  else if (data[0] === 19) result = { round: p(), team: p(), amount: n(), claimed: boolean() };
   else if (data[0] === 3) result = { nonce: n() };
   else throw Error('Unknown SingleSpark account version');
   assert.equal(offset, data.length, 'Unexpected state length'); return result;

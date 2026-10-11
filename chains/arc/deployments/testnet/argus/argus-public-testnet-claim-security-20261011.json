@@ -1,0 +1,274 @@
+{
+  "status": "passed",
+  "chainId": 5042002,
+  "rpc": "https://rpc.testnet.arc.io",
+  "independentTestDeployment": true,
+  "publicTransactions": true,
+  "accounts": {
+    "deployer": "0xa3FcB4d46294E1DfAe1a54Bc75092DcD7820Fffd",
+    "admin": "0xAB370A85F810a1a598660Db1946b04C4c1bb541e",
+    "executor": "0x8C4435334c20e69009AaAe2367cb8e2B85358b00"
+  },
+  "provenance": {
+    "portal": {
+      "address": "0xB021Be536808f551b31789422Fd28a6c9c6e97Da",
+      "sourcesSha256": "1171944452e1dd808b79dff0f272f12127ac0a5ff0b1196c58d6e6265c84c9c6",
+      "compilationSha256": "67e4856f505eacded688b3d1f8f821d9b606c5efb58ecc139f03f0864db0e09a",
+      "contract": "ArgusV4Portal7",
+      "verifiedCompilationReproduced": true
+    },
+    "tokenImpl": {
+      "address": "0x1B74922c01DDfD9C77B37D02C0a236611E8Fe500",
+      "sourcesSha256": "d3a75d9c61fa1cf8a3a40cd1cd231ce5eaae3d9ed3caf12f418aec97e06ba6ac",
+      "compilationSha256": "19b210e721e7be9a1e78b1218b44bc7b8a137a3a5f85a82c7a788e6ba7859901",
+      "contract": "ArgusV4LaunchToken7",
+      "verifiedCompilationReproduced": true
+    },
+    "lockerImpl": {
+      "address": "0xb2eD8112Db1bc11F7e7AB7969C2a9d1f819Cfc6A",
+      "sourcesSha256": "5ff7d0a83ce384248cee2715e01fbf189c91813d98caa3b2c1d296970934b114",
+      "compilationSha256": "429c7404308bca1bb961d8828cc854cf6d5aac97212a7859d5da5d71ab522f68",
+      "contract": "ArgusV4HookedLocker",
+      "verifiedCompilationReproduced": true
+    },
+    "splitterImpl": {
+      "address": "0xd9578dd861b2fe59675C2C4B09b026FcB0df37FC",
+      "sourcesSha256": "df3201bee21764c9c04e070603a6d26cecda6cc436f16f2c6cca463135bdeb7f",
+      "compilationSha256": "f91d0a541f206f14a23d1dea3ac286d27599bbd211e81ddd92044f1b59c27a77",
+      "contract": "ArgusV4HookedSplitter7",
+      "verifiedCompilationReproduced": true
+    }
+  },
+  "testnetChanges": [
+    "Router and Vault Factory deployment chain guard: 5042002",
+    "Router Portal constant: predicted independent testnet Portal",
+    "Other quote assets and conversions disabled by UsdcOnly; upstream USDC execution unchanged",
+    "Claim testnet controller delay: 10 minutes; production source remains 48 hours"
+  ],
+  "addresses": {
+    "router": "0x58895a336Cc204e47eD085BaECfb3C2cA7E6b417",
+    "implementation": "0xF6570959a1bD552adeDdA38AC5d949bbAEdBd7Ef",
+    "factory": "0xA90af635f0dd1C8755ac1cA76545e48a6C380f61",
+    "platformToken": "0x77f936bdd43D19FDb2956b59ebeb67b8768010d0"
+  },
+  "transactions": {
+    "router": {
+      "hash": "0x20bf59ed1194f9ebb6bdb45cf00314948222f2c06c9b6a15e4f28b5bddbc5b70",
+      "block": "66666147",
+      "gasUSDC": "0.0831929",
+      "status": "success"
+    },
+    "implementation": {
+      "hash": "0x0fecd60dd43b38ab06bee1d946726097636a3635aa9de740633e794c267a48c1",
+      "block": "66666189",
+      "gasUSDC": "0.11341785",
+      "status": "success"
+    },
+    "factory": {
+      "hash": "0xdde5f55fc40ed23362a92cbd47de9869e2b83cdcfffdecbc7e13da6a8b3c78d7",
+      "block": "66666232",
+      "gasUSDC": "0.0705158",
+      "status": "success"
+    },
+    "launch-TCLAIM1": {
+      "hash": "0xcfc635117a6db22463befb58f8d54d47ec5037123cb4cf03177ff0e7477c7814",
+      "block": "66666434",
+      "gasUSDC": "0.083458425",
+      "status": "success"
+    },
+    "launch-TCLAIM0": {
+      "hash": "0xb547bdc8d58a838ce34b38ce434ca36f633bda009ed9301dcd8cdf57f7b7815c",
+      "block": "66666479",
+      "gasUSDC": "0.084036",
+      "status": "success"
+    },
+    "trade-approve": {
+      "hash": "0xd5911fa718407b86e324bb72f3e609cd8029dc6f3453915ff4269044d2ba09b0",
+      "block": "66666517",
+      "gasUSDC": "0.00138595",
+      "status": "success"
+    },
+    "trade-buy": {
+      "hash": "0xdd3596a6e96e9e992ecc0e1ec797a367cfd0fd847f7f0cceb60bd158b2f127ee",
+      "block": "66666548",
+      "gasUSDC": "0.0071485",
+      "status": "success"
+    },
+    "collect-fees": {
+      "hash": "0x44ffad16c4fdb298e6c00bd4158bfcd8016a97d755edc25bf67f0a337eaa7c60",
+      "block": "66666574",
+      "gasUSDC": "0.016646375",
+      "status": "success"
+    },
+    "labelled-test-donation": {
+      "hash": "0xa452790749d5addd5ca8ea8ab286340d927d046fdbb322d4ec99a283cdbfb396",
+      "block": "66666607",
+      "gasUSDC": "0.00122375",
+      "status": "success"
+    },
+    "account-donation": {
+      "hash": "0xb1ff37b198e5b4265ebee8bd308ebb702b91ebfe1e895cbfc379a24d7475f306",
+      "block": "66666633",
+      "gasUSDC": "0.00247585",
+      "status": "success"
+    },
+    "claim-own": {
+      "hash": "0x6445f5651f267b4eba3c38ec89bba2516edec34aa9072ee5748a51fa90896659",
+      "block": "66666683",
+      "gasUSDC": "0.0129751",
+      "status": "success"
+    },
+    "claim-platform": {
+      "hash": "0x174993e2bb6897c8857405efc4351424d0527a8519127298ddb6c5e713020347",
+      "block": "66666735",
+      "gasUSDC": "0.012310275",
+      "status": "success"
+    },
+    "claim-inventory": {
+      "hash": "0x51c77002c308b6d569598314ffb9f22ca55f5b0acc60640dda322dca24ddd8b6",
+      "block": "66666785",
+      "gasUSDC": "0.01172335",
+      "status": "success"
+    },
+    "trade-approval-clear": {
+      "hash": "0xfc1d04e7a5211777a257b6d130b4d1b1ea1e0d76254ec599cda92d8570149101",
+      "block": "66666811",
+      "gasUSDC": "0.00083755",
+      "status": "success"
+    },
+    "claim-payout": {
+      "hash": "0xc87e4ea896775ecba55e7cf00feb42709f43e201c4235b883f360dfaf4589f7b",
+      "block": "66666851",
+      "gasUSDC": "0.145435175",
+      "status": "success"
+    },
+    "settle-operations": {
+      "hash": "0x4902924e97948a5750d3b86a67e3e1ddb039087f6776b91027b1b0e00e95ac62",
+      "block": "66666899",
+      "gasUSDC": "0.003171375",
+      "status": "success"
+    },
+    "all-off-test-donation": {
+      "hash": "0xfe19fcc13fb2702950f540620b8fd8d722fad7bf7d9a506e39fe44e97da5d42f",
+      "block": "66666935",
+      "gasUSDC": "0.00122345",
+      "status": "success"
+    },
+    "all-off-trade-approve": {
+      "hash": "0x1961260e1cd061828c3eaf17ce052a91e763da63390fd5e2ee57c36bcf33bb44",
+      "block": "66666960",
+      "gasUSDC": "0.00138595",
+      "status": "success"
+    },
+    "all-off-trade": {
+      "hash": "0x31a3adf9f68d902e26fe9b58c539de96b8a7e806ab44c535995043d685ccf29e",
+      "block": "66666991",
+      "gasUSDC": "0.0061882",
+      "status": "success"
+    },
+    "all-off-trade-clear": {
+      "hash": "0x64c512081c4e0cd6bea0ada153a5854133caa4bba284e08f66286ab177346149",
+      "block": "66667017",
+      "gasUSDC": "0.00088755",
+      "status": "success"
+    },
+    "all-off-collect": {
+      "hash": "0xab649807f7a50ce4eb53d64460b694c3a7ea855f95bf2c429f40fc60745552e6",
+      "block": "66667043",
+      "gasUSDC": "0.015276",
+      "status": "success"
+    },
+    "all-off-platform-settlement": {
+      "hash": "0xb280763878c1cd79fa6353ff05992f983b59921182c8662d929ada765826467b",
+      "block": "66667079",
+      "gasUSDC": "0.003598575",
+      "status": "success"
+    }
+  },
+  "codeHashes": {
+    "router": "0xb335d67dcfc0116868ddff3ce16cba3ad9cfbc1af724a055ff00260f9e05aebf",
+    "implementation": "0x4473c1dbbdd0bc2716bdda1380aacc1c619dee88acf905c4944207b019622cb8",
+    "factory": "0x2886f8a050f2180a691f51492b3c9791e0092d125a3f716d9bd693163d6a0998"
+  },
+  "limitations": [
+    "USDC only; other quote routes and conversions disabled",
+    "Real 10-minute delay cannot be fast-forwarded on public testnet",
+    "Application frontend/backend rollout is separate from this contract deployment"
+  ],
+  "identity": "acf0ad49e6585388f1fb97a58e8592e6e24c447652f710284e73b6ba8d551d1a",
+  "updatedAt": "2026-10-11T15:11:00.106Z",
+  "bootstrapPlatformToken": "0x77f936bdd43D19FDb2956b59ebeb67b8768010d0",
+  "allocation": {
+    "platformFeeBps": 1000,
+    "claimFeeBps": 50,
+    "pluginWeights": [
+      1,
+      1,
+      1
+    ],
+    "policyDelaySeconds": 600
+  },
+  "pluginContracts": [
+    {
+      "kind": 0,
+      "address": "0xad9eCCFfc5F7eB976341826f143C2C457A84173b",
+      "codeHash": "0xb168da88f220fdc987ac73b1674005e51cc4dae420c76a56705ad4db88a28889"
+    },
+    {
+      "kind": 1,
+      "address": "0xeC72A3Fcb41859d4B38c0E6e23dB7542407a91af",
+      "codeHash": "0x44be013c040233074cd02460efa6c2f89c97b5ce03acf48d13b531b7658f5785"
+    },
+    {
+      "kind": 2,
+      "address": "0x693C6241624BE97f89d7e6ddbF7f7644D7329851",
+      "codeHash": "0x1943f6999de61afdd2684d21449f5756786a70e82f0ef3b64220b535d07f14e2"
+    }
+  ],
+  "projects": [
+    {
+      "label": "TCLAIM1",
+      "token": "0xeeE0ab9D5C40b99242580A16732D497313a25c79",
+      "vault": "0xAa66920661d648f00177A22852cF3F36De5c5205",
+      "plugins": 7,
+      "splitter": "0xA7B5915293b78BDb0c494b3b245E0C31268218a1",
+      "locker": "0x79138B26A57A5A65c7d7Ef170114b1B85E775c2E"
+    },
+    {
+      "label": "TCLAIM0",
+      "token": "0x0A4c566ed5466D463C9620044d5397a3B75e5fea",
+      "vault": "0xA9766288Be3c3645A9e033abD02Cf968Afd6b1DF",
+      "plugins": 0,
+      "splitter": "0x0ABEe51b4C8Ff1c30F141283967eeB9C2d64A7EF",
+      "locker": "0x4ac808E5D41a4883293D1Aba322A62Bde6d0742A"
+    }
+  ],
+  "organicFeeUSDC6": "13320",
+  "labelledTestDonationUSDC6": "1000000",
+  "acceptance": {
+    "weightedAllocation": true,
+    "relativeWeights": [
+      1,
+      1,
+      1
+    ],
+    "fixedFeeBps": 1000,
+    "claimFeeBps": 50,
+    "externalPluginContracts": true,
+    "realTradeAndCreatorFees": true,
+    "independentVaults": true,
+    "userFundedClaim": true,
+    "ownAndPlatformBurn": true,
+    "inventoryRewardDeferred": true,
+    "distributionRecipients": 100,
+    "syntheticRecipients": true,
+    "replayRejected": true,
+    "executorOnlyBuyPreserved": true,
+    "operationsFixedRecipient": true,
+    "allOffRetainsUnallocated": true,
+    "allOffFixedFeesSettle": true,
+    "allowanceCleared": true,
+    "policyDelaySeconds": 600,
+    "applicationRolloutVerified": false
+  }
+}

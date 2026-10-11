@@ -5,7 +5,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createPublicClient, createWalletClient, defineChain, http, encodeDeployData, encodeFunctionData, decodeFunctionData, getContractAddress, getCreate2Address, encodeAbiParameters, parseAbiParameters, parseEventLogs, parseTransaction, recoverTransactionAddress, keccak256, toHex, erc20Abi, parseEther, formatEther, zeroAddress } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { root, dir, v2dir, claimDir, json, hash } from './build.mjs';
+import { root, dir, v2dir, claimDir, json, hash, deploymentId } from './build.mjs';
 
 export const QUOTE = '0x3600000000000000000000000000000000000000';
 export function persist(path, value) {
@@ -30,7 +30,9 @@ export function link(a, libraries, runtime = false) {
 }
 export async function context(options = {}) {
   assert(options.version == null || [2, 3].includes(options.version));
-  const deploymentDir = options.version === 3 ? claimDir : options.version === 2 ? v2dir : dir;
+  const baseDir = options.version === 3 ? claimDir : options.version === 2 ? v2dir : dir;
+  const id = deploymentId();
+  const deploymentDir = id ? resolve(baseDir, 'redeployments', id) : baseDir;
   const build = JSON.parse(readFileSync(resolve(deploymentDir, 'build.json')));
   const path = resolve(dir, 'wallets.json');
   assert.equal(statSync(path).mode & 0o077, 0, 'Wallet file must be owner-only');
@@ -89,7 +91,8 @@ export async function context(options = {}) {
   const identity = hash({ chainId: chain.id, build, accounts: Object.fromEntries(Object.entries(accounts).map(([role, account]) => [role, account.address])) });
   const journal = existsSync(journalPath) ? JSON.parse(readFileSync(journalPath)) : { identity, steps: {} };
   assert.equal(journal.identity, identity, 'Build or wallet identity changed; preserve original deployment');
-  const reportPath = local ? resolve(storageDir, 'report.json') : resolve(root, options.version === 3 ? 'deployments/testnet/argus/argus-public-testnet-claim.json' : options.version === 2 ? 'deployments/testnet/argus/argus-public-testnet-v2.json' : 'deployments/testnet/argus/argus-public-testnet.json');
+  const reportName = options.version === 3 ? 'argus-public-testnet-claim' : options.version === 2 ? 'argus-public-testnet-v2' : 'argus-public-testnet';
+  const reportPath = local ? resolve(storageDir, 'report.json') : resolve(root, `deployments/testnet/argus/${reportName}${id ? `-${id}` : ''}.json`);
   const report = existsSync(reportPath) ? JSON.parse(readFileSync(reportPath)) : { status: 'prepared', chainId: chain.id, rpc, independentTestDeployment: true, publicTransactions: false,
     accounts: Object.fromEntries(Object.entries(accounts).map(([k, v]) => [k, v.address])), provenance: build.provenance, testnetChanges: build.testnetChanges,
     addresses: {}, transactions: {}, codeHashes: {}, limitations: ['USDC only; other quote routes and conversions disabled', `Real ${options.version === 3 ? '10-minute' : '48-hour'} delay cannot be fast-forwarded on public testnet`, 'Application frontend/backend rollout is separate from this contract deployment'] };

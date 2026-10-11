@@ -26,7 +26,7 @@ pub fn process_instruction(
         .ok_or(ProgramError::InvalidInstructionData)?;
     match tag {
         0 => configuration::initialize(program, accounts, data),
-        16..=20 => governance::process(program, accounts, *tag, data),
+        16..=22 => governance::process(program, accounts, *tag, data),
         _ => Err(ProgramError::InvalidInstructionData),
     }
 }

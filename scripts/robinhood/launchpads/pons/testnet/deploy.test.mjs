@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { keccak256, getCreate2Address } from 'viem';
 import { hookAddress, maskImmutables, executableCode, preflight } from './deploy.mjs';
-import { requireTestnet } from './transactions.mjs';
+import { requireTestnet, context } from './transactions.mjs';
 import { validateBundle, hash, sorted } from './build.mjs';
 
 test('deployment refuses mainnet, another testnet and mislabeled configuration', () => {
@@ -10,6 +10,12 @@ test('deployment refuses mainnet, another testnet and mislabeled configuration',
   for (const id of [4663, 5042002, 1, 31337]) assert.throws(() => requireTestnet({ chainId: 46630, environment: 'testnet' }, id));
   assert.throws(() => requireTestnet({ chainId: 4663, environment: 'testnet' }, 46630));
   assert.throws(() => requireTestnet({ chainId: 46630, environment: 'mainnet' }, 46630));
+});
+
+test('redeployment IDs cannot escape or overwrite historical journal directories', async () => {
+  for (const deploymentId of ['..','../vault-launch','/tmp/deployment','security/20261011','--broadcast'])
+    await assert.rejects(context({walletPath:'/unused',deploymentName:'vault-launch',artifacts:{},deploymentId}), /Invalid testnet deployment ID/);
+  await assert.rejects(context({walletPath:'/unused',deploymentId:'security-20261011'}), /Invalid testnet deployment ID/);
 });
 
 test('source review pins reject altered compiler, source and deployment bytecode', () => {

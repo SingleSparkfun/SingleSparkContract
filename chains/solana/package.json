@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "exports": "./client.mjs",
+  "overrides": {
+    "jayson": "5.0.0"
+  },
   "scripts": {
     "test": "node --test tests/client.test.mjs",
     "test:local": "node tests/local.mjs",
@@ -15,5 +18,8 @@
   "dependencies": {
     "@solana/web3.js": "1.98.4",
     "@solana/spl-token": "0.4.15"
-  }
+  },
+  "workspaces": [
+    "shared/bigint-buffer"
+  ]
 }
