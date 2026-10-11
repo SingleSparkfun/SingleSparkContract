@@ -1,21 +1,23 @@
 # Deployment environments
 
-Contract sources belong to their chain and launchpad under `chains/`. Environment directories contain parameters, addresses, verification results and deployment records, without duplicating test versions of business logic.
+Public configuration and evidence use `deployments/<environment>/<chain>/<launchpad>/`. Contracts have one source under `chains/`; environment records do not duplicate business logic.
 
-```text
-deployments/
-  mainnet/robinhood/pons/reference.json   Official mainnet reference; broadcasting prohibited
-  testnet/robinhood/pons/config.json      Verified reusable testnet addresses and parameters
-  testnet/robinhood/pons/deployment.json  Reuse records and public acceptance transactions
-chains/robinhood/launchpads/pons/         Verified upstream source pins
-robinhood/pons/                          Build, deployment and verification entrypoints
-.data/robinhood/pons/                    Ignored source caches, builds and signed journals
-```
+| Environment | Contents |
+| --- | --- |
+| `mainnet/arc/singlespark/profile.json` | Existing ARC 5042 chain parameters |
+| `testnet/arc/singlespark/profile.json` | Verified ARC Testnet 5042002 chain parameters |
+| `testnet/arc/argus/` | Independent Portal, V2, weighted Claim and Keeper evidence |
+| `local/arc/argus/` | Local fork and structural verification evidence |
+| `mainnet/robinhood/pons/reference.json` | Read-only mainnet reference; broadcasting prohibited |
+| `testnet/robinhood/pons/` | Verified test configuration, deployments and acceptance receipts |
 
-Existing ARC and Solana deployment entrypoints, addresses and recovery journals retain compatible paths. New deployments use `mainnet|testnet / chain / launchpad`; existing signed transaction journals are not moved.
+Moving a public record does not change its historical status. Read its timestamp, deployment version, transaction scope and result; older blocked or pending records describe those earlier checks.
 
-- Existing ARC test deployments: [Argus Claim](../arc/deployments/argus-public-testnet-claim.json), [Argus V2](../arc/deployments/argus-public-testnet-v2.json).
-- Compatible ARC mainnet and testnet configuration remains in `arc/chains/`; operational rules are in [VAULTS.md](../arc/VAULTS.md).
-- Pons test deployment instructions are in [robinhood/pons/README.md](../robinhood/pons/README.md).
+Private wallets, frozen compiler inputs and signed journals stay at their original ignored paths: `arc/data/argus-public-testnet*`, `.data/robinhood/pons/` and configured operator data directories. They are not moved with public reports.
 
-A mainnet directory does not authorize mainnet execution. Test scripts enforce Robinhood Testnet `46630`; replacing configuration cannot enable mainnet execution.
+- [ARC Claim receipts](testnet/arc/argus/argus-public-testnet-claim.json)
+- [ARC V2 receipts](testnet/arc/argus/argus-public-testnet-v2.json)
+- [ARC custody and rollout](../docs/arc/vaults.md)
+- [Pons deployment guide](../docs/robinhood/pons.md)
+
+Production Solidity retains a 48-hour policy delay. The isolated Claim/gameplay testnet builds use 10 minutes. Selecting a directory or replacing configuration cannot authorize another network or migrate funds.

@@ -54,3 +54,36 @@ test('ownership checks reject cross-chain, cross-platform and reverse shared dep
   assert.equal(violation('chains/arc/launchpads/argus/Vault.sol', 'chains/evm/governance/Treasury.sol'), false);
   assert.equal(violation('chains/solana/launchpads/pump/lib.rs', 'chains/solana/shared/state.rs'), false);
 });
+
+test('operational scripts resolve their imports after organization', () => {
+  const failures = [];
+  for (const file of files(resolve(root, 'scripts')).filter(path => path.endsWith('.mjs'))) {
+    for (const [, path] of readFileSync(file, 'utf8').matchAll(/(?:from\s+|import\s+)["'](\.[^"']+)["']/g)) {
+      const target = resolve(dirname(file), path);
+      // Optional workspace integration tools are not dependencies of a standalone contract checkout.
+      if (relative(root, target).startsWith('../')) continue;
+      if (!existsSync(target)) failures.push(`${relative(root, file)} -> ${path}`);
+    }
+  }
+  assert.deepEqual(failures, []);
+});
+
+test('build roots contain no misplaced browser checks or asset generators', () => {
+  for (const entry of readdirSync(resolve(root, 'arc'))) {
+    assert(!/^(?:check-.*-ui|build-(?:geo|globe)-.*|render-.*)\.mjs$/.test(entry), entry);
+  }
+  for (const environment of ['mainnet', 'testnet', 'local']) assert(existsSync(resolve(root, 'deployments', environment)));
+});
+
+test('contract documentation links resolve after moving guides', () => {
+  const failures = [];
+  const guides = [resolve(root, 'README.md'), ...files(resolve(root, 'docs')), resolve(root, 'deployments/README.md'), resolve(root, 'solana/README.md')];
+  for (const file of guides.filter(path => path.endsWith('.md'))) {
+    for (const [, link] of readFileSync(file, 'utf8').matchAll(/\]\(([^)]+)\)/g)) {
+      if (link.startsWith('#') || /^[a-z]+:/i.test(link)) continue;
+      const target = resolve(dirname(file), link.split('#')[0]);
+      if (!relative(root, target).startsWith('../') && !existsSync(target)) failures.push(`${relative(root, file)} -> ${link}`);
+    }
+  }
+  assert.deepEqual(failures, []);
+});
