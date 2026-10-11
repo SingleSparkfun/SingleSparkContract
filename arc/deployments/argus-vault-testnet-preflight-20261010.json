@@ -1,0 +1,72 @@
+{
+  "status": "blocked_before_transaction_validation",
+  "checkedAt": "2026-10-10T02:42:39.956Z",
+  "scope": "ARC public testnet readiness for the new Argus Vault architecture",
+  "chainId": 5042002,
+  "rpc": "https://rpc.testnet.arc.io",
+  "publicTransactions": false,
+  "verificationBlock": "66407550",
+  "verificationTimestamp": "1791600102",
+  "checks": {
+    "network": "passed",
+    "nativeUsdc": {
+      "address": "0x3600000000000000000000000000000000000000",
+      "codeBytes": 1798,
+      "codeHash": "0xc9987bd3af6b26a030951faa7eacc017b68343aeedf3ce5fe68f821c4b93939d"
+    },
+    "argusPortal": {
+      "address": "0xB021Be536808f551b31789422Fd28a6c9c6e97Da",
+      "code": "0x",
+      "result": "Configured mainnet Portal is not deployed at this address on testnet; no alternate testnet deployment supplied."
+    },
+    "singlesparkFactory": {
+      "address": "0xd6a56abcddc83d4b780ef4cbfb8f6b7fc093ecf4",
+      "codeBytes": 18572,
+      "codeHash": "0xed48d981c50bcc45c4ead252431fe060ec1ecbcb79400814c865b446571770eb",
+      "result": "Existing SingleSpark deployment, not Argus Vault."
+    },
+    "api": {
+      "url": "https://singlespark.fun/api/arc/snapshot",
+      "httpStatus": 200,
+      "chainId": 5042002,
+      "launch": "0xd6a56abcddc83d4b780ef4cbfb8f6b7fc093ecf4",
+      "keeperEnabled": true,
+      "blockNumber": "66407637",
+      "syncedAt": "2026-10-10T02:42:27.314Z",
+      "tokenCount": 10,
+      "argusVaultFactoryPresent": false
+    },
+    "historicalAccounts": [
+      {
+        "address": "0x0ca76906cef08981717f81dfa1519b5a3cecca57",
+        "nativeUSDC": "50.488095930570991482",
+        "erc20USDC6": "50488095"
+      },
+      {
+        "address": "0xdb8953d77d1948c3be9920dfada33a0639045134",
+        "nativeUSDC": "3.394013782193178347",
+        "erc20USDC6": "3394013"
+      }
+    ],
+    "historicalWalletFilePresent": false,
+    "historicalTestnetEnvPresent": false,
+    "productionDeploymentChainGuard": 5042,
+    "architecture": "passed"
+  },
+  "notExecuted": [
+    "Public-testnet Vault deployment and project creation",
+    "Real Argus creator fee collection into Vault",
+    "Public-testnet Keeper buyback, burn, rewards and settlement",
+    "Public-testnet 48-hour delayed changes"
+  ],
+  "sourceSha256": {
+    "SingleSparkContract/arc/src/ArgusVaultFactory.sol": "00367dc135e1468b15f7fbc6e6980162fceb358e612f5cd6b7be3452c8cb4874",
+    "SingleSparkContract/arc/src/ArgusCustodyRouter.sol": "0054fda0d581ab7ed659f335cf8393d09f7b6c81927a2aa5572b635c3616ae78",
+    "SingleSparkContract/arc/deploy-argus-vault.mjs": "0a30bece963026bc605af2f032ae46d1f61f029ba505dfa0e1ac3f113fcedae7"
+  },
+  "references": {
+    "arcNetwork": "https://docs.arc.io/arc/references/connect-to-arc",
+    "argusDeployment": "https://github.com/arguspad/argus-world/blob/main/README.md"
+  },
+  "userDecision": "No separate Argus testnet deployment or account config available; return findings."
+}

@@ -1,0 +1,16 @@
+{
+  "status": "not_implemented",
+  "chainId": 5042002,
+  "project": {
+    "label": "TVLT3",
+    "token": "0x09B2Fde7b184ffEABe734e20d9FAf5C26374CeD6",
+    "vault": "0x219ACe16865D711a1b68D34AFD57352C46A8F42C",
+    "splitter": "0xcfA1941282fD53Cf88Daa1E7BFa2037dBef72D8F",
+    "locker": "0xcAFd3a916ba8e00076CDb2452FA443cC0F63DFF2"
+  },
+  "ordinaryWallet": "0xa3FcB4d46294E1DfAe1a54Bc75092DcD7820Fffd",
+  "onlyExecutorGuardVerified": true,
+  "publicTransactions": false,
+  "reason": "The deployed V2 vault has no signed public Claim entrypoint. Reward funding has not been selected. An existing-vault implementation upgrade requires a separate immutable 48-hour timelock after the pending platform-target operation.",
+  "checkedAt": "2026-10-10T06:05:10.327Z"
+}

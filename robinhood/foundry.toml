@@ -1,0 +1,17 @@
+[profile.default]
+src = "../chains/robinhood/launchpads/pons"
+test = "../chains/robinhood/launchpads/pons/test"
+skip = ["PonsTestRevenueVault.sol"]
+out = "out"
+cache_path = "cache"
+libs = ["../arc/lib"]
+solc = "0.8.26"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = true
+bytecode_hash = "none"
+remappings = ["@openzeppelin/=../arc/lib/openzeppelin-contracts/", "forge-std/=../arc/lib/forge-std/src/", "@uniswap/v4-core/=../arc/lib/v4-core/", "solmate/=../arc/lib/solmate/"]
+
+[lint]
+lint_on_build = false

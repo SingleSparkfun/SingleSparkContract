@@ -6,6 +6,7 @@ rust-version = "1.84"
 publish = false
 
 [lib]
+path = "../../../chains/solana/launchpads/pump/lib.rs"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]

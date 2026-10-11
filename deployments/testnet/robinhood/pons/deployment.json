@@ -1,0 +1,114 @@
+{
+  "identity": "d6abc187db077ce1ae71e1a1585fe2acb6034bee53faac81672751d0135d0a89",
+  "status": "testnet_acceptance_passed_pending_finality",
+  "chainId": 46630,
+  "local": false,
+  "independentDeployment": false,
+  "officialPonsDeployment": false,
+  "deployer": "0xa3FcB4d46294E1DfAe1a54Bc75092DcD7820Fffd",
+  "addresses": {
+    "factory": "0xEc987cEb5F08D6bdE2871E78AB67Af145746BC8c",
+    "escrow": "0x7e637b4760549fE8d815D640bFfBaAEB93b722E4",
+    "hook": "0x975a2B6c9B769cB065431445Ff554845D28E2044",
+    "buyback": "0x5AFcAfb36e774c05D3F8a7484dccD9E3Deca44A1",
+    "locker": "0xd2B8C094b1c8f154d88b4305539A80909e752ab0",
+    "deployer": "0xD428999b375fA665f5Ed86403B041253441e8a4e",
+    "graduation": "0x49AB005469AA6B293fdF3C3c2e6779fbaf5e12BD",
+    "graduationGuard": "0x2da4B27EA006B28eDB6b73cBa91E95321FCbABb2",
+    "testRevenueVault": "0xF952414504c8D892e21a8fa7Cb40C63822F3B91f",
+    "testToken": "0x07e4F508582fCf81f76B7a3b4cBc0A15a9661A3F",
+    "testCurve": "0x345c2002268bE662084cCa31d9414A388ABaB91b"
+  },
+  "codeHashes": {
+    "factory": "0x8610636d8e26ebda6a9fccdd4913d12eb19e0db8463422d137794ac9a7bfd394",
+    "escrow": "0xf25f75cfbc1637ba068dc34f69098fa4e8a80f8ee8fe7bf7820594e0b3fed2f1",
+    "hook": "0xafc4875f7c3528e18c90ef69f5d90d7021f8e82769f945867414f48c5fc5cab4",
+    "buyback": "0xa5a6bfd9af88147889a525d72af5ba58dc48a013bd0da349a4b965f70c4706db",
+    "locker": "0x58455f80b3773871d601a025e56ec27c71ab3bbb8e2ca6b17828954450742025",
+    "deployer": "0xff18cf1dfb239ca17170e006dcd2e411dddf2195b7a53af307e7f2629cd193a1",
+    "graduation": "0x680ca9a52dd3272f69120bd88eae0889dfb7c89ecb96c866cebf77adf6fe3ca1",
+    "testRevenueVault": "0x5e70ad3af26a76b0dde45423c39ca439c3963d0d966bd4a2f570e7919a471684"
+  },
+  "transactions": {
+    "test-revenue-vault": {
+      "hash": "0x4bd94c34384aec5bcc3c78484aa1e081c3b479c239799891e3dd53e6bb274cde",
+      "blockNumber": "132734232",
+      "blockHash": "0x73af865019a5959b4420a315bef33504362ebb309f2a65d72860959c5ed4d953",
+      "gasCostWei": "1293700000000"
+    },
+    "test-launch": {
+      "hash": "0xeb8cea1267e6395e0a7a08277e836830b7d6160da79d6e3f85ced1efa3d14700",
+      "blockNumber": "132734296",
+      "blockHash": "0x6248ad321b81444b60b225d5a285e4d4ff32c2bbbd28093e40ee0f6a521fe8d3",
+      "gasCostWei": "35413310000000"
+    },
+    "test-buy": {
+      "hash": "0xf749a9cec9b79330346866f01ce11a812251b2e92e03d37595a2b9c64b0dce51",
+      "blockNumber": "132734346",
+      "blockHash": "0xc849094c8ad569702867a8ed7faf443a512f7e5488eb825921485b5ee2d5801a",
+      "gasCostWei": "1453640000000"
+    },
+    "test-approve-sell": {
+      "hash": "0x9c03a9ea3f516c10c74c15180ceb28a070bc35b71b3e80aac302f7080ca07315",
+      "blockNumber": "132734388",
+      "blockHash": "0x128e4183d6ba15c0710d2d97bb807034ae56d3b386c0722e6d78b63b2d455a0e",
+      "gasCostWei": "460090000000"
+    },
+    "test-sell": {
+      "hash": "0x1f38da1862cfd8b7147bd8f92c571598084b16c5c8d9af01ea934edadd3904b5",
+      "blockNumber": "132734437",
+      "blockHash": "0xc3ded1463ff7443cefc6c8a19f7da3e6777add55650c62fa6568f9ee0306a035",
+      "gasCostWei": "817050000000"
+    },
+    "test-cross-threshold": {
+      "hash": "0x6431755c8b45be8becbb6f3ea3f080167353b995a4bf95a289480f9be313054e",
+      "blockNumber": "132735313",
+      "blockHash": "0x7068378ec07a0f30e0936a88971c55782de3b83ab5e07a68a22c6fb00ffd33dd",
+      "gasCostWei": "2755520000000"
+    },
+    "test-claim-fees": {
+      "hash": "0x626a8cf55df5183f7e01fe656702d0275982218b0f81cfb54dd61b6099f05047",
+      "blockNumber": "132735397",
+      "blockHash": "0xc3cf09c58d78c4bad4fcaadad653630fce21fd425215f7745c4d0c23a4a5675e",
+      "gasCostWei": "356570000000"
+    },
+    "test-create-pool": {
+      "hash": "0xa52ef87da7f626748f7db91f7c01bc10b801287007c0c01172b1ca9196852f62",
+      "blockNumber": "132735509",
+      "blockHash": "0x6dc63f982ec4bfa269f888b803cdd341d4036323d97825651689492ef807f48f",
+      "gasCostWei": "7997920000000"
+    }
+  },
+  "testnetDifferences": [
+    "Reuse an existing third-party testnet deployment, not an officially published Pons testnet.",
+    "Native phantom reserve 0.000008 ETH, graduation threshold 0.00002 ETH, launch fee zero.",
+    "External administrator can change launch availability and policies; every run rechecks the recorded state."
+  ],
+  "reusedDeployment": true,
+  "administrator": "0x15cc407D2d385AeB3D082cF9A3DfACE3953C9fFB",
+  "finalizedThroughBlock": "132728015",
+  "verification": {
+    "token": "0x07e4F508582fCf81f76B7a3b4cBc0A15a9661A3F",
+    "curve": "0x345c2002268bE662084cCa31d9414A388ABaB91b",
+    "revenueVault": "0xF952414504c8D892e21a8fa7Cb40C63822F3B91f",
+    "checks": [
+      "verified Pons executable bytecode",
+      "factory and dependency bindings",
+      "native launch",
+      "stale economics rejected",
+      "curve buy and sell",
+      "creator fees claimed into a separate contract",
+      "graduation and Uniswap V4 pool creation"
+    ],
+    "recovery": {
+      "nonceBefore": 8,
+      "nonceAfter": 8,
+      "duplicateTransactions": 0
+    },
+    "gasSpentWei": "50547800000000"
+  },
+  "sourceVerification": {
+    "testRevenueVault": "verified",
+    "explorerUrl": "https://explorer.testnet.chain.robinhood.com/address/0xF952414504c8D892e21a8fa7Cb40C63822F3B91f?tab=contract"
+  }
+}

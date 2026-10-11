@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { hasChainProfile, loadChainProfile, loadProfileFile, parseAmount, parseProfile, profileSummary } from './profile.mjs';
 
-const ethLikePath = fileURLToPath(new URL('../test/profiles/eth-like.json', import.meta.url));
+const ethLikePath = fileURLToPath(new URL('../../chains/arc/test/profiles/eth-like.json', import.meta.url));
 const arcJson = () => JSON.parse(readFileSync(new URL('./5042.json', import.meta.url), 'utf8'));
 
 test('amounts parse exactly, in integer or scientific form', () => {

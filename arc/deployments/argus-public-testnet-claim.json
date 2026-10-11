@@ -1,0 +1,395 @@
+{
+  "status": "passed",
+  "chainId": 5042002,
+  "rpc": "https://rpc.testnet.arc.io",
+  "independentTestDeployment": true,
+  "publicTransactions": true,
+  "accounts": {
+    "deployer": "0xa3FcB4d46294E1DfAe1a54Bc75092DcD7820Fffd",
+    "admin": "0xAB370A85F810a1a598660Db1946b04C4c1bb541e",
+    "executor": "0x8C4435334c20e69009AaAe2367cb8e2B85358b00"
+  },
+  "provenance": {
+    "portal": {
+      "address": "0xB021Be536808f551b31789422Fd28a6c9c6e97Da",
+      "sourcesSha256": "1171944452e1dd808b79dff0f272f12127ac0a5ff0b1196c58d6e6265c84c9c6",
+      "compilationSha256": "67e4856f505eacded688b3d1f8f821d9b606c5efb58ecc139f03f0864db0e09a",
+      "contract": "ArgusV4Portal7",
+      "verifiedCompilationReproduced": true
+    },
+    "tokenImpl": {
+      "address": "0x1B74922c01DDfD9C77B37D02C0a236611E8Fe500",
+      "sourcesSha256": "d3a75d9c61fa1cf8a3a40cd1cd231ce5eaae3d9ed3caf12f418aec97e06ba6ac",
+      "compilationSha256": "19b210e721e7be9a1e78b1218b44bc7b8a137a3a5f85a82c7a788e6ba7859901",
+      "contract": "ArgusV4LaunchToken7",
+      "verifiedCompilationReproduced": true
+    },
+    "lockerImpl": {
+      "address": "0xb2eD8112Db1bc11F7e7AB7969C2a9d1f819Cfc6A",
+      "sourcesSha256": "5ff7d0a83ce384248cee2715e01fbf189c91813d98caa3b2c1d296970934b114",
+      "compilationSha256": "429c7404308bca1bb961d8828cc854cf6d5aac97212a7859d5da5d71ab522f68",
+      "contract": "ArgusV4HookedLocker",
+      "verifiedCompilationReproduced": true
+    },
+    "splitterImpl": {
+      "address": "0xd9578dd861b2fe59675C2C4B09b026FcB0df37FC",
+      "sourcesSha256": "df3201bee21764c9c04e070603a6d26cecda6cc436f16f2c6cca463135bdeb7f",
+      "compilationSha256": "f91d0a541f206f14a23d1dea3ac286d27599bbd211e81ddd92044f1b59c27a77",
+      "contract": "ArgusV4HookedSplitter7",
+      "verifiedCompilationReproduced": true
+    }
+  },
+  "testnetChanges": [
+    "Router and Vault Factory deployment chain guard: 5042002",
+    "Router Portal constant: predicted independent testnet Portal",
+    "Other quote assets and conversions disabled by UsdcOnly; upstream USDC execution unchanged",
+    "Claim testnet controller delay: 10 minutes; production source remains 48 hours"
+  ],
+  "addresses": {
+    "router": "0x8095d22346bE424134e376c1A34779c586dC1BA3",
+    "implementation": "0x2a4f6b8ce455540Ae5614f9A18Da34262c1a2C3b",
+    "factory": "0xe5326c9586a12C6EE15273EA59d2c905416605fE",
+    "platformToken": "0xA70b060578389CDd4FdE184C06A0D8e2173bbb21"
+  },
+  "transactions": {
+    "router": {
+      "hash": "0x33a6867ca398144d0ce8f628f6ea1bc61aa1a3cf975c8b9a6db8f984ac787bbf",
+      "block": "66441168",
+      "gasUSDC": "0.0831929",
+      "status": "success"
+    },
+    "implementation": {
+      "hash": "0x0f3d0bc50020e882905d4049be03decf6bd1cdfa8757b398701f0e6368e7e85b",
+      "block": "66441227",
+      "gasUSDC": "0.11341785",
+      "status": "success"
+    },
+    "factory": {
+      "hash": "0x89815e0dd4155a4a911d1a60591960243fbbcd995829bdac5fe5b9eaa9588a1f",
+      "block": "66441298",
+      "gasUSDC": "0.0705158",
+      "status": "success"
+    },
+    "launch-TCLAIM1": {
+      "hash": "0x59d6a6a5932dea62c3d5e692bb9a7e170f4b46cfb4e1ab279d3b6a585d8e0d29",
+      "block": "66441467",
+      "gasUSDC": "0.084036",
+      "status": "success"
+    },
+    "launch-TCLAIM0": {
+      "hash": "0x0a1fd5d069b59b59608472ca935eafe89be2d467b525a1f6572ae49e1929a3dc",
+      "block": "66441511",
+      "gasUSDC": "0.084036",
+      "status": "success"
+    },
+    "trade-approve": {
+      "hash": "0x60a829435dca0dfbf065aaa774d7c30e716e65ebace48bfc27681985910ccc18",
+      "block": "66441534",
+      "gasUSDC": "0.00138595",
+      "status": "success"
+    },
+    "trade-buy": {
+      "hash": "0x1f122ea7f4d2269c6a419213be1f2a952179937f929e9ffbca7412ee3f49648c",
+      "block": "66441554",
+      "gasUSDC": "0.0063071",
+      "status": "success"
+    },
+    "collect-fees": {
+      "hash": "0xb503d69b29200c735a004ed9d663c3e1da4aa5ca13c393d1f936bd8104b3766c",
+      "block": "66441569",
+      "gasUSDC": "0.016648575",
+      "status": "success"
+    },
+    "labelled-test-donation": {
+      "hash": "0x646d82a2d54b2aac268cf74029efd3e048fe60bfdb9928bad63594102927e97e",
+      "block": "66441588",
+      "gasUSDC": "0.00122375",
+      "status": "success"
+    },
+    "account-donation": {
+      "hash": "0x7ef9461f18464e8e49a098a5e6bbdad44c7b7279d6c5f68a7cc6076218418d43",
+      "block": "66441953",
+      "gasUSDC": "0.00247585",
+      "status": "success"
+    },
+    "claim-own": {
+      "hash": "0xe903cd92881dd3f1027ce52d9f3dce5c3406a6f28a069283a615928460798103",
+      "block": "66442003",
+      "gasUSDC": "0.012945425",
+      "status": "success"
+    },
+    "claim-platform": {
+      "hash": "0x22574636bd03cfe2c4efe90d5bb3a7b2e5ad6f86a21d30afd71cb9c431ca6f5e",
+      "block": "66442055",
+      "gasUSDC": "0.0123097",
+      "status": "success"
+    },
+    "claim-inventory": {
+      "hash": "0xd56446190fd5b9d51eabaf504029fd19460e990f2602951ed1a367c1823326ec",
+      "block": "66442105",
+      "gasUSDC": "0.011714",
+      "status": "success"
+    },
+    "trade-approval-clear": {
+      "hash": "0x915f28ca874d2e167589f1c3465057e9e4b134950a7caa7332f779f7c46d7d20",
+      "block": "66442131",
+      "gasUSDC": "0.00083755",
+      "status": "success"
+    },
+    "claim-payout": {
+      "hash": "0xc25872dec8b329a5036f3ba0724c5c4c81e100dae44484974b851c85d37b2679",
+      "block": "66442172",
+      "gasUSDC": "0.1454339",
+      "status": "success"
+    },
+    "settle-operations": {
+      "hash": "0x09cdc88e4e0bdb3b1c22c6dbf4e0fdccab9a7973b330c91440c686c75b2fe47c",
+      "block": "66442219",
+      "gasUSDC": "0.003171375",
+      "status": "success"
+    },
+    "all-off-test-donation": {
+      "hash": "0xc570687f8333f8c7af41aae44d2766215cb405ec4203cc218ed6f7f7f29552a0",
+      "block": "66442254",
+      "gasUSDC": "0.00122345",
+      "status": "success"
+    },
+    "all-off-trade-approve": {
+      "hash": "0x2c137df88306b88b8810a6d96928d6d0e8eb26e4a6ca1d94870fde58963a2b25",
+      "block": "66442280",
+      "gasUSDC": "0.00138595",
+      "status": "success"
+    },
+    "all-off-trade": {
+      "hash": "0x9ed24b4632c7b8767b8347669a4ff0662dfe9293b3d5e62fbbb597e645901ef2",
+      "block": "66442311",
+      "gasUSDC": "0.0061882",
+      "status": "success"
+    },
+    "all-off-trade-clear": {
+      "hash": "0x4519a98c226436882666dbda483eaf96514fa83b719583969d1e13d80038ede0",
+      "block": "66442337",
+      "gasUSDC": "0.00088755",
+      "status": "success"
+    },
+    "all-off-collect": {
+      "hash": "0x1035a829db6516ea903b69823135e2c211110ec36c3417e4be5a62bf884916f7",
+      "block": "66442363",
+      "gasUSDC": "0.015276",
+      "status": "success"
+    },
+    "all-off-platform-settlement": {
+      "hash": "0x43acc830809fb12e1b83076e03aab8406791cc8a51296b37e6d2fbe69e0c03b6",
+      "block": "66442399",
+      "gasUSDC": "0.003598575",
+      "status": "success"
+    },
+    "launch-TSPARK3": {
+      "hash": "0x69bac533095e4ad0d0d39762e8e39687ce485050e5ac23661815243748770864",
+      "block": "66442469",
+      "gasUSDC": "0.083458725",
+      "status": "success"
+    },
+    "schedule-platform-TSPARK3": {
+      "hash": "0x00ed6e922dacd4df16ee8a1dbff9f57cd5954387d716a00f291d6138e1a4ace7",
+      "block": "66442497",
+      "gasUSDC": "0.003676925",
+      "status": "success"
+    },
+    "app-sync-donation": {
+      "hash": "0xc41b0d8ba4199633ed9d376971569d197f6fd21f50c69e9b29b6f851d2c3019f",
+      "block": "66443042",
+      "gasUSDC": "0.00122315",
+      "status": "success"
+    },
+    "execute-platform-TSPARK3": {
+      "hash": "0xf9dca580c8056efb3f2bcc7ac317e7feb248359f8080465781fd1999d9d2584f",
+      "block": "66443776",
+      "gasUSDC": "0.0018089",
+      "status": "success"
+    },
+    "app-user-sync": {
+      "hash": "0x64767572559270121b0c360433cbf68ea1c21316ddbab5d25107cb634079b77c",
+      "block": "66445699",
+      "gasUSDC": "0.001901",
+      "status": "success"
+    },
+    "flow-20261011-launch": {
+      "hash": "0xc673124ec4fd81451c2fe80c912d8a2d6dec0465dfcf615530c8b00f6fdfcfe6",
+      "block": "66588941",
+      "gasUSDC": "0.083459925",
+      "status": "success"
+    },
+    "flow-20261011-approve-buy": {
+      "hash": "0x17f1f5d5c5aaec349673afe2f0c96d3947045fc9640f6fd7e10aa04957345b6b",
+      "block": "66589025",
+      "gasUSDC": "0.00138595",
+      "status": "success"
+    },
+    "flow-20261011-buy": {
+      "hash": "0x4fa224b5b01c03bc92da669748487a6a4d5324f22b36eafa67ef3cbf41c8359e",
+      "block": "66589056",
+      "gasUSDC": "0.0070285",
+      "status": "success"
+    },
+    "flow-20261011-collect-organic": {
+      "hash": "0x8332f6fb955811fcd7980e09acff0031a5c8013cd85c655257d6cb4cca03431c",
+      "block": "66589084",
+      "gasUSDC": "0.016646375",
+      "status": "success"
+    },
+    "flow-20261011-labelled-top-up": {
+      "hash": "0xcf363856b68c66376288387c4f88c3c9bed87bf78475b2d157bdc748382618f4",
+      "block": "66589117",
+      "gasUSDC": "0.00122405",
+      "status": "success"
+    },
+    "flow-20261011-sync": {
+      "hash": "0x73ead3eec389ed8948f6996d9ce6c78b478b0572b2538a5f99480ce5eb1b28f3",
+      "block": "66589165",
+      "gasUSDC": "0.003218605",
+      "status": "success"
+    },
+    "flow-20261011-operations": {
+      "hash": "0x4b7346b0e3f64330fbbea8a6bd660723f9ff92d585a9a134fca56af8d1856a4a",
+      "block": "66589351",
+      "gasUSDC": "0.00449859375",
+      "status": "success"
+    },
+    "flow-20261011-own": {
+      "hash": "0x3e3a109131ccef013abbd505b8cca02dabac874219da21f99ba14d9c224c2b7b",
+      "block": "66590595",
+      "gasUSDC": "0.016425435",
+      "status": "success"
+    },
+    "flow-20261011-spark": {
+      "hash": "0xed4cfb086ac85bac29d47810a36918de2389619a1ae3e7f96d79a6c10641bc10",
+      "block": "66590660",
+      "gasUSDC": "0.01833117",
+      "status": "success"
+    },
+    "flow-20261011-rewards": {
+      "hash": "0xd626042b843a888464fb27b82c4c9e8d582be5ef1b66282e3246a098b0a501a2",
+      "block": "66590804",
+      "gasUSDC": "0.01463053125",
+      "status": "success"
+    },
+    "flow-20261011-payout": {
+      "hash": "0x9feb3e692882a098e9168d8d7ea7fb7d0a7dfea5d8ca16301bf39f850942ef3d",
+      "block": "66591179",
+      "gasUSDC": "0.185429848125",
+      "status": "success"
+    }
+  },
+  "codeHashes": {
+    "router": "0xb335d67dcfc0116868ddff3ce16cba3ad9cfbc1af724a055ff00260f9e05aebf",
+    "implementation": "0x4473c1dbbdd0bc2716bdda1380aacc1c619dee88acf905c4944207b019622cb8",
+    "factory": "0x50f74ae6ae50ce8477cd872c6cabda7a9879a4a93827742b10804e9bbda16125"
+  },
+  "limitations": [
+    "USDC only; other quote routes and conversions disabled",
+    "Real 10-minute delay cannot be fast-forwarded on public testnet",
+    "Application frontend/backend rollout is separate from this contract deployment"
+  ],
+  "identity": "acf0ad49e6585388f1fb97a58e8592e6e24c447652f710284e73b6ba8d551d1a",
+  "updatedAt": "2026-10-11T04:32:25.857Z",
+  "bootstrapPlatformToken": "0x77f936bdd43D19FDb2956b59ebeb67b8768010d0",
+  "allocation": {
+    "platformFeeBps": 1000,
+    "claimFeeBps": 50,
+    "pluginWeights": [
+      1,
+      1,
+      1
+    ],
+    "policyDelaySeconds": 600
+  },
+  "pluginContracts": [
+    {
+      "kind": 0,
+      "address": "0xc1c739CF67009a59F97aCB02b5ae3b9eF283f21f",
+      "codeHash": "0xb168da88f220fdc987ac73b1674005e51cc4dae420c76a56705ad4db88a28889"
+    },
+    {
+      "kind": 1,
+      "address": "0xeb0b04341b2eB1BA217813853e1d893b8D97F066",
+      "codeHash": "0x44be013c040233074cd02460efa6c2f89c97b5ce03acf48d13b531b7658f5785"
+    },
+    {
+      "kind": 2,
+      "address": "0x83e6D26fF3EC0F86313EFA4E6a61528FE60FDEB6",
+      "codeHash": "0x1943f6999de61afdd2684d21449f5756786a70e82f0ef3b64220b535d07f14e2"
+    }
+  ],
+  "projects": [
+    {
+      "label": "TCLAIM1",
+      "token": "0x013ba8caeC912C9b7f1cd373FaF10Dd5079F7200",
+      "vault": "0xfAE6Ac348Ab61390f3Fda8759F5C614bB9a05407",
+      "plugins": 7,
+      "splitter": "0xACF907c747d0d5B04F3D2C867942625EA10cfF09",
+      "locker": "0xFe4f04954812bfc0f27De5C12187CaaB615886F7"
+    },
+    {
+      "label": "TCLAIM0",
+      "token": "0x1A25342a9706D881b5017F6BB61Ab57CAd4ADaCC",
+      "vault": "0xCfd0A35C1Eda094Ff829bfdbD8C0A0B09CEf1e68",
+      "plugins": 0,
+      "splitter": "0xB879154c72E1C978Cd86Ead40D03524EFf102012",
+      "locker": "0x467DAd0C081707A8A4742aEF6fd8Ae4e87381556"
+    }
+  ],
+  "organicFeeUSDC6": "13320",
+  "labelledTestDonationUSDC6": "6250000",
+  "acceptance": {
+    "weightedAllocation": true,
+    "relativeWeights": [
+      1,
+      1,
+      1
+    ],
+    "fixedFeeBps": 1000,
+    "claimFeeBps": 50,
+    "externalPluginContracts": true,
+    "realTradeAndCreatorFees": true,
+    "independentVaults": true,
+    "userFundedClaim": true,
+    "ownAndPlatformBurn": true,
+    "inventoryRewardDeferred": true,
+    "distributionRecipients": 100,
+    "syntheticRecipients": true,
+    "replayRejected": true,
+    "executorOnlyBuyPreserved": true,
+    "operationsFixedRecipient": true,
+    "allOffRetainsUnallocated": true,
+    "allOffFixedFeesSettle": true,
+    "allowanceCleared": true,
+    "policyDelaySeconds": 600,
+    "applicationRolloutVerified": true
+  },
+  "platformProject": {
+    "label": "TSPARK3",
+    "name": "SingleSpark Test TSPARK3",
+    "token": "0xA70b060578389CDd4FdE184C06A0D8e2173bbb21",
+    "vault": "0x37647de2b44B103D5f9270587392CCDe74F528EB",
+    "plugins": 7
+  },
+  "platformTargetSwitch": {
+    "target": "0xA70b060578389CDd4FdE184C06A0D8e2173bbb21",
+    "readyAt": "1791618389",
+    "status": "executed",
+    "vaultsBalancesAndBudgetsPreserved": true,
+    "earlyExecutionRejected": true
+  },
+  "applicationAcceptance": {
+    "url": "https://singlespark.fun",
+    "deploymentPinsMatch": true,
+    "ordinaryProjectsListed": true,
+    "platformExcludedFromUserClaim": true,
+    "authenticatedPreparation": true,
+    "disabledPluginsAllowAccounting": true,
+    "userPaidGas": true,
+    "transaction": "0x64767572559270121b0c360433cbf68ea1c21316ddbab5d25107cb634079b77c",
+    "browserWalletSigningVerified": false
+  }
+}

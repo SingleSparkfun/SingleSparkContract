@@ -1,0 +1,7 @@
+{
+  "chainId": 46630,
+  "admin": "0xAB370A85F810a1a598660Db1946b04C4c1bb541e",
+  "authorizer": "0x8C4435334c20e69009AaAe2367cb8e2B85358b00",
+  "treasury": "0xAB370A85F810a1a598660Db1946b04C4c1bb541e",
+  "description": "Isolated testnet roles; project funds stay in contract vaults. Treasury receives only the fixed 10% platform allocation. No platform token is designated."
+}

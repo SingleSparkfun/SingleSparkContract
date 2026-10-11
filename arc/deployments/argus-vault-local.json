@@ -1,0 +1,283 @@
+{
+  "status": "passed",
+  "generatedAt": "2026-10-10T04:03:27.881Z",
+  "publicTransactions": false,
+  "limitations": "Anvil mock ERC20 USDC; native USDC precompile/blocklist not emulated; synthetic recipient fixture",
+  "steps": [
+    {
+      "name": "fork ready",
+      "gasLimit": "60000000"
+    },
+    {
+      "name": "launch SPARK",
+      "token": "0xB83199eE64192e40B4972341fDaC351edffd35d6",
+      "splitter": "0xd41F4E6E1b5eBaFF294cA2eaA834513868D89fFA",
+      "hook": "0x1d65d12CaD7E0637985ca8edd2c5AD4E3d0f2044",
+      "transactionHash": "0xc651a328882c04754b346ca12b8197080fe89caba26d949a7da84c7f7fad4f1c",
+      "tokenIsToken0": false
+    },
+    {
+      "name": "single custody and governance binding",
+      "custody": "0xBCf946234C8ea143f0747Bc289827F45A3425cd5",
+      "router": "0x6d42132de61064732cb91bd756aca4a5cea3b301",
+      "platformVault": "0x35a64ed71c5c0c9d90ef4643cfec3c1871a629d3"
+    },
+    {
+      "name": "vault deployment journal and immutable 48-hour controller verified",
+      "status": "deployed",
+      "chainId": 5042,
+      "router": "0x6d42132de61064732cb91bd756aca4a5cea3b301",
+      "admin": "0xcc25527eCB4085cb6029A4C1ddB31c63354fE576",
+      "executor": "0xBCf946234C8ea143f0747Bc289827F45A3425cd5",
+      "delaySeconds": 172800,
+      "ARC_ARGUS_VAULT_FACTORY": "0x9336636c7db9b552605C0Cd015F9960D2bd1ca66",
+      "ARC_ARGUS_VAULT_FACTORY_CODE_HASH": "0xdd9830e3f6d33b3fef3305585377f1294310b4ffb24ec8ddc1c4130a97d6e53a",
+      "ARC_ARGUS_VAULT_IMPLEMENTATION_CODE_HASH": "0x9fcf9f1f390bb3108714845c6d8d6a93a3a0e6298f80ad7066f0aa5bececc05b"
+    },
+    {
+      "name": "two real Portal creators are isolated contract vaults; index and restart need no project keys",
+      "projects": [
+        {
+          "token": "0xF677651d1Bc2CA35E8b1b535B84a474C8a1BE149",
+          "vault": "0x9e1Ab2762cd71469F507fA52735d7bD7b1dcA753",
+          "splitter": "0xaC0E9b95204419089ae65F741c84D431dE7a88ed",
+          "locker": "0x305c83ce785F46815bF7f67ce376746C378bD6ab"
+        },
+        {
+          "token": "0xa46b3Da330599eBC6202B6B2F435eEee6d597Ae5",
+          "vault": "0xBB0A20Dd1B40DD0D1EBAF606EE3aa3B2cC89474e",
+          "splitter": "0x0a4E0D91f90A82d16C10CaabE2b3491Ae3285C79",
+          "locker": "0x637B5e332bEE83EA1997B07c7d3A97C5033F2F4B"
+        }
+      ]
+    },
+    {
+      "name": "Rust journal executes collection, burns, reward buys, 100-recipient payouts and treasury buckets through vaults",
+      "actions": [
+        {
+          "source": "0xf677651d1bc2ca35e8b1b535b84a474c8a1be149",
+          "kind": "sync",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0x9e1ab2762cd71469f507fa52735d7bd7b1dca753",
+          "tx_hash": "0xe54891253d8c402bc4c144bf0f91bd10c8b2e46eaf13cffb65eb2d44d9aed060"
+        },
+        {
+          "source": "0xa46b3da330599ebc6202b6b2f435eeee6d597ae5",
+          "kind": "sync",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xbb0a20dd1b40dd0d1ebaf606ee3aa3b2cc89474e",
+          "tx_hash": "0x92cb8cd70354741157368eba1c4eab6ce5438d2cc908b83eb405a10e4dd257f7"
+        },
+        {
+          "source": "0xf677651d1bc2ca35e8b1b535b84a474c8a1be149",
+          "kind": "community",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0x9e1ab2762cd71469f507fa52735d7bd7b1dca753",
+          "tx_hash": "0x117676c71c993f430d825d66a2df1c2ccf80f4e251a53f01d50160292002969e"
+        },
+        {
+          "source": "0xa46b3da330599ebc6202b6b2f435eeee6d597ae5",
+          "kind": "own",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xbb0a20dd1b40dd0d1ebaf606ee3aa3b2cc89474e",
+          "tx_hash": "0x65c86b3b4afd5b2e3a3f1f77abdc9c8169a7fec081857213aa68f41f80fba4cf"
+        },
+        {
+          "source": "0xf677651d1bc2ca35e8b1b535b84a474c8a1be149",
+          "kind": "own",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0x9e1ab2762cd71469f507fa52735d7bd7b1dca753",
+          "tx_hash": "0x39f9362d87357e6f0f24dabf5b5061de502e453504300a6aab78d84505632a6d"
+        },
+        {
+          "source": "0xa46b3da330599ebc6202b6b2f435eeee6d597ae5",
+          "kind": "own",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xbb0a20dd1b40dd0d1ebaf606ee3aa3b2cc89474e",
+          "tx_hash": "0xd044c4ed3704028bb20e2518011af9f6c0d146e43f9da5a2fb4a8850b6ff6091"
+        },
+        {
+          "source": "0xf677651d1bc2ca35e8b1b535b84a474c8a1be149",
+          "kind": "own",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0x9e1ab2762cd71469f507fa52735d7bd7b1dca753",
+          "tx_hash": "0xb9c37b17d5cece6f26dd2a9e95e61c40aa4435a5f025017fe4c50a7a8103eeca"
+        },
+        {
+          "source": "0xa46b3da330599ebc6202b6b2f435eeee6d597ae5",
+          "kind": "own",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xbb0a20dd1b40dd0d1ebaf606ee3aa3b2cc89474e",
+          "tx_hash": "0x7bb732774c515c4b53b3b8a18374ba0481323c19f4bbcf8109a5a9a721d93123"
+        },
+        {
+          "source": "0xf677651d1bc2ca35e8b1b535b84a474c8a1be149",
+          "kind": "own",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0x9e1ab2762cd71469f507fa52735d7bd7b1dca753",
+          "tx_hash": "0xd3f8c66d434f11bfba5c8a525492441e9929a5e836115c927080d875a204fc46"
+        },
+        {
+          "source": "0xa46b3da330599ebc6202b6b2f435eeee6d597ae5",
+          "kind": "own",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xbb0a20dd1b40dd0d1ebaf606ee3aa3b2cc89474e",
+          "tx_hash": "0x9850395cd5ca9023ad9fa1caeba47c4c4b398a0bd0f477ebbcabd296d126b7a2"
+        },
+        {
+          "source": "0xf677651d1bc2ca35e8b1b535b84a474c8a1be149",
+          "kind": "own",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0x9e1ab2762cd71469f507fa52735d7bd7b1dca753",
+          "tx_hash": "0x40ad03bb9fefe193ee4d1e70ff19d11132e9670c9f89fe60bd42b6c8169f9e12"
+        },
+        {
+          "source": "0xa46b3da330599ebc6202b6b2f435eeee6d597ae5",
+          "kind": "own",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xbb0a20dd1b40dd0d1ebaf606ee3aa3b2cc89474e",
+          "tx_hash": "0x84b8b4594edde8a3805f3a0938976172960b99cd6d2b146155bee3e0d6940a7a"
+        },
+        {
+          "source": "0xf677651d1bc2ca35e8b1b535b84a474c8a1be149",
+          "kind": "own",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0x9e1ab2762cd71469f507fa52735d7bd7b1dca753",
+          "tx_hash": "0x3cb5c91849f5fc9c35f2f06771f539e03a9a567e0ae67fff0f56a09ac904d2ed"
+        },
+        {
+          "source": "0xa46b3da330599ebc6202b6b2f435eeee6d597ae5",
+          "kind": "spark",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xbb0a20dd1b40dd0d1ebaf606ee3aa3b2cc89474e",
+          "tx_hash": "0xe6c303241ff005d9b36e3c4e6e6eac2a4be286a4b8e52ecd9f6be2511454a608"
+        },
+        {
+          "source": "0xb83199ee64192e40b4972341fdac351edffd35d6",
+          "kind": "split",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xd41f4e6e1b5ebaff294ca2eaa834513868d89ffa",
+          "tx_hash": "0x6792443a5fa9177705a04e510227c1c593463d45675d3536cdcdcdd22444fc77"
+        },
+        {
+          "source": "0xf677651d1bc2ca35e8b1b535b84a474c8a1be149",
+          "kind": "spark",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0x9e1ab2762cd71469f507fa52735d7bd7b1dca753",
+          "tx_hash": "0x500b097361880843710336c79fdc2b47db40127d86e925b3e9a832c4b32aa99c"
+        },
+        {
+          "source": "0xa46b3da330599ebc6202b6b2f435eeee6d597ae5",
+          "kind": "rewards",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xbb0a20dd1b40dd0d1ebaf606ee3aa3b2cc89474e",
+          "tx_hash": "0xfa4fa34a203d351619f5bd32575e185f0dfafc0ebc509c0eaab99e825edad8c1"
+        },
+        {
+          "source": "0xb83199ee64192e40b4972341fdac351edffd35d6",
+          "kind": "split",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xd41f4e6e1b5ebaff294ca2eaa834513868d89ffa",
+          "tx_hash": "0x93c5777f5e7d48e68ba10543661f5d622a8ec0b7b2862b7254cc85d6cd26f0a5"
+        },
+        {
+          "source": "0xf677651d1bc2ca35e8b1b535b84a474c8a1be149",
+          "kind": "rewards",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0x9e1ab2762cd71469f507fa52735d7bd7b1dca753",
+          "tx_hash": "0xae51c7f7d9b02db6b9dbdd63b53bf495d19e13cfedbc549a8f9c08b786d1e8d4"
+        },
+        {
+          "source": "0xa46b3da330599ebc6202b6b2f435eeee6d597ae5",
+          "kind": "community",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xbb0a20dd1b40dd0d1ebaf606ee3aa3b2cc89474e",
+          "tx_hash": "0x28c3d40ce02fe17833161817dca3d217d430df270bb867fd12f4ab3a3650dfda"
+        },
+        {
+          "source": "0xb83199ee64192e40b4972341fdac351edffd35d6",
+          "kind": "split",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xd41f4e6e1b5ebaff294ca2eaa834513868d89ffa",
+          "tx_hash": "0x4d3c55d1144db5512a9205ab7580cbd1f7a1e893c0decc9aa4e102d0bd094257"
+        },
+        {
+          "source": "0xf677651d1bc2ca35e8b1b535b84a474c8a1be149",
+          "kind": "operations",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0x9e1ab2762cd71469f507fa52735d7bd7b1dca753",
+          "tx_hash": "0x81770fe9a5b1a8da8bd6feda8ba97b857b1298c51e40be52beda3c78c8db63a0"
+        },
+        {
+          "source": "0xa46b3da330599ebc6202b6b2f435eeee6d597ae5",
+          "kind": "operations",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xbb0a20dd1b40dd0d1ebaf606ee3aa3b2cc89474e",
+          "tx_hash": "0xafb047ec1d9dbd4e718d4253ab8005b62f5c393932e4b8dbb5f3f944bfd08329"
+        },
+        {
+          "source": "0xb83199ee64192e40b4972341fdac351edffd35d6",
+          "kind": "split",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xd41f4e6e1b5ebaff294ca2eaa834513868d89ffa",
+          "tx_hash": "0x8488dd96bcc176d5951e3366bfbfac8d0167ceb20f46b57dbc9f104b4a6f5ad7"
+        },
+        {
+          "source": "0xf677651d1bc2ca35e8b1b535b84a474c8a1be149",
+          "kind": "payout",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0x9e1ab2762cd71469f507fa52735d7bd7b1dca753",
+          "tx_hash": "0x4f2fce422f57a5094ce1c178bb5380131251559b6b9a470512ef231dcb98e0dc"
+        },
+        {
+          "source": "0xa46b3da330599ebc6202b6b2f435eeee6d597ae5",
+          "kind": "payout",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xbb0a20dd1b40dd0d1ebaf606ee3aa3b2cc89474e",
+          "tx_hash": "0x30299d0c71728057394c66e99c2e941ede055054a3bf7a8aa1394c33e2a817d7"
+        },
+        {
+          "source": "0xb83199ee64192e40b4972341fdac351edffd35d6",
+          "kind": "split",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xd41f4e6e1b5ebaff294ca2eaa834513868d89ffa",
+          "tx_hash": "0x968bffdac59f1c14a268b7e6e6e71ec6c3a0e94837f0ead50465cdb72feeba1f"
+        },
+        {
+          "source": "0xf677651d1bc2ca35e8b1b535b84a474c8a1be149",
+          "kind": "collect",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0x9e1ab2762cd71469f507fa52735d7bd7b1dca753",
+          "tx_hash": "0x67b7bf65c094f67489f8456177219b6b259e0a10eb286e520089bccd64ce04de"
+        },
+        {
+          "source": "0xa46b3da330599ebc6202b6b2f435eeee6d597ae5",
+          "kind": "collect",
+          "sender": "0xbcf946234c8ea143f0747bc289827f45a3425cd5",
+          "target": "0xbb0a20dd1b40dd0d1ebaf606ee3aa3b2cc89474e",
+          "tx_hash": "0x07db65469afa8d99f2a631f61c1b9d25396ba207ef912991bbb35de1ced5942b"
+        }
+      ]
+    },
+    {
+      "name": "global pause and delayed resume survive backend restarts"
+    },
+    {
+      "name": "one delayed platform target update reaches both unchanged vaults and stale intents fail",
+      "previousTarget": "0xB83199eE64192e40B4972341fDaC351edffd35d6",
+      "nextTarget": "0xa46b3Da330599eBC6202B6B2F435eEee6d597Ae5",
+      "updatedBurn": {
+        "blockNumber": "23563361",
+        "bought": "1726774707493236529375534",
+        "cycle": "13",
+        "feeTokens": "0",
+        "nativeAmount": "9606900000000000000",
+        "sourceToken": "0xf677651d1bc2ca35e8b1b535b84a474c8a1be149",
+        "timestamp": "1791146644",
+        "token": "0xa46b3da330599ebc6202b6b2f435eeee6d597ae5",
+        "totalBurned": "38286841511229675776808505",
+        "transactionHash": "0x2bb13462a940ac18207f63925d4f0d858bc539944d6a292cdcbfb66c117e40b1"
+      }
+    }
+  ]
+}

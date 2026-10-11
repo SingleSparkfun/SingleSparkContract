@@ -1,0 +1,77 @@
+{
+  "chainId": 4663,
+  "verifiedOn": "2026-10-11",
+  "reference": "https://docs.ponsfamily.com/v2",
+  "contracts": {
+    "factory": {
+      "address": "0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e",
+      "contract": "contracts/src/v2/PonsV2LaunchFactory.sol:PonsV2LaunchFactory",
+      "compilerVersion": "0.8.35",
+      "match": "exact_match",
+      "matchId": "43289536",
+      "sourcesSha256": "2b24e51dff15c6dbd3a920ea47ee32d6fc56e91b7b1189673650ab6a07a1dc67",
+      "compilationSha256": "c3e04484d1a4a8c89b61d7c35bdbcabbf8e190f82b41c9c6c7e9394b9e7bc571",
+      "creationSha256": "a58353b59ceface6d654fed4da6d6a61547c975d13ca4f8e86178b2575a487c9"
+    },
+    "escrow": {
+      "address": "0xd3AFEB2a57f70eF218Aa82451c51B2fb0416Ac9e",
+      "contract": "contracts/src/v2/PonsV2FeeEscrow.sol:PonsV2FeeEscrow",
+      "compilerVersion": "0.8.35",
+      "match": "match",
+      "matchId": "43642574",
+      "sourcesSha256": "8afdf7768667552e1f23311786e5a42c86a16161fdb8082af7ad91c02f9cdc79",
+      "compilationSha256": "59f930a4bfd050daf1269bab35a6074255b24c4b09b5d2560de5c57aafa56bc7",
+      "creationSha256": "a03032099611aab936fdc7e0d99968daf279f86938727de006a801bd6b1e3ea4"
+    },
+    "hook": {
+      "address": "0xE5e702641Ea86F4ae6cC3cDaeD2B886f976Be044",
+      "contract": "contracts/src/v2/hooks/PonsV2MemeHook.sol:PonsV2MemeHook",
+      "compilerVersion": "0.8.35",
+      "match": "match",
+      "matchId": "43313796",
+      "sourcesSha256": "3a1b7d416dfeb7f4db5ca3ed6f582e9dcaadd9d940d44cb68fdfe2bbb9811aa7",
+      "compilationSha256": "4c2fee4f16c944cf3c50def6c66a016ca480f5679016b803805df29a2a58babe",
+      "creationSha256": "7b3608b41b19c2e0a96819a644198cc3db66d9a4dcb61d9535d7d8a76105d721"
+    },
+    "buyback": {
+      "address": "0x42df2a798f82289E177311362e8f5ccC45c1219c",
+      "contract": "contracts/src/v2/PonsV2BuybackVault.sol:PonsV2BuybackVault",
+      "compilerVersion": "0.8.35",
+      "match": "match",
+      "matchId": "43855070",
+      "sourcesSha256": "90c03bea84f0d406315421ee5b1124fcd6eaa9b6773b8f5d1f3ab56773c17388",
+      "compilationSha256": "3d2883c796da306a9eac4e891e180081604bdc7facde18317ec81a05c7c0eeed",
+      "creationSha256": "07359b38c39e1c380852ed920226e5bd87d6bc81e2ec34958fecbc0a4cf146e6"
+    },
+    "locker": {
+      "address": "0x267444D099b10fB5Ed7c3Cc7B7c767AdcA574952",
+      "contract": "src/v2/RobinFunFiV2LaunchLocker.sol:RobinFunFiV2LaunchLocker",
+      "compilerVersion": "0.8.26",
+      "match": "match",
+      "matchId": "46819469",
+      "sourcesSha256": "72ad5811622964284e3b2976df33f70ce6a5fc72333b30f49a9a2b702dadcaf5",
+      "compilationSha256": "5dce977060b676a12b7d426a77a0ef0f0b29b8c6b4bf611fac134959aa3124f5",
+      "creationSha256": "9a265028610feb3835d0963b5e9022302ca81797ce0f86836b53c2978446743e"
+    },
+    "deployer": {
+      "address": "0x3711ceA4feaDE896C913C68F01Eda97Cb06D1A42",
+      "contract": "contracts/src/v2/PonsV2LaunchDeployer.sol:PonsV2LaunchDeployer",
+      "compilerVersion": "0.8.35",
+      "match": "exact_match",
+      "matchId": "43289543",
+      "sourcesSha256": "221179675cd7c65e06e2742077add863898ece4d0e9efaf5a11f8bead3c50531",
+      "compilationSha256": "2607b42406b85109101664ac287465b93c25b8242668bf55b30299528db2fa8d",
+      "creationSha256": "2809836b6e159498a8bc893949494b7d4072e20384193a0e7876d32709fe2a4e"
+    },
+    "graduation": {
+      "address": "0xC7819B64A1dAECD7eC19856d026cb14EfBd89046",
+      "contract": "contracts/src/v2/PonsV2GraduationExecutor.sol:PonsV2GraduationExecutor",
+      "compilerVersion": "0.8.35",
+      "match": "match",
+      "matchId": "46819467",
+      "sourcesSha256": "3b7b01a6a621063d9fb2406bd537fcd195df4dc237a3e261825c283706c534fc",
+      "compilationSha256": "3bb1bde90d33610292e1be42c542f220c5a9a9bf3044a4e51d00078dc5480964",
+      "creationSha256": "c1e4d72dc4411f9aa2c6df35011b3634767b8fb8aa84b7c0587429f8279995d1"
+    }
+  }
+}

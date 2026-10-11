@@ -1,10 +1,10 @@
 // Local Anvil only: deploys the whole stack with a chain profile that is not Arc — by default the synthetic
-// ETH-like test profile (SingleSparkContract/arc/test/profiles/eth-like.json, chain 31337) — and runs a launch, a buy, a sell,
+// ETH-like test profile (SingleSparkContract/chains/arc/test/profiles/eth-like.json, chain 31337) — and runs a launch, a buy, a sell,
 // fee collection with a keeper gas top-up, and a keeper burn through the executor, all in that profile's
 // currency units. Then the two read-only deployment verifiers run against it. Public development keys and
 // synthetic addresses; nothing touches a public network.
 //
-//   node SingleSparkContract/arc/check-profile-deploy.mjs [--profile SingleSparkContract/arc/test/profiles/eth-like.json] [--out report.json]
+//   node SingleSparkContract/arc/check-profile-deploy.mjs [--profile SingleSparkContract/chains/arc/test/profiles/eth-like.json] [--out report.json]
 import assert from 'node:assert/strict';
 import { execFileSync, spawn } from 'node:child_process';
 import { createServer } from 'node:net';
@@ -20,7 +20,7 @@ import { loadProfileFile } from './chains/profile.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const option = name => { const index = process.argv.indexOf(name); return index < 0 ? undefined : process.argv[index + 1]; };
-const profilePath = resolve(option('--profile') ?? resolve(root, 'test/profiles/eth-like.json'));
+const profilePath = resolve(option('--profile') ?? resolve(root, '../chains/arc/test/profiles/eth-like.json'));
 const outPath = option('--out');
 const profile = loadProfileFile(profilePath);
 const { halfSupplyCost, keeperGas } = profile.economics;

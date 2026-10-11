@@ -1,0 +1,21 @@
+[profile.default]
+src = "../chains/evm/gameplay"
+test = "../chains/evm/gameplay/test"
+out = "out"
+cache_path = "cache"
+libs = ["../arc/lib"]
+solc = "0.8.26"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = true
+bytecode_hash = "none"
+remappings = [
+  "@openzeppelin/=../arc/lib/openzeppelin-contracts/",
+  "@uniswap/v4-core/=../arc/lib/v4-core/",
+  "solmate/=../arc/lib/solmate/",
+  "forge-std/=../arc/lib/forge-std/src/"
+]
+
+[lint]
+lint_on_build = false

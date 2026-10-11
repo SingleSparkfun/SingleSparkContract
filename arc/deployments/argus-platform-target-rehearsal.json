@@ -1,0 +1,72 @@
+{
+  "status": "passed",
+  "network": "local-fork-of-arc-testnet",
+  "publicTransactions": false,
+  "publicEarlyExecutionRejected": true,
+  "sourceBlock": "66431331",
+  "factory": "0xFA9939b3c9453CdD919B3060f59EDA80CB9cce6B",
+  "previous": "0x77f936bdd43D19FDb2956b59ebeb67b8768010d0",
+  "next": "0x458567344B881D6D98294718FefbBE3794E05c49",
+  "publicReadyAt": "2026-10-12T04:56:12.000Z",
+  "oneSecondEarlyRejected": true,
+  "afterDelayExecuted": true,
+  "replayRejected": true,
+  "projectsPreserved": [
+    {
+      "token": "0x09B2Fde7b184ffEABe734e20d9FAf5C26374CeD6",
+      "vault": "0x219ACe16865D711a1b68D34AFD57352C46A8F42C",
+      "ledger": [
+        [
+          "0",
+          "0",
+          "0",
+          "20532",
+          "0"
+        ],
+        "9030203240358451647061",
+        "513320",
+        "5",
+        "100"
+      ],
+      "balance": "20532000000000000"
+    },
+    {
+      "token": "0x2BDCb8CeBfcF690592b9f8A4fd17FFe90b4CaAD7",
+      "vault": "0x125Bf17Ade98ef126A149770EA1ecE4278e77513",
+      "ledger": [
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "balance": "0"
+    },
+    {
+      "token": "0x458567344B881D6D98294718FefbBE3794E05c49",
+      "vault": "0xf031Ed078202594792B0FcCcf6E4cFb7D10Ad92C",
+      "ledger": [
+        [
+          "0",
+          "427000",
+          "305000",
+          "244000",
+          "61000"
+        ],
+        "0",
+        "6100000",
+        "1",
+        "0"
+      ],
+      "balance": "1037000000000000000"
+    }
+  ],
+  "publicTargetUnchanged": true,
+  "verifiedAt": "2026-10-10T06:02:53.618Z"
+}

@@ -1,6 +1,6 @@
 [profile.default]
-src = "src"
-test = "test"
+src = "../chains/arc"
+test = "../chains/arc"
 script = "script"
 out = "out"
 libs = ["lib"]
@@ -12,6 +12,7 @@ optimizer_runs = 200
 via_ir = true
 bytecode_hash = "none"
 remappings = [
+  "bls-solidity/=lib/bls-solidity/src/",
   "launcher/=lib/liquidity-launcher/",
   "@uniswap/v4-core/=lib/v4-core/",
   "@uniswap/v4-periphery/=lib/v4-periphery/",

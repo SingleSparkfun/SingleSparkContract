@@ -13,7 +13,8 @@ import { artifact } from './deploy.mjs';
 const PORTAL='0xB021Be536808f551b31789422Fd28a6c9c6e97Da',QUOTE='0x3600000000000000000000000000000000000000',DEAD='0x000000000000000000000000000000000000dEaD';
 const checkPlugins=process.argv.includes('--plugins');
 const serve=process.argv.includes('--serve');
-const independent=process.argv.includes('--independent-wallets')||process.argv.includes('--launch-gas');
+const vaults=process.argv.includes('--vaults');
+const independent=vaults||process.argv.includes('--independent-wallets')||process.argv.includes('--launch-gas');
 assert(!(serve&&independent));
 const serveDir=resolve('SingleSparkContract/arc/data/argus-local-fork');
 if(serve)mkdirSync(serveDir,{recursive:true,mode:0o700});
@@ -122,8 +123,8 @@ try{
       ARC_SATISFACTION_ADDRESS:vault,ARC_SATISFACTION_FROM_BLOCK:spark.launchReceipt.blockNumber.toString(),ARC_RPC_MAX_RPS:'100',ARC_RPC_BURST:'100',
       ARC_MAX_GAS_PER_TX:'10000000'};
     if(independent){
-      const {checkIndependentWallets}=await import('./check-argus-independent.mjs');
-      await checkIndependentWallets({env,client,chain,dbUrl,route,router,portalAbi,splitterAbi,trader,send,read,warp,now,mark,steps});
+      const checkIndependentWallets=vaults?(await import('./check-argus-vault.mjs')).checkVaults:(await import('./check-argus-independent.mjs')).checkIndependentWallets;
+      await checkIndependentWallets({env,client,chain,dbUrl,route,router,portalAbi,splitterAbi,trader,custody,send,read,warp,now,mark,steps});
     }else{
     writeFileSync(resolve(serveDir,'deployment.json'),JSON.stringify({chainId:31338,publicTransactions:false,quote:'explicit mock ERC20; separate native gas balance',portal:PORTAL,platformToken:spark.token,router:route,vault,steps},null,2));
     await serveBackend(env);

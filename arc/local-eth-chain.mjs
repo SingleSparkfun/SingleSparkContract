@@ -22,7 +22,7 @@ const root = fileURLToPath(new URL('.', import.meta.url));
 const dir = resolve(root, 'data/local-eth-31337');
 const PORT = 8546, API_PORT = 8091;
 const url = `http://127.0.0.1:${PORT}`;
-const profilePath = resolve(root, 'test/profiles/eth-like.json');
+const profilePath = resolve(root, '../chains/arc/test/profiles/eth-like.json');
 const profile = loadProfileFile(profilePath);
 mkdirSync(dir, { recursive: true, mode: 0o700 });
 const pidFile = resolve(dir, 'anvil.pid');

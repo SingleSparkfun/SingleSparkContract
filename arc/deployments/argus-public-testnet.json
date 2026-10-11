@@ -1,0 +1,312 @@
+{
+  "status": "passed",
+  "chainId": 5042002,
+  "rpc": "https://rpc.testnet.arc.io",
+  "independentTestDeployment": true,
+  "publicTransactions": true,
+  "accounts": {
+    "deployer": "0xa3FcB4d46294E1DfAe1a54Bc75092DcD7820Fffd",
+    "admin": "0xAB370A85F810a1a598660Db1946b04C4c1bb541e",
+    "executor": "0x8C4435334c20e69009AaAe2367cb8e2B85358b00"
+  },
+  "provenance": {
+    "portal": {
+      "address": "0xB021Be536808f551b31789422Fd28a6c9c6e97Da",
+      "sourcesSha256": "1171944452e1dd808b79dff0f272f12127ac0a5ff0b1196c58d6e6265c84c9c6",
+      "compilationSha256": "67e4856f505eacded688b3d1f8f821d9b606c5efb58ecc139f03f0864db0e09a",
+      "contract": "ArgusV4Portal7",
+      "verifiedCompilationReproduced": true
+    },
+    "tokenImpl": {
+      "address": "0x1B74922c01DDfD9C77B37D02C0a236611E8Fe500",
+      "sourcesSha256": "d3a75d9c61fa1cf8a3a40cd1cd231ce5eaae3d9ed3caf12f418aec97e06ba6ac",
+      "compilationSha256": "19b210e721e7be9a1e78b1218b44bc7b8a137a3a5f85a82c7a788e6ba7859901",
+      "contract": "ArgusV4LaunchToken7",
+      "verifiedCompilationReproduced": true
+    },
+    "lockerImpl": {
+      "address": "0xb2eD8112Db1bc11F7e7AB7969C2a9d1f819Cfc6A",
+      "sourcesSha256": "5ff7d0a83ce384248cee2715e01fbf189c91813d98caa3b2c1d296970934b114",
+      "compilationSha256": "429c7404308bca1bb961d8828cc854cf6d5aac97212a7859d5da5d71ab522f68",
+      "contract": "ArgusV4HookedLocker",
+      "verifiedCompilationReproduced": true
+    },
+    "splitterImpl": {
+      "address": "0xd9578dd861b2fe59675C2C4B09b026FcB0df37FC",
+      "sourcesSha256": "df3201bee21764c9c04e070603a6d26cecda6cc436f16f2c6cca463135bdeb7f",
+      "compilationSha256": "f91d0a541f206f14a23d1dea3ac286d27599bbd211e81ddd92044f1b59c27a77",
+      "contract": "ArgusV4HookedSplitter7",
+      "verifiedCompilationReproduced": true
+    }
+  },
+  "testnetChanges": [
+    "Router and Vault Factory deployment chain guard: 5042002",
+    "Router Portal constant: predicted independent testnet Portal",
+    "Other quote assets and conversions disabled by UsdcOnly; upstream USDC execution unchanged"
+  ],
+  "addresses": {
+    "stateView": "0xF952414504c8D892e21a8fa7Cb40C63822F3B91f",
+    "usdcOnly": "0x4A328Fedaac64bEDE7a4638dC5FebCfa837fe5D0",
+    "launchConfig": "0x0980Ec6701502B5Ec7bcEcadDE61a53d919e84f3",
+    "tokenImpl": "0x29cdd83C1A111eE43CDCc7195e0F084f942aa4D3",
+    "lockerImpl": "0xce197E34DFBe1889B3EC85E0a3A4a6ba60572261",
+    "splitterImpl": "0x4B87dBda691Fe8FBc38bc25a93448947329c3633",
+    "ArgusV4Curve": "0x073e7A4C2862d82F2ab037b2e8779d93c0B40BEB",
+    "ArgusV4DevBuyERC20": "0x1EF842ab77d8162a3019b508171F369f06BB98Dd",
+    "portal": "0xC27F99ca0Fb8e4EE79dFF8BA36F77eFfbe52E42B",
+    "platformToken": "0x77f936bdd43D19FDb2956b59ebeb67b8768010d0",
+    "router": "0xD11B7A99d88C2bCa9973E96C75604e684855c78D",
+    "implementation": "0x0A5d1Fe03E92Ef5789E4DB46182C3740413E0f9C",
+    "factory": "0xA4E54E1F342289a2E8d43D0D60f12DBc27A579Df"
+  },
+  "transactions": {
+    "stateView": {
+      "hash": "0xfec02215b44a1babdfab2949e28d6c9967e22a6205b0c3554ea13ae6b021a9df",
+      "block": "66409797",
+      "gasUSDC": "0.016139225",
+      "status": "success"
+    },
+    "usdcOnly": {
+      "hash": "0x318f01870273433a6ae8513e677713a49f7503033b64e945db13ba5a5e4dddba",
+      "block": "66409862",
+      "gasUSDC": "0.002897275",
+      "status": "success"
+    },
+    "launchConfig": {
+      "hash": "0xf238b8a08cf29b7254cd0a1b9a248cc10c9b0a0f9a1f0c254aabd72f4dfca1aa",
+      "block": "66409928",
+      "gasUSDC": "0.0057636",
+      "status": "success"
+    },
+    "tokenImpl": {
+      "hash": "0xd6f2750c3651e7aba82acbf927a2a0152fc6d6da140c61ae7fd0cda131b856d7",
+      "block": "66410000",
+      "gasUSDC": "0.081124025",
+      "status": "success"
+    },
+    "lockerImpl": {
+      "hash": "0x74d76164b515fb400ef54768da204cbeff015ca8d3f81f05bd93d3a5a5b57a5c",
+      "block": "66410060",
+      "gasUSDC": "0.04433175",
+      "status": "success"
+    },
+    "splitterImpl": {
+      "hash": "0xdaeddbe97bf64d3015336e0cdaea6aa2b9bab9f9c49664ed9a29b5f76169fbf4",
+      "block": "66410120",
+      "gasUSDC": "0.130189375",
+      "status": "success"
+    },
+    "ArgusV4Curve": {
+      "hash": "0x1d4853d9447b3502114dcf2c9a8859817dbc2f792082f89f3ddb4ab6682a41ea",
+      "block": "66410181",
+      "gasUSDC": "0.0207204",
+      "status": "success"
+    },
+    "ArgusV4DevBuyERC20": {
+      "hash": "0xbc3225a5061f4c3312e17232f97b295f32f4c1d6a13792a5a43e27a01d3d72f9",
+      "block": "66410238",
+      "gasUSDC": "0.02884875",
+      "status": "success"
+    },
+    "portal": {
+      "hash": "0x6723eb6ff09780041912bf205c0f0923a18df5a81256eb99bc33f09b18eff0e5",
+      "block": "66410302",
+      "gasUSDC": "0.16989685",
+      "status": "success"
+    },
+    "executor-gas": {
+      "hash": "0x3390b794ee87bcbd48aa420629f559c6841b5501acce253a85daa7501475121f",
+      "block": "66410312",
+      "gasUSDC": "0.000525",
+      "status": "success"
+    },
+    "platform-launch": {
+      "hash": "0x38588b7ee5ce713312bc075f367d9938c8c19197b75057d4e140e0c639e78927",
+      "block": "66410322",
+      "gasUSDC": "0.0715906",
+      "status": "success"
+    },
+    "router": {
+      "hash": "0xaa45e4fbe3cb29bd702c612e2801e2e856bd6156b5a06913cffca12cefcbea85",
+      "block": "66410382",
+      "gasUSDC": "0.0831929",
+      "status": "success"
+    },
+    "implementation": {
+      "hash": "0xcd28768a5ef00c393d283540f15480a93dfb056f589bf13b256b73814e313928",
+      "block": "66410440",
+      "gasUSDC": "0.0523663",
+      "status": "success"
+    },
+    "factory": {
+      "hash": "0x688f72ef1b46fd3d502d37c3c256eec82dd335411636cb6f002dfb46b062d63d",
+      "block": "66410499",
+      "gasUSDC": "0.0340394",
+      "status": "success"
+    },
+    "launch-TVLT1": {
+      "hash": "0xa780ba1eab9d9b0b6e6a5797b2f44b263e40532cb62a6f4faf1a54968e80dc16",
+      "block": "66410532",
+      "gasUSDC": "0.082323875",
+      "status": "success"
+    },
+    "launch-TVLT2": {
+      "hash": "0x552a702e8cc69c4a8a63c5ed032777753c47e0225a7ef15e5bf6214f846cfc68",
+      "block": "66410546",
+      "gasUSDC": "0.0817463",
+      "status": "success"
+    },
+    "trader-allowance": {
+      "hash": "0xd56861a695fcb4f32f012f6342aa618014da3f9d786272fd4ec99cba2080689a",
+      "block": "66410555",
+      "gasUSDC": "0.00138595",
+      "status": "success"
+    },
+    "organic-trade": {
+      "hash": "0xd881f87125cfcd6be1dc18531d3f6590bd909c89253fc6299b6c9a28e4ab423b",
+      "block": "66410563",
+      "gasUSDC": "0.0063074",
+      "status": "success"
+    },
+    "organic-collect": {
+      "hash": "0x39ca8a069773a9e6c26344876b759e475c23558cab5571d8dfa7f3aaaca89eda",
+      "block": "66410570",
+      "gasUSDC": "0.017023525",
+      "status": "success"
+    },
+    "labelled-test-donation": {
+      "hash": "0x66e6a023671836f4f90cd43c7a8841b27239f160b6858c336a6d567d1b4afe4a",
+      "block": "66410578",
+      "gasUSDC": "0.00122375",
+      "status": "success"
+    },
+    "sync-donation": {
+      "hash": "0x7dabb158d26d6fb478a0c5cf5c6cec4702a03dc0449a383e3bf4410cf92f6aa9",
+      "block": "66410584",
+      "gasUSDC": "0.002175625",
+      "status": "success"
+    },
+    "own-burn": {
+      "hash": "0xe3e519c0d005dab0f9a29ecec9bdc1aa55f00fa7814640952faebd288a4f1bb2",
+      "block": "66410596",
+      "gasUSDC": "0.0080092",
+      "status": "success"
+    },
+    "platform-burn": {
+      "hash": "0x72845e9023e242deaae81f51e70b3a762ae5b014e73d3efb94c1b3abb4713e0d",
+      "block": "66410610",
+      "gasUSDC": "0.00990495",
+      "status": "success"
+    },
+    "reward-buy": {
+      "hash": "0x57f27d171350637f1d1f4d99aa8f097064533f863ea2397fa0d85f4a0db908be",
+      "block": "66410622",
+      "gasUSDC": "0.007586925",
+      "status": "success"
+    },
+    "reward-payout": {
+      "hash": "0xed5a13d6496366904992da5a3ce5494d8d8e9c73a75117c828919797f570db0d",
+      "block": "66410632",
+      "gasUSDC": "0.140599425",
+      "status": "success"
+    },
+    "fixed-operations-payment": {
+      "hash": "0xf694812d15030197b4509270522394fda082d8fd087ebaab38b940566ef1a04d",
+      "block": "66410654",
+      "gasUSDC": "0.003146525",
+      "status": "success"
+    },
+    "trader-allowance-clear": {
+      "hash": "0xf44abfbb74ec1865bde0789175c4a57c9c87db8a46f48bdb3bb6ec2b4506c299",
+      "block": "66410662",
+      "gasUSDC": "0.00083755",
+      "status": "success"
+    },
+    "pause-second-project": {
+      "hash": "0xd19a739590022ae996ffdad0959feb7ce2ffda466c8a70bdb4bcf62e7bf0f504",
+      "block": "66410670",
+      "gasUSDC": "0.0016143",
+      "status": "success"
+    },
+    "admin-gas": {
+      "hash": "0xd4f9c7f1d9bdd8085d711338c80b46859d947c177e836467af0acfc918ad546d",
+      "block": "66410678",
+      "gasUSDC": "0.000525",
+      "status": "success"
+    },
+    "schedule-policy": {
+      "hash": "0x3cb76217bc816dccc354bafc6e289288091163fc5b1d8c5dc3993cff772f224c",
+      "block": "66410689",
+      "gasUSDC": "0.001868075",
+      "status": "success"
+    },
+    "cancel-policy": {
+      "hash": "0x39e5d14a064e1317f619e14acae2f8ab476688833bf3eb71e745033766fce2fb",
+      "block": "66410704",
+      "gasUSDC": "0.0006582",
+      "status": "success"
+    }
+  },
+  "codeHashes": {
+    "stateView": "0x7049779ba9e379b64ec4f2ba69e0a3e6957375b6db8f50a2d56b339dd2ce53d7",
+    "usdcOnly": "0x62413adc964ef8da46a6b3136059e37dfbe9e16996365a1eb31e42cff15d71c3",
+    "launchConfig": "0x8a54129fd839ee81050e9ee37b3c135dcf3150b22be1eed33d2acb767e51628f",
+    "tokenImpl": "0x7e10b184988814311561c580d368427bc1b263d2bb1f826c331da0cb4eb009b0",
+    "lockerImpl": "0xab742b1d34605c4f138047ba782e4905bb24b111c079501db915dcfb851d2b13",
+    "splitterImpl": "0x807a7b7928e4215b16f163be511ba153b3be8ef2856e074e5605cfa980e9b146",
+    "ArgusV4Curve": "0x9eae6bbe3d19f969fcd5ab67fbe487c26f872aba1afae6f50a026402768df631",
+    "ArgusV4DevBuyERC20": "0xb3f5cfb73e2bc403a39f37c2f90fbbf4681cdcacb9a949b4bd4d9d12d60ca06e",
+    "portal": "0xa5281a68557de7451ce61ec256805682c59fd95eb5484a17bf59d2cf097d0d9a",
+    "router": "0xb335d67dcfc0116868ddff3ce16cba3ad9cfbc1af724a055ff00260f9e05aebf",
+    "implementation": "0x526a604b3f8b4ea3c8766b694606b361a492cfddbc32f41f8289f6bd1421c1fe",
+    "factory": "0x3f661c197bc74a25b9383459963bcbbe6634ed9e8f90821dfa16e64af607d275"
+  },
+  "limitations": [
+    "USDC only; other quote routes and conversions disabled",
+    "Real 48-hour delay cannot be fast-forwarded on public testnet",
+    "Application frontend/backend rollout is separate from this contract deployment"
+  ],
+  "identity": "0cac9d33370050cec5f2494fe7d0e5abf898eeb601742f823fb55f92ca78b3a8",
+  "updatedAt": "2026-10-10T03:08:13.001Z",
+  "projects": [
+    {
+      "label": "TVLT1",
+      "token": "0x2fe36897B4670f7EC9C6A831e7754B0C0780a55f",
+      "vault": "0xbD4406B27a346A13Ee354e842D8Fbbaec312E934",
+      "splitter": "0x94C85ec8837a1966e221d0669E3965892278c05c",
+      "locker": "0x757ef3F5A769aD8DfE00ee66C304dC948d3fEEaa"
+    },
+    {
+      "label": "TVLT2",
+      "token": "0xF9339C945E1691dD0D4A71C879e63e75FD7e6C6a",
+      "vault": "0x060794F4E1750c1D95F5B24169C47C58BcF5b410",
+      "splitter": "0x5c73319EbB7252caD115aaFa3A838622FE9223F2",
+      "locker": "0x0f0E6c765c2Cab9da0A01087B79840a6a615E323"
+    }
+  ],
+  "organicFeeUSDC6": "13320",
+  "acceptance": {
+    "creatorAndSplitterRecipient": "per-project contract vault",
+    "actualNativeUsdc": true,
+    "realUniswapV4Trades": true,
+    "organicFeesCollected": true,
+    "labelledDonationUSDC6": "500000",
+    "isolatedProjects": 2,
+    "ownAndPlatformBurn": true,
+    "rewardBuy": true,
+    "payouts": 100,
+    "payoutTokensEach": "10",
+    "syntheticTestRecipients": true,
+    "duplicatePayoutRejected": true,
+    "unauthorizedExecutionRejected": true,
+    "allowanceCleared": true,
+    "fixedOperationsPayment": true,
+    "communityShareReserved": true,
+    "projectPauseIsolated": true,
+    "policyDelaySeconds": 172800,
+    "earlyPolicyExecutionRejected": true,
+    "policyQueueCancelled": true,
+    "real48HourExecutionCompleted": false,
+    "backendAutomaticKeeperValidated": false
+  }
+}

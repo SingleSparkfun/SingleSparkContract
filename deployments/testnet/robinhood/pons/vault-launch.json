@@ -1,0 +1,103 @@
+{
+  "identity": "c9088fa4d8f97aad1c4c2597b52bf0c00c4818086b10ff4bf31329824c72a34c",
+  "status": "vault_launch_verified_pending_finality",
+  "chainId": 46630,
+  "local": false,
+  "independentDeployment": true,
+  "officialPonsDeployment": false,
+  "deployer": "0xa3FcB4d46294E1DfAe1a54Bc75092DcD7820Fffd",
+  "addresses": {
+    "vaultFactory": "0xc27f99ca0fb8e4ee79dff8ba36f77effbe52e42b",
+    "vaultImplementation": "0x2e399E259D7F2CDFA0d49a198837cD2e3272da5a",
+    "testToken": "0xAaCa58eB127be707177B854c180bA011536bCE06",
+    "testCurve": "0xcBC8eC6ac35d45D2C36D41b130DDfDCf6e1CCFD2",
+    "testVault": "0x24d73044FA10263979526F2855C160B01Fd6AbF0"
+  },
+  "codeHashes": {
+    "vaultFactory": "0x53de2fc01744ced7225e4d7782fa6a76ec1a2d4a5afe9bd317e4091826205dbe",
+    "vaultImplementation": "0xe3a91690f6ab7f0a2d8c63721491eef2e42718cc94adb3bc6f89e2a746b102a8"
+  },
+  "transactions": {
+    "vault-factory": {
+      "hash": "0x5ae59297d238031dd0bcbc2a2d1eaaf4afefd9ce1ae6eaaad847f14efcf4904d",
+      "blockNumber": "132747827",
+      "blockHash": "0x3a672164c0865048e3a55cdd22249601e1dcc0469a16ab5a67de8d9e1103b750",
+      "gasCostWei": "53552140000000"
+    },
+    "vault-launch": {
+      "hash": "0x41618fdc4eb108bb5e884ad88c328f07d6b0b9777bb90d0fbc60e3dfd72871bf",
+      "blockNumber": "132747881",
+      "blockHash": "0x63af92a045e0c45a06c04fa0e7b6b8d63e79b4dd6fbb80e77aacabe47ddea3dd",
+      "gasCostWei": "37764230000000"
+    },
+    "vault-curve-buy": {
+      "hash": "0xe40389c9771dfea06e75ea052faae25bd14118c1eafd182f05d90fbfe6fbd450",
+      "blockNumber": "132747922",
+      "blockHash": "0x5df77e949681b546ebe9a846318fd24334aa0fc8d7e351a29c5eb1a3e71803d9",
+      "gasCostWei": "1453640000000"
+    },
+    "vault-collect-revenue": {
+      "hash": "0x22c0abd1fe1e93bd8ff64cab52775df255278359d8dce714ba5aa09f12be2113",
+      "blockNumber": "132747949",
+      "blockHash": "0x1f51b2ee18e60968dcfe29b362c6f4f8bd99bd9deb0b4e2229d2515db136e9f6",
+      "gasCostWei": "2497110000000"
+    },
+    "vault-native-deposit": {
+      "hash": "0x22b4bf3edd5eacc183a18aaec9e47ec24dedd0fc2e78d135f9fdb52282640f1e",
+      "blockNumber": "132747997",
+      "blockHash": "0xd6badfea74722d71c1e913a52f70d875b01a3640dab921ca6d41ff8aa8e878d9",
+      "gasCostWei": "619110000000"
+    },
+    "user-launch-20261011-ssptest": {
+      "hash": "0xea09d6743f464e1da23d7402245ff27e4c3b138459234507a0f3b646ad12f8dc",
+      "blockNumber": "132846041",
+      "blockHash": "0xb727d70fa6b5a9760e0925a85f9fe362dc3a30db1f018b7c72b8d91fc28ac8dd",
+      "gasCostWei": "38649470000000"
+    }
+  },
+  "testnetDifferences": [
+    "Reuse an existing third-party testnet deployment, not an officially published Pons testnet.",
+    "Native phantom reserve 0.000008 ETH, graduation threshold 0.00002 ETH, launch fee zero.",
+    "External administrator can change launch availability and policies; every run rechecks the recorded state."
+  ],
+  "sourcePons": {
+    "addresses": {
+      "factory": "0xEc987cEb5F08D6bdE2871E78AB67Af145746BC8c",
+      "escrow": "0x7e637b4760549fE8d815D640bFfBaAEB93b722E4",
+      "hook": "0x975a2B6c9B769cB065431445Ff554845D28E2044",
+      "buyback": "0x5AFcAfb36e774c05D3F8a7484dccD9E3Deca44A1",
+      "locker": "0xd2B8C094b1c8f154d88b4305539A80909e752ab0",
+      "deployer": "0xD428999b375fA665f5Ed86403B041253441e8a4e",
+      "graduation": "0x49AB005469AA6B293fdF3C3c2e6779fbaf5e12BD",
+      "graduationGuard": "0x2da4B27EA006B28eDB6b73cBa91E95321FCbABb2",
+      "testRevenueVault": "0xF952414504c8D892e21a8fa7Cb40C63822F3B91f",
+      "testToken": "0x07e4F508582fCf81f76B7a3b4cBc0A15a9661A3F",
+      "testCurve": "0x345c2002268bE662084cCa31d9414A388ABaB91b"
+    },
+    "codeHashes": {
+      "factory": "0x8610636d8e26ebda6a9fccdd4913d12eb19e0db8463422d137794ac9a7bfd394",
+      "escrow": "0xf25f75cfbc1637ba068dc34f69098fa4e8a80f8ee8fe7bf7820594e0b3fed2f1",
+      "hook": "0xafc4875f7c3528e18c90ef69f5d90d7021f8e82769f945867414f48c5fc5cab4",
+      "buyback": "0xa5a6bfd9af88147889a525d72af5ba58dc48a013bd0da349a4b965f70c4706db",
+      "locker": "0x58455f80b3773871d601a025e56ec27c71ab3bbb8e2ca6b17828954450742025",
+      "deployer": "0xff18cf1dfb239ca17170e006dcd2e411dddf2195b7a53af307e7f2629cd193a1",
+      "graduation": "0x680ca9a52dd3272f69120bd88eae0889dfb7c89ecb96c866cebf77adf6fe3ca1",
+      "testRevenueVault": "0x5e70ad3af26a76b0dde45423c39ca439c3963d0d966bd4a2f570e7919a471684"
+    }
+  },
+  "finalizedThroughBlock": "132839171",
+  "verification": {
+    "checks": [
+      "atomic launch and deterministic Vault",
+      "wallet owner preserved",
+      "Pons creator fee recipient is project Vault",
+      "curve income swept and claimed by Vault",
+      "10% / 0.5% / 89.5% budgets",
+      "native ETH deposit without wrapping",
+      "48-hour production controller"
+    ],
+    "creatorIncomeWei": "54000000000",
+    "pluginsEnabled": false,
+    "platformToken": null
+  }
+}

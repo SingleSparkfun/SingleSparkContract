@@ -1,0 +1,31 @@
+{
+  "chainId": 4663,
+  "environment": "mainnet",
+  "broadcastAllowed": false,
+  "referenceOnly": true,
+  "officialContracts": {
+    "factory": "0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e",
+    "escrow": "0xd3AFEB2a57f70eF218Aa82451c51B2fb0416Ac9e",
+    "hook": "0xE5e702641Ea86F4ae6cC3cDaeD2B886f976Be044",
+    "buyback": "0x42df2a798f82289E177311362e8f5ccC45c1219c",
+    "locker": "0x267444D099b10fB5Ed7c3Cc7B7c767AdcA574952",
+    "deployer": "0x3711ceA4feaDE896C913C68F01Eda97Cb06D1A42",
+    "graduation": "0xC7819B64A1dAECD7eC19856d026cb14EfBd89046"
+  },
+  "launchConfig": {
+    "getLaunchConfig": {
+      "supply": "1000000000000000000000000000",
+      "curveFeeBps": "100",
+      "phantomQuote": "1680000000000000000",
+      "graduationThreshold": "4200000000000000000",
+      "poolFee": 0,
+      "tickSpacing": 200,
+      "enabled": true
+    },
+    "launchFee": "500000000000000",
+    "maxCreatorTaxBps": "1000",
+    "snipeTaxStartBps": "9900",
+    "snipeTaxSeconds": "3"
+  },
+  "source": "https://docs.ponsfamily.com/v2"
+}

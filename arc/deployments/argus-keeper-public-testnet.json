@@ -1,0 +1,110 @@
+{
+  "chainId": 5042002,
+  "platform": {
+    "label": "TSPARK2",
+    "token": "0x458567344B881D6D98294718FefbBE3794E05c49",
+    "vault": "0xf031Ed078202594792B0FcCcf6E4cFb7D10Ad92C",
+    "splitter": "0x3e4Ea7E1eF6F0519A7deAf18842a40f931f2488a",
+    "locker": "0x9FE1D070F535cADe79795fa84DCEA56f4a0dcfC9"
+  },
+  "executor": "0x8C4435334c20e69009AaAe2367cb8e2B85358b00",
+  "status": "passed",
+  "labelledTestDonationUSDC6": "6100000",
+  "executorGasTopUpUSDC": "1",
+  "beforeBlock": "66431120",
+  "beforeLedger": [
+    [
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+    ],
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  "beforeBurned": "250239775",
+  "ordinaryProjects": [
+    {
+      "label": "TVLT3",
+      "token": "0x09B2Fde7b184ffEABe734e20d9FAf5C26374CeD6",
+      "vault": "0x219ACe16865D711a1b68D34AFD57352C46A8F42C",
+      "splitter": "0xcfA1941282fD53Cf88Daa1E7BFa2037dBef72D8F",
+      "locker": "0xcAFd3a916ba8e00076CDb2452FA443cC0F63DFF2"
+    },
+    {
+      "label": "TVLT4",
+      "token": "0x2BDCb8CeBfcF690592b9f8A4fd17FFe90b4CaAD7",
+      "vault": "0x125Bf17Ade98ef126A149770EA1ecE4278e77513",
+      "splitter": "0x5c0304AA8DFF4Bb143535a3EE61772A1430B694B",
+      "locker": "0x21f7ce903F3a38a3F2221Ac13cC4FB7E200C527d"
+    }
+  ],
+  "funding": {
+    "automatic-keeper-gas": {
+      "hash": "0x01d5749547a3e98c1d91025d909b27576985797c598edef7cc3f43da9f150c99",
+      "block": "66431127",
+      "gasUSDC": "0.000525",
+      "status": "success"
+    },
+    "automatic-keeper-test-donation": {
+      "hash": "0xceb3cf2fed7f44bfbf56ec0ae96847322a6a2e78385c0e040e0372d07707e06b",
+      "block": "66431182",
+      "gasUSDC": "0.00122375",
+      "status": "success"
+    }
+  },
+  "observedAt": "2026-10-10T06:03:30.165Z",
+  "latestLedger": [
+    [
+      "0",
+      "427000",
+      "305000",
+      "244000",
+      "61000"
+    ],
+    "0",
+    "6100000",
+    "1",
+    "0"
+  ],
+  "latestBurned": "1976107772938103265544001",
+  "automaticBurn": {
+    "transactionHash": "0xf5737b0c0c7728dbcd82ac01123239a9a0109ef5a7f183220a2ce4492094ef15",
+    "block": "66431273",
+    "sender": "0x8c4435334c20e69009aaae2367cb8e2b85358b00",
+    "quoteUSDC6": "5063000",
+    "tokensBurned": "1976107772938103015304226",
+    "minimumOutput": "1966227234073412500227704",
+    "gasPaidWei": "12849593750000000",
+    "finalized": true,
+    "allowanceCleared": true
+  },
+  "backendJournal": {
+    "sync": {
+      "transactionHash": "0x6e00eab1ee396cc0bad6d4eae2292335915f4a56e0f9e04fef1e1f914195e488",
+      "status": "applied"
+    },
+    "own": {
+      "transactionHash": "0xf5737b0c0c7728dbcd82ac01123239a9a0109ef5a7f183220a2ce4492094ef15",
+      "status": "applied",
+      "amountUSDC6": "5063000"
+    },
+    "onlySourceProject": "0x458567344B881D6D98294718FefbBE3794E05c49",
+    "ordinaryProjectActions": 0,
+    "durableRecordsVerifiedAfterRestart": true
+  },
+  "onlineSnapshot": {
+    "syncedAt": "2026-10-10T06:07:35.786Z",
+    "keeperScope": "platform",
+    "automaticBurnCycles": 1,
+    "totalBurned": "1976107772938103015304226",
+    "ordinaryProjectCycles": 0,
+    "pendingHash": null,
+    "indexerError": null,
+    "publicRpcCaveat": "Slow snapshots can still defer new Keeper work; staleness and price guards remain enabled."
+  },
+  "verifiedAt": "2026-10-10T06:08:21.379262+00:00"
+}

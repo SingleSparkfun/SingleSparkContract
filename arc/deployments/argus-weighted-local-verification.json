@@ -1,0 +1,240 @@
+{
+  "status": "local_verification_passed_public_rollout_pending",
+  "verifiedAt": "2026-10-10T07:22:09.957Z",
+  "feature": "Vault weighted allocation and user-funded Claim",
+  "chain": "ARC",
+  "launchpad": "Argus",
+  "allocation": {
+    "platformFeeBps": 1000,
+    "claimFeeBps": 50,
+    "pluginPoolBps": 8950,
+    "initialRelativeWeights": [
+      1,
+      1,
+      1
+    ],
+    "allDisabled": "unallocated in project Vault",
+    "existingBudgets": "preserved",
+    "communityPolicy": "unresolved; no additional top-level deduction"
+  },
+  "checks": {
+    "architecture": "passed",
+    "frontend": {
+      "passed": 1316,
+      "productionBuild": "passed"
+    },
+    "backend": {
+      "passed": 290,
+      "ignored": 2
+    },
+    "native": {
+      "passed": 47
+    },
+    "arcContracts": {
+      "passed": 228
+    }
+  },
+  "timelock": {
+    "productionSourceSeconds": 172800,
+    "isolatedTestnetBuildSeconds": 600
+  },
+  "productionSourcesSha256": "8121b7f5a1e69f7c69b55b5cd17d90c0af1bf4f754df2def04ed1bf8dbc2b1d8",
+  "rehearsal": {
+    "network": "local-fork-of-arc-testnet",
+    "sourceBlock": 66440020,
+    "publicTransactions": false,
+    "quotePrecompile": "Explicit test ERC20 mock; native USDC/gas mirroring and ARC blocklist are not emulated",
+    "acceptance": {
+      "weightedAllocation": true,
+      "relativeWeights": [
+        1,
+        1,
+        1
+      ],
+      "fixedFeeBps": 1000,
+      "claimFeeBps": 50,
+      "externalPluginContracts": true,
+      "realTradeAndCreatorFees": true,
+      "independentVaults": true,
+      "userFundedClaim": true,
+      "ownAndPlatformBurn": true,
+      "inventoryRewardDeferred": true,
+      "distributionRecipients": 100,
+      "syntheticRecipients": true,
+      "replayRejected": true,
+      "executorOnlyBuyPreserved": true,
+      "operationsFixedRecipient": true,
+      "allOffRetainsUnallocated": true,
+      "allOffFixedFeesSettle": true,
+      "allowanceCleared": true,
+      "policyDelaySeconds": 600,
+      "applicationRolloutVerified": false
+    },
+    "timelockAndRecovery": {
+      "publicTransactions": false,
+      "oneSecondEarlyRejected": true,
+      "after600SecondsExecuted": true,
+      "allOffFundsAllocated": true,
+      "replayWithoutExtraTransactions": true
+    },
+    "contracts": {
+      "router": "0x2a4f6b8ce455540Ae5614f9A18Da34262c1a2C3b",
+      "implementation": "0xe5326c9586a12C6EE15273EA59d2c905416605fE",
+      "factory": "0x1578FbEd29F5B678a7f3D2ce7C2Ce83b73f96AAb",
+      "platformToken": "0x77f936bdd43D19FDb2956b59ebeb67b8768010d0"
+    },
+    "transactions": {
+      "router": {
+        "hash": "0x6d0a3c4393adaa06902766f3a4940d5bbcf76149a601871009fb6fb3772452b5",
+        "block": "66440022",
+        "gasUSDC": "0.054420097752800388",
+        "status": "success"
+      },
+      "implementation": {
+        "hash": "0x0e1e13ef6a253089fce5f3906a1ca54d24893bba189cccd4a0b30e57e0abedcc",
+        "block": "66440023",
+        "gasUSDC": "0.067416294516932088",
+        "status": "success"
+      },
+      "factory": {
+        "hash": "0xa340540c8d1b459534fc27926b9a52fda027ffed9aac48e06b751ae45ee4df30",
+        "block": "66440024",
+        "gasUSDC": "0.03850624201680052",
+        "status": "success"
+      },
+      "launch-TCLAIM1": {
+        "hash": "0xf4c66db6611036a439b09e6840ba69179cba29da5acb7b7d44c14461aafaa0ae",
+        "block": "66440025",
+        "gasUSDC": "0.04115471910950486",
+        "status": "success"
+      },
+      "launch-TCLAIM0": {
+        "hash": "0x2af737eae30efb3f2a90132b5d084e5628fa0c290a0024cb229a0b4f08505c75",
+        "block": "66440026",
+        "gasUSDC": "0.037475289260254984",
+        "status": "success"
+      },
+      "trade-approve": {
+        "hash": "0x9fdbc77895df545ec5698fc025bd0a48502503b0d83e17db041dddb425758c71",
+        "block": "66440027",
+        "gasUSDC": "0.000471318255768906",
+        "status": "success"
+      },
+      "trade-buy": {
+        "hash": "0x81304e3a44617a0510a407380d289ab7fee2d060ce2539ec6e044d5b53fc4bdb",
+        "block": "66440028",
+        "gasUSDC": "0.00281288523078426",
+        "status": "success"
+      },
+      "collect-fees": {
+        "hash": "0x254d17054fce0bbbb1c65040f0482c24aec37fab16bac6452189f3dc1be93efb",
+        "block": "66440029",
+        "gasUSDC": "0.005158325781988128",
+        "status": "success"
+      },
+      "labelled-test-donation": {
+        "hash": "0x11e5b02f1661e4848032b9e7e31bb9dc123e7a06122d29d4aef3e003912f528e",
+        "block": "66440030",
+        "gasUSDC": "0.000247911810343198",
+        "status": "success"
+      },
+      "account-donation": {
+        "hash": "0xe30a5580762c9421a5ba3e4bfea8768aea749b80928625d047b7d3a7045d930a",
+        "block": "66440031",
+        "gasUSDC": "0.000607453577071285",
+        "status": "success"
+      },
+      "claim-own": {
+        "hash": "0x222fb222399af3b05cecc2c48e43e51b041a2160083ae0297309c1fd663989a2",
+        "block": "66440032",
+        "gasUSDC": "0.00293565163326598",
+        "status": "success"
+      },
+      "claim-platform": {
+        "hash": "0xd3c03ce98ba08b7f614646b8b58fe756f777a47ea642e504d285d70ed13f0877",
+        "block": "66440033",
+        "gasUSDC": "0.002507175861204112",
+        "status": "success"
+      },
+      "claim-inventory": {
+        "hash": "0xec542d1003ccfde4382568c32689b71e772f515f2feabd7806c6decd93b8fc9f",
+        "block": "66440034",
+        "gasUSDC": "0.002167294811942631",
+        "status": "success"
+      },
+      "trade-approval-clear": {
+        "hash": "0xad0e148eaf024313a7b8f3c74a906abc7a1f137e9d09634345d1440de32331cb",
+        "block": "66440035",
+        "gasUSDC": "0.000102214303308",
+        "status": "success"
+      },
+      "claim-payout": {
+        "hash": "0xce2db875dee8aa6865d7e8df902f1cfc7fcf76434a4b30fe2aa804364b3187ff",
+        "block": "66440036",
+        "gasUSDC": "0.022375957199140713",
+        "status": "success"
+      },
+      "settle-operations": {
+        "hash": "0x675d1dc55229134079652f434ed5ea80f22769004784d348febfc5419b2a57d7",
+        "block": "66440037",
+        "gasUSDC": "0.00039163213888602",
+        "status": "success"
+      },
+      "all-off-test-donation": {
+        "hash": "0xf756dbbb83f7b5ecfb9d13649c9da86fc12416b972c399b3fc1a84e24c37b268",
+        "block": "66440038",
+        "gasUSDC": "0.000169452107545714",
+        "status": "success"
+      },
+      "all-off-trade-approve": {
+        "hash": "0xa8028fe12486600532d95f5ea5f47c6ce37a179697ade14c729c2f0a11d4fc2e",
+        "block": "66440039",
+        "gasUSDC": "0.000138732104155725",
+        "status": "success"
+      },
+      "all-off-trade": {
+        "hash": "0x196abe07499fc95c82887ee61108f75b16fc319370bb4f5fe9e3057f003ee445",
+        "block": "66440040",
+        "gasUSDC": "0.000712888012891166",
+        "status": "success"
+      },
+      "all-off-trade-clear": {
+        "hash": "0x292789cd4e13dc910ac94bba1977cb3fb56a0c310d14df50be8474aee97096bb",
+        "block": "66440041",
+        "gasUSDC": "0.000066310595641555",
+        "status": "success"
+      },
+      "all-off-collect": {
+        "hash": "0x7d02bc7c5dfaa1b10c831cf255460e0b9f6eed053a59966d6f165fd19414b64b",
+        "block": "66440042",
+        "gasUSDC": "0.0012886198690554",
+        "status": "success"
+      },
+      "all-off-platform-settlement": {
+        "hash": "0xcbeb8a4b419b57a30236a1383dfbc2ff04d65e7295bf673bd43ea3ccde41bc67",
+        "block": "66440043",
+        "gasUSDC": "0.000266496948425229",
+        "status": "success"
+      },
+      "schedule-weights": {
+        "hash": "0xda3d82e3037acfd9a03e0b43d48ec9718603dc7719c7daaaf86a40452f6b0e42",
+        "block": "66440044",
+        "gasUSDC": "0.000270260874271965",
+        "status": "success"
+      },
+      "execute-weights": {
+        "hash": "0x6581ed6e61daaa72dd3c47c6c68a35b03130ca321b8d99e6324f7fdc936cbc07",
+        "block": "66440047",
+        "gasUSDC": "0.00022105472333442",
+        "status": "success"
+      }
+    }
+  },
+  "notVerified": [
+    "Public ARC native-USDC/gas mirroring and blocklist",
+    "Public testnet deployment of this version",
+    "Hosted frontend/backend and real browser-wallet end-to-end Claim",
+    "Production security audit"
+  ],
+  "publicDeploymentChanged": false
+}

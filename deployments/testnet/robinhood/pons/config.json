@@ -1,0 +1,93 @@
+{
+  "chainId": 46630,
+  "environment": "testnet",
+  "independentDeployment": false,
+  "rpc": "https://rpc.testnet.chain.robinhood.com",
+  "explorer": "https://explorer.testnet.chain.robinhood.com",
+  "dependencies": {
+    "poolManager": {
+      "address": "0x8366a39CC670B4001A1121B8F6A443A643e40951",
+      "codeHash": "0xbd3881180b547f5fe817545743cfb4343e96b1bc6640dcd70c106b0066e95626"
+    },
+    "positionManager": {
+      "address": "0x58daec3116aae6D93017bAAea7749052E8a04fA7",
+      "codeHash": "0xf3a0edb689229fa4bf135a728f2ec2eb4a2fbee2e41e3e74ffadb7b4c56e8a6d"
+    },
+    "permit2": {
+      "address": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "codeHash": "0x0117e0ed818bc3f2a8729ffc336c837e63e965f04b473047b39b35ad86aac259"
+    },
+    "create2": {
+      "address": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+      "codeHash": "0x2fa86add0aed31f33a762c9d88e807c475bd51d0f52bd0955754b2608f7e4989"
+    }
+  },
+  "launchConfig": {
+    "supply": "1000000000000000000000000000",
+    "curveFeeBps": "100",
+    "phantomQuote": "8000000000000",
+    "graduationThreshold": "20000000000000",
+    "poolFee": 0,
+    "tickSpacing": 200,
+    "enabled": true
+  },
+  "launchFeeWei": "0",
+  "maxCreatorTaxBps": 1000,
+  "snipeTaxStartBps": 9900,
+  "snipeTaxSeconds": 3,
+  "maximumTotalCostWei": "9000000000000000",
+  "maximumTransactionGasCostWei": "1500000000000000",
+  "testnetDifferences": [
+    "Reuse an existing third-party testnet deployment, not an officially published Pons testnet.",
+    "Native phantom reserve 0.000008 ETH, graduation threshold 0.00002 ETH, launch fee zero.",
+    "External administrator can change launch availability and policies; every run rechecks the recorded state."
+  ],
+  "reuse": {
+    "owner": "0x15cc407D2d385AeB3D082cF9A3DfACE3953C9fFB",
+    "contracts": {
+      "factory": {
+        "address": "0xEc987cEb5F08D6bdE2871E78AB67Af145746BC8c",
+        "codeHash": "0x8610636d8e26ebda6a9fccdd4913d12eb19e0db8463422d137794ac9a7bfd394",
+        "match": true,
+        "executableMatch": true
+      },
+      "escrow": {
+        "address": "0x7e637b4760549fE8d815D640bFfBaAEB93b722E4",
+        "codeHash": "0xf25f75cfbc1637ba068dc34f69098fa4e8a80f8ee8fe7bf7820594e0b3fed2f1",
+        "match": false,
+        "executableMatch": true
+      },
+      "hook": {
+        "address": "0x975a2B6c9B769cB065431445Ff554845D28E2044",
+        "codeHash": "0xafc4875f7c3528e18c90ef69f5d90d7021f8e82769f945867414f48c5fc5cab4",
+        "match": false,
+        "executableMatch": true
+      },
+      "buyback": {
+        "address": "0x5AFcAfb36e774c05D3F8a7484dccD9E3Deca44A1",
+        "codeHash": "0xa5a6bfd9af88147889a525d72af5ba58dc48a013bd0da349a4b965f70c4706db",
+        "match": false,
+        "executableMatch": true
+      },
+      "locker": {
+        "address": "0xd2B8C094b1c8f154d88b4305539A80909e752ab0",
+        "codeHash": "0x58455f80b3773871d601a025e56ec27c71ab3bbb8e2ca6b17828954450742025",
+        "match": false,
+        "executableMatch": true
+      },
+      "deployer": {
+        "address": "0xD428999b375fA665f5Ed86403B041253441e8a4e",
+        "codeHash": "0xff18cf1dfb239ca17170e006dcd2e411dddf2195b7a53af307e7f2629cd193a1",
+        "match": true,
+        "executableMatch": true
+      },
+      "graduation": {
+        "address": "0x49AB005469AA6B293fdF3C3c2e6779fbaf5e12BD",
+        "codeHash": "0x680ca9a52dd3272f69120bd88eae0889dfb7c89ecb96c866cebf77adf6fe3ca1",
+        "match": false,
+        "executableMatch": true
+      }
+    },
+    "graduationGuard": "0x2da4B27EA006B28eDB6b73cBa91E95321FCbABb2"
+  }
+}

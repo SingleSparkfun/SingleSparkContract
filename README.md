@@ -39,7 +39,7 @@ This is the intended cycle. Market cap, user growth and individual project benef
 
 **Planned · not live**
 
-The planned Solana platform token launches on Pump.fun. Its governance model connects team token releases to a community satisfaction vote.
+The SingleSpark platform token is planned for Robinhood / Pons; its SPARK testnet deployment is separate from historical ARC tokens and SSPTEST. Its governance model connects team token releases to a community satisfaction vote.
 
 ### Planned initial time lock
 
@@ -163,7 +163,7 @@ Execution checks plugin permissions, pause gates, funding and market limits. Dis
 
 Buybacks purchase tokens for burning; distributions transfer tokens to eligible wallets. Follow confirmed amounts, recipient counts and transaction links on the token page.
 
-The product model is shared across chains; contract code, balances and transactions stay on their own network. Funds are not automatically pooled or bridged between networks. Public launches are restricted to ARC / Argus; other networks are coming soon; an EVM vault description or catalog entry does not enable public execution.
+The product model is shared across chains; contract code, balances and transactions stay on their own network. Funds are not automatically pooled or bridged between networks. Public launches support ARC / Argus and the explicitly authorized Robinhood Testnet / Pons integration; other networks remain disabled; an EVM vault description or catalog entry does not enable public execution.
 
 ## Transparency & participation
 
@@ -174,3 +174,18 @@ Use the token page and public activity records to check what a project has actua
 - DAO participation will open when its Solana governance is available. Until then, the displayed model describes the plan, with no live staking or voting.
 
 [Explore tokens](https://singlespark.fun/tokens) · [View confirmed burns](https://singlespark.fun/burn)
+
+## ARC/Argus contract revenue vaults
+
+New projects use `ArgusVaultFactory` + `ArgusRevenueVault`: separate balances and on-chain budgets, shared code, immediate pause, fixed 48-hour policy/resume/upgrade delay. The existing router and legacy EOA launches remain bound to their original deployment. Deployment, durable recovery and local-fork verification are documented in [arc/VAULTS.md](arc/VAULTS.md). Deployment is explicit; changing code alone does not alter any mainnet recipient.
+
+The independent [EVM gameplay protocol](evm/PROTOCOL.md) adds `GameplayVaultFactory` for registering already deployed project tokens, with one native/ERC20 funding asset per project Vault, isolated plugin budgets, delayed code registration and user-paid Claim execution. `forge test --root evm` verifies the contracts, including native-currency Uniswap v4 swaps without WETH. This is a local contract/interface delivery; it does not replace deployed Argus contracts, migrate fees or enable additional public chains/platforms.
+
+## Source ownership and build entrypoints
+
+Contract implementations follow chain-common and launchpad-specific ownership under `chains/`. `chains/evm` holds shared EVM governance, execution and revenue contracts; `chains/arc/launchpads/{argus,singlespark}` holds protocol-specific contracts. Solana shared state, governance and DAO/timelock entrypoints live under `chains/solana`; Pump revenue lives in `chains/solana/launchpads/pump`. `chains/bsc/launchpads/four-meme` contains interface metadata only.
+
+`arc/` and `solana/` retain the existing build/deployment/ABI-export entrypoints. Foundry and Cargo point at the canonical source; artifact output paths and deployed bindings do not change. No contract is redeployed or vault migrated by moving source. Run the workspace architecture check plus `test:contracts`, `test:arc-contracts` and `test:sol-contracts` after source moves.
+## Robinhood / Pons environments
+
+Verified on-chain sources are pinned in `chains/robinhood/launchpads/pons/sources.json`, with operational entrypoints in `robinhood/pons/`. New deployments separate `deployments/testnet/` from `deployments/mainnet/`; existing ARC/Solana addresses and signed recovery journals retain their original paths. See [deployment environments](deployments/README.md) and [Pons test deployment](robinhood/pons/README.md).

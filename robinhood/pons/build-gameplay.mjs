@@ -1,0 +1,51 @@
+import assert from 'node:assert/strict';
+import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { posix, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { root, data, compile, hash, json, readJson } from './build.mjs';
+
+export function buildGameplay() {
+  const sources = {};
+  const remappings = { '@openzeppelin/': 'arc/lib/openzeppelin-contracts/', '@uniswap/v4-core/': 'arc/lib/v4-core/', 'solmate/': 'arc/lib/solmate/' };
+  function visit(path) {
+    assert(!path.startsWith('../') && !posix.isAbsolute(path));
+    if (sources[path]) return;
+    const content = readFileSync(resolve(root, path), 'utf8'); sources[path] = { content };
+    for (const match of content.matchAll(/import\s+(?:[^;]*?from\s*)?["']([^"']+)["']\s*;/g)) {
+      let target = match[1];
+      if (target.startsWith('.')) target = posix.normalize(posix.join(posix.dirname(path), target));
+      else for (const [prefix, replacement] of Object.entries(remappings)) if (target.startsWith(prefix)) { target = replacement + target.slice(prefix.length); break; }
+      visit(target);
+    }
+  }
+  const owned = {
+    factory: ['chains/robinhood/launchpads/pons/PonsVaultFactory.sol', 'PonsVaultFactory'],
+    vault: ['chains/robinhood/launchpads/pons/PonsGameplayVault.sol', 'PonsGameplayVault'],
+    adapter: ['chains/robinhood/launchpads/pons/PonsSwapAdapter.sol', 'PonsSwapAdapter'],
+    buyback: ['chains/evm/gameplay/GameplayPlugins.sol', 'GameplayBuybackPlugin'],
+    distribution: ['chains/evm/gameplay/GameplayPlugins.sol', 'GameplayDistributionPlugin'],
+  };
+  for (const [path] of Object.values(owned)) visit(path);
+  const productionSourcesSha256 = hash(sources);
+  const output = resolve(data, 'gameplay-build.json');
+  if (existsSync(resolve(data, 'testnet/gameplay/transactions.json')))
+    assert.equal(readJson(output).productionSourcesSha256, productionSourcesSha256, 'Public gameplay build is frozen; preserve its journal');
+  const factory = sources['chains/evm/gameplay/GameplayVaultFactory.sol'];
+  assert.equal(factory.content.split('DELAY = 48 hours').length, 2);
+  factory.content = factory.content.replace('DELAY = 48 hours', 'DELAY = 10 minutes');
+  assert(sources[owned.factory[0]].content.includes('block.chainid != 46630'));
+  const input = { language: 'Solidity', sources, settings: { optimizer: { enabled: true, runs: 200 }, viaIR: true,
+    evmVersion: 'cancun', metadata: { bytecodeHash: 'none' }, remappings: Object.entries(remappings).map(([a,b]) => `${a}=${b}`),
+    outputSelection: { '*': { '*': ['abi', 'evm.bytecode', 'evm.deployedBytecode'] } } } };
+  const compiled = compile(input, '0.8.26');
+  const artifacts = Object.fromEntries(Object.entries(owned).map(([name,[file,contract]]) => {
+    const a = compiled[file][contract]; assert(a.evm.deployedBytecode.object.length / 2 <= 24576);
+    return [name, { abi: a.abi, bytecode: `0x${a.evm.bytecode.object}`, runtime: a.evm.deployedBytecode }];
+  }));
+  const build = { chainId: 46630, policyDelaySeconds: 600, productionSourcesSha256, artifacts,
+    testnetChanges: ['Isolated Robinhood Testnet controller: 10 minutes. Production source remains 48 hours.'] };
+  mkdirSync(data, { recursive: true });
+  writeFileSync(resolve(data, 'gameplay-compiler-input.json'), json(input)); writeFileSync(output, json(build));
+  return build;
+}
+if (process.argv[1] === fileURLToPath(import.meta.url)) console.log(json({ ...buildGameplay(), artifacts: 'saved locally' }));

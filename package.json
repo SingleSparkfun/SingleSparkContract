@@ -1,0 +1,15 @@
+{
+  "name": "@singlespark/contracts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:pons": "node robinhood/pons/build.mjs",
+    "test:pons": "node --test robinhood/pons/*.test.mjs",
+    "test:pons:fork": "node robinhood/pons/rehearse.mjs",
+    "deploy:pons:testnet": "node robinhood/pons/deploy.mjs",
+    "verify:pons:testnet": "node robinhood/pons/verify.mjs",
+    "test:pons:vault": "forge test --root robinhood",
+    "deploy:pons:vault": "node robinhood/pons/deploy-vault.mjs"
+  },
+  "dependencies": { "viem": "2.57.3" }
+}

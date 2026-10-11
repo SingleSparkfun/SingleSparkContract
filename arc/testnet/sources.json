@@ -1,0 +1,30 @@
+{
+  "purpose": "Pinned Sourcify-verified Argus V7 sources for independent ARC testnet USDC integration",
+  "githubReference": {
+    "repository": "https://github.com/arguspad/argus-world",
+    "commit": "c8c3d5fc2b0a4557a535bb4f7e7a3be9301c289e",
+    "note": "GitHub Portal interface differs from deployed V7; compilation uses pinned verified sources."
+  },
+  "upstream": {
+    "portal": {
+      "address": "0xB021Be536808f551b31789422Fd28a6c9c6e97Da",
+      "sourcesSha256": "1171944452e1dd808b79dff0f272f12127ac0a5ff0b1196c58d6e6265c84c9c6",
+      "compilationSha256": "67e4856f505eacded688b3d1f8f821d9b606c5efb58ecc139f03f0864db0e09a"
+    },
+    "tokenImpl": {
+      "address": "0x1B74922c01DDfD9C77B37D02C0a236611E8Fe500",
+      "sourcesSha256": "d3a75d9c61fa1cf8a3a40cd1cd231ce5eaae3d9ed3caf12f418aec97e06ba6ac",
+      "compilationSha256": "19b210e721e7be9a1e78b1218b44bc7b8a137a3a5f85a82c7a788e6ba7859901"
+    },
+    "lockerImpl": {
+      "address": "0xb2eD8112Db1bc11F7e7AB7969C2a9d1f819Cfc6A",
+      "sourcesSha256": "5ff7d0a83ce384248cee2715e01fbf189c91813d98caa3b2c1d296970934b114",
+      "compilationSha256": "429c7404308bca1bb961d8828cc854cf6d5aac97212a7859d5da5d71ab522f68"
+    },
+    "splitterImpl": {
+      "address": "0xd9578dd861b2fe59675C2C4B09b026FcB0df37FC",
+      "sourcesSha256": "df3201bee21764c9c04e070603a6d26cecda6cc436f16f2c6cca463135bdeb7f",
+      "compilationSha256": "f91d0a541f206f14a23d1dea3ac286d27599bbd211e81ddd92044f1b59c27a77"
+    }
+  }
+}
