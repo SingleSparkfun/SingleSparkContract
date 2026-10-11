@@ -35,10 +35,10 @@ import { createPublicClient, createWalletClient, defineChain, http, parseEther, 
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { artifact } from '../../../shared/deploy.mjs';
 import { persist, stringify } from '../../../shared/runtime.mjs';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
-const dir = process.env.ARC_DEPLOYMENT_DIR || 'SingleSparkContract/arc/data/spark-satisfaction-testnet-20260919';
-const reportPath = process.env.ARC_DEPLOYMENT_REPORT || 'SingleSparkContract/deployments/testnet/arc/singlespark/spark-satisfaction-testnet-20260919.json';
+const dir = process.env.ARC_DEPLOYMENT_DIR || 'SingleSparkContract/chains/arc/data/spark-satisfaction-testnet-20260919';
+const reportPath = process.env.ARC_DEPLOYMENT_REPORT || 'SingleSparkContract/chains/arc/deployments/testnet/singlespark/spark-satisfaction-testnet-20260919.json';
 const base = process.env.ARC_ACCEPTANCE_API_BASE || 'http://127.0.0.1:8090';
 assert.equal(new URL(base).hostname, '127.0.0.1');
 const apiPort = Number(new URL(base).port || 80);

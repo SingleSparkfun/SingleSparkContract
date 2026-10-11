@@ -2,7 +2,7 @@
 
 Feature: launch. Chain: Robinhood EVM. Launchpad: Pons V2. The current integration reuses testnet factory `0xEc987cEb5F08D6bdE2871E78AB67Af145746BC8c` and its dependencies. Its executable code matches the verified production version, but no official testnet deployment announcement exists; it is not labeled an official Pons deployment.
 
-Test configuration: `deployments/testnet/robinhood/pons/config.json`. Read-only mainnet reference: `deployments/mainnet/robinhood/pons/reference.json`. Source pins: `chains/robinhood/launchpads/pons/sources.json`.
+Test configuration: `chains/robinhood/deployments/testnet/pons/config.json`. Read-only mainnet reference: `chains/robinhood/deployments/mainnet/pons/reference.json`. Source pins: `chains/robinhood/launchpads/pons/sources.json`.
 
 ## Project Vault launch entrypoint (testnet)
 
@@ -10,13 +10,13 @@ Test configuration: `deployments/testnet/robinhood/pons/config.json`. Read-only 
 
 The first independent Vault retains the 48-hour delay and unallocated-income rules. Later gameplay validation uses a separately identified test factory with a fixed 10-minute delay; production sources still use 48 hours. The two deployments do not migrate funds or signed journals. Only native ETH launches on Robinhood Testnet (46630) are enabled, with Pons built-in buyback disabled. Pons external administrators can still change future creator recipients after its three-day delay.
 
-Verification: `npm run test:pons:vault`. Deployment and reentrancy verification: `npm run deploy:pons:vault -- --wallet <testnet-wallet.json> --broadcast`. New journals stay in `.data/robinhood/pons/testnet/vault-launch/`; public records go to `deployments/testnet/robinhood/pons/vault-launch.json`, preserving earlier base-Pons rehearsal records.
+Verification: `npm run test:pons:vault`. Deployment and reentrancy verification: `npm run deploy:pons:vault -- --wallet <testnet-wallet.json> --broadcast`. New journals stay in `chains/robinhood/data/pons/testnet/vault-launch/`; public records go to `chains/robinhood/deployments/testnet/pons/vault-launch.json`, preserving earlier base-Pons rehearsal records.
 
 Platform-token plan (2026-10-11): issue SingleSpark's platform token on Robinhood through Pons, with new custody/gameplay integration owned by Robinhood/Pons. Historical ARC platform-token records retain original addresses, funds and recovery. SSPTEST is an old acceptance token; the new platform test token is independently issued SingleSpark / SPARK. Addresses and actual acceptance status appear below. Cloud testnet availability was requested; mainnet issuance is not authorized.
 
 ## Base Pons build
 
-Run workspace `npm install` for the contract project's declared viem dependency. Requirements: Node 24, Foundry Anvil, solc 0.8.35 and 0.8.26. Compiler lookup checks `SOLC_0_8_35` / `SOLC_0_8_26`, project `.data/robinhood/pons/compiler/`, then system SVM.
+Run workspace `npm install` for the contract project's declared viem dependency. Requirements: Node 24, Foundry Anvil, solc 0.8.35 and 0.8.26. Compiler lookup checks `SOLC_0_8_35` / `SOLC_0_8_26`, project `chains/robinhood/data/pons/compiler/`, then system SVM.
 
 ```sh
 npm --prefix SingleSparkContract run build:pons
@@ -47,13 +47,13 @@ The reused test deployment has zero launch fee, 0.000008 ETH virtual reserves an
 
 The acceptance token sends creator revenue to an independent `PonsTestRevenueVault`, which claims through FeeEscrow. It has no withdrawal entrypoint, so small test revenues remain there. This fixture is not a complete SingleSpark gameplay Vault. Repeating the command resumes acceptance without duplicate launch or trades.
 
-Before broadcasting, every raw signature, nonce, transaction hash and expected parameter is atomically persisted in `.data/robinhood/pons/testnet/transactions.json`. Resume with the same command after failure; do not delete journals. Changed configuration, build artifacts or account identities block recovery. A run lock prevents concurrent deployment in the same directory. After abnormal exit, verify no process remains before manually removing stale `run.lock`.
+Before broadcasting, every raw signature, nonce, transaction hash and expected parameter is atomically persisted in `chains/robinhood/data/pons/testnet/transactions.json`. Resume with the same command after failure; do not delete journals. Changed configuration, build artifacts or account identities block recovery. A run lock prevents concurrent deployment in the same directory. After abnormal exit, verify no process remains before manually removing stale `run.lock`.
 
 Test ETH faucet: https://faucet.testnet.chain.robinhood.com/ . It requires human verification and Google login. Consult public report status: local builds, transaction confirmations, public finality and application integration are separate stages.
 
 ## Completed public acceptance
 
-On 2026-10-11, eight test transactions completed with total Gas cost 0.0000505478 ETH. Actual transactions, addresses, code hashes and finality status are in `deployments/testnet/robinhood/pons/deployment.json`.
+On 2026-10-11, eight test transactions completed with total Gas cost 0.0000505478 ETH. Actual transactions, addresses, code hashes and finality status are in `chains/robinhood/deployments/testnet/pons/deployment.json`.
 
 - Test token: `0x07e4F508582fCf81f76B7a3b4cBc0A15a9661A3F`.
 - Recipient contract: `0xF952414504c8D892e21a8fa7Cb40C63822F3B91f`, with browser source verification completed.
@@ -88,7 +88,7 @@ node scripts/robinhood/launchpads/pons/testnet/build-gameplay.mjs
 node scripts/robinhood/launchpads/pons/testnet/verify-gameplay.mjs --wallet /absolute/testnet-wallet.json --broadcast
 ```
 
-The script requires separate deployer/admin/executor test identities. Raw signatures are first persisted to `.data/robinhood/pons/testnet/gameplay/transactions.json`; public results go to `deployments/testnet/robinhood/pons/gameplay.json`. The same command resumes registration, waiting, policy, funding, all three plugins, Claim rewards and post-graduation V4 execution. Never delete journals to bypass the wait. `finalityComplete` separately tracks RPC finalized coverage; confirmation is not finality.
+The script requires separate deployer/admin/executor test identities. Raw signatures are first persisted to `chains/robinhood/data/pons/testnet/gameplay/transactions.json`; public results go to `chains/robinhood/deployments/testnet/pons/gameplay.json`. The same command resumes registration, waiting, policy, funding, all three plugins, Claim rewards and post-graduation V4 execution. Never delete journals to bypass the wait. `finalityComplete` separately tracks RPC finalized coverage; confirmation is not finality.
 
 The web app reuses shared transaction review and EVM recovery journals. Optional backend `PONS_TESTNET_CLAIM_SIGNING_KEY` signs bounded tasks only. Caller, Vault, chain, policy revision, nonce, budget, minimum output and deadline are bound; the backend does not pay ordinary-project Gas. Historical ARC tokens lose current platform designation without changing their funds, immutable recipients or recovery records.
 

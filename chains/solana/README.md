@@ -138,7 +138,7 @@ The fixture distributes 0.001 SOL of Claim rewards but intentionally incurs high
 
 After changing `client.mjs`, run `npm run export:backend` here. Workspace architecture checks byte-compare that standalone ABI copy. Frontend/api routes, database schema, encrypted mint custody, network pins and signed recovery journals remain stable. There is no new administrative browser UI; the validated SDK builders above are the operator interface.
 
-[BUSINESS_FLOW.md](../docs/solana/business-flow.md) records other business-flow work and its remaining gaps. It uses the same PDA/shared-program model and separates implemented accounting from outstanding distribution replacement, combined Claim profitability and DAO settlement work.
+[BUSINESS_FLOW.md](../../docs/solana/business-flow.md) records other business-flow work and its remaining gaps. It uses the same PDA/shared-program model and separates implemented accounting from outstanding distribution replacement, combined Claim profitability and DAO settlement work.
 
 The pinned existing Solana JS dependency family reports the `bigint-buffer` buffer-overflow advisory and `jayson` / `stream-json` / `uuid` advisories; npm's proposed fixes require incompatible major changes or a downgrade of SPL Token. They have not been automatically applied. This Node SDK dependency risk does not affect the separately built Rust SBF artifact.
 

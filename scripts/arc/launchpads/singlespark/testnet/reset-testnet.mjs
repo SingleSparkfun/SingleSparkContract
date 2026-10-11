@@ -7,17 +7,17 @@ import { createPublicClient, createWalletClient, defineChain, http, parseEther, 
 import { privateKeyToAccount } from 'viem/accounts';
 import { deployArc, artifact } from '../../../shared/deploy.mjs';
 import { persist, stringify } from '../../../shared/runtime.mjs';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
-const dir = process.env.ARC_DEPLOYMENT_DIR || 'SingleSparkContract/arc/data/spark-testnet-20260917';
+const dir = process.env.ARC_DEPLOYMENT_DIR || 'SingleSparkContract/chains/arc/data/spark-testnet-20260917';
 const envFile = `${dir}/runtime.env`;
-const reportPath = process.env.ARC_DEPLOYMENT_REPORT || 'SingleSparkContract/deployments/testnet/arc/singlespark/arc-current-testnet.json';
+const reportPath = process.env.ARC_DEPLOYMENT_REPORT || 'SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-current-testnet.json';
 const base = process.env.ARC_DEPLOYMENT_API_BASE || 'http://127.0.0.1:8090';
 assert.equal(new URL(base).hostname, '127.0.0.1');
 const mediaBase = `${base}/api/arc/media`;
 const keeperSeed = process.env.ARC_KEEPER_SEED_USDC || '1.5';
 mkdirSync(`${dir}/runtime/media`, { recursive: true, mode: 0o700 });
-process.loadEnvFile(existsSync(envFile) ? envFile : 'SingleSparkContract/arc/.env.testnet.local');
+process.loadEnvFile(existsSync(envFile) ? envFile : 'SingleSparkContract/chains/arc/.env.testnet.local');
 const reserveUSDC = process.env.ARC_DEPLOYER_RESERVE_USDC || '50';
 assert(/^\d+(\.\d{1,18})?$/.test(reserveUSDC), 'Invalid deployment reserve');
 const reserve = parseEther(reserveUSDC);
@@ -32,7 +32,7 @@ const source = { keeper: { address: privateKeyToAccount(process.env.ARC_KEEPER_P
 const satisfactionMode = process.argv.includes('--satisfaction');
 // The defaults are the ones a real deployment should get: a 7-day round with voting open for 6 d 23 h.
 // A fast acceptance run overrides them (that is what the existing 30-minute testnet vault was deployed with):
-// ARC_SATISFACTION_ROUND_SECONDS=1800 ARC_SATISFACTION_VOTING_SECONDS=600. See SingleSparkContract/arc/README.md for what the
+// ARC_SATISFACTION_ROUND_SECONDS=1800 ARC_SATISFACTION_VOTING_SECONDS=600. See SingleSparkContract/docs/arc/vaults.md for what the
 // long window implies: the pot is fixed about an hour in, and a quorum-sized stake must be in by mid-window.
 const satisfaction = satisfactionMode ? { team: getAddress(process.env.ARC_SATISFACTION_TEAM || source.platform.address),
   roundDuration: Number(process.env.ARC_SATISFACTION_ROUND_SECONDS || 604800),
@@ -300,12 +300,12 @@ try {
   }
   if (process.argv.includes('--activate')) {
     // Never open two writers for the same runtime; archived deployments may run independently.
-    const paths = ['SingleSparkContract/arc/.env.testnet.local', 'SingleSparkContract/arc/.env.testnet-v2.local', '.env.arc.local', '.env.arc-v2.local'];
+    const paths = ['SingleSparkContract/chains/arc/.env.testnet.local', 'SingleSparkContract/chains/arc/.env.testnet-v2.local', '.env.arc.local', '.env.arc-v2.local'];
     mkdirSync(`${dir}/previous-env`, { recursive: true, mode: 0o700 });
     for (const path of paths) {
       const backup = `${dir}/previous-env/${path.replaceAll('/', '_')}`;
       if (!existsSync(backup) && existsSync(path)) { copyFileSync(path, backup); chmodSync(backup, 0o600); }
-      if (path.startsWith('SingleSparkContract/arc/')) { copyFileSync(envFile, path); chmodSync(path, 0o600); }
+      if (path.startsWith('SingleSparkContract/chains/arc/')) { copyFileSync(envFile, path); chmodSync(path, 0o600); }
       else {
         let content = readFileSync(path, 'utf8').replace(/^VITE_API_BASE=.*$/m, `VITE_API_BASE=${base}`);
         const configKey = process.env.ARC_CONFIG_SIGNING_KEY;

@@ -14,7 +14,7 @@ import { mkdirSync } from 'node:fs';
 // Build the backend first: cargo build --locked --manifest-path SingleSparkBackend/api/Cargo.toml
 //
 // The alert `for` windows are driven by documented TEST KNOBS (ARC_ALERT_*_SECONDS, listed in
-// SingleSparkContract/arc/.env.example) so a sixty-second window can be exercised in ten. The rules themselves are
+// SingleSparkContract/chains/arc/.env.example) so a sixty-second window can be exercised in ten. The rules themselves are
 // unchanged; only the clock they are compared against is shortened.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
@@ -29,7 +29,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { deployArc, artifact } from '../shared/deploy.mjs';
 import { testDatabase, testSql, localApiLimits } from './test-database.mjs';
 import { arcAbi } from '../../../../SingleSparkFront/front/chains/evm/arcAbi.ts';
-mkdirSync('SingleSparkContract/deployments/local/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/local/singlespark', { recursive: true });
 
 /** A fake credential in the RPC URLs and in the webhook URL. It must never appear in the backend's
  *  output, in /metrics, in the alert endpoint or in the snapshot. */
@@ -204,7 +204,7 @@ const parseExposition = (text) => {
   };
 };
 
-/** Every metric the operations package and SingleSparkContract/arc/README.md document. All of them must exist on a
+/** Every metric the operations package and SingleSparkContract/docs/arc/vaults.md document. All of them must exist on a
  *  healthy backend on this platform; the two Linux-only ones are listed separately below. */
 const DOCUMENTED = ['arc_build_info', 'arc_process_start_time_seconds', 'arc_uptime_seconds',
   'arc_index_head_block', 'arc_index_indexed_block', 'arc_index_lag_blocks', 'arc_index_age_seconds',
@@ -966,7 +966,7 @@ try {
     measured: { scrape: scrapeCost, flood: floodResult, freeze: freezeResult },
     webhookDeliveries: receiver ? receiver.deliveries.length : 0,
     scenarios: results, notes };
-  const outputPath = resolve('SingleSparkContract/deployments/local/arc/singlespark/monitoring-local-acceptance-20260920.json');
+  const outputPath = resolve('SingleSparkContract/chains/arc/deployments/local/singlespark/monitoring-local-acceptance-20260920.json');
   writeFileSync(outputPath, JSON.stringify(report, null, 2) + '\n');
   console.log(`${report.status.toUpperCase()}: ${results.filter(r => r.status === 'passed').length}/${results.length} scenarios in ${outputPath}`);
   if (!passed) process.exitCode = 1;

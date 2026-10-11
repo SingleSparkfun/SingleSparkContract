@@ -40,7 +40,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { deployArc, artifact } from '../shared/deploy.mjs';
 import { testDatabase, testSql, localApiLimits } from './test-database.mjs';
 import { arcAbi } from '../../../../SingleSparkFront/front/chains/evm/arcAbi.ts';
-mkdirSync('SingleSparkContract/deployments/local/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/local/singlespark', { recursive: true });
 
 const ADMIN_TOKEN = 'b2'.repeat(32);
 const EXIT_DEPOSED = 75;
@@ -466,7 +466,7 @@ try {
         + 'exists for the length of this process. They are not users and not volume.',
       'The no_leader alert window was shortened with ARC_ALERT_NO_LEADER_SECONDS=5, a documented test knob.'],
   };
-  const output = resolve('SingleSparkContract/deployments/local/arc/singlespark/keeper-failover-local-acceptance-20260922.json');
+  const output = resolve('SingleSparkContract/chains/arc/deployments/local/singlespark/keeper-failover-local-acceptance-20260922.json');
   writeFileSync(output, JSON.stringify(report, null, 2) + '\n');
   console.log(`${report.status.toUpperCase()}: ${results.filter(r => r.status === 'passed').length}/${results.length} in ${output}`);
   if (report.status !== 'passed') process.exitCode = 1;

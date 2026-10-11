@@ -8,7 +8,7 @@ import { context } from './deploy.mjs';
 import { root, json } from './build.mjs';
 
 export async function deployClaim(c) {
-  const original = JSON.parse(readFileSync(resolve(root, '../deployments/testnet/arc/argus/argus-public-testnet.json')));
+  const original = JSON.parse(readFileSync(resolve(root, 'deployments/testnet/argus/argus-public-testnet.json')));
   assert.equal(original.status, 'passed');
   assert.equal(keccak256(await c.client.getCode({ address: c.build.portal })), original.codeHashes.portal, 'Verified Portal dependency');
   if (!process.argv.includes('--broadcast')) {

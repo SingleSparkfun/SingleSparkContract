@@ -7,10 +7,10 @@ import { createPublicClient, createWalletClient, defineChain, http, parseEther, 
 import { privateKeyToAccount } from 'viem/accounts';
 import { artifact } from '../../../shared/deploy.mjs';
 import { persist, stringify } from '../../../shared/runtime.mjs';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
-process.loadEnvFile('SingleSparkContract/arc/.env.testnet-v2.local');
-const deployment = JSON.parse(readFileSync('SingleSparkContract/deployments/testnet/arc/singlespark/jet-v2-testnet-verification.json')).deployment;
+process.loadEnvFile('SingleSparkContract/chains/arc/.env.testnet-v2.local');
+const deployment = JSON.parse(readFileSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark/jet-v2-testnet-verification.json')).deployment;
 assert.equal(Number(process.env.ARC_CHAIN_ID), 5042002);
 assert.equal(process.env.ARC_LAUNCH_ADDRESS.toLowerCase(), deployment.launch.toLowerCase());
 const plans = [
@@ -29,7 +29,7 @@ const rewardAbi = artifact('ArcRewards').abi;
 const api = 'http://127.0.0.1:8091';
 const dir = process.env.ARC_DATA_DIR;
 const journalPath = `${dir}/tax-check-journal.json`;
-const reportPath = 'SingleSparkContract/deployments/testnet/arc/singlespark/v2-tax-check-testnet.json';
+const reportPath = 'SingleSparkContract/chains/arc/deployments/testnet/singlespark/v2-tax-check-testnet.json';
 const identity = stringify({ chainId: chain.id, launch: deployment.launch, account: account.address, plans, buyUSDC: '1', sellShare: '50%' });
 const journal = existsSync(journalPath) ? JSON.parse(readFileSync(journalPath)) : { identity, steps: {} };
 assert.equal(journal.identity, identity);

@@ -1,9 +1,12 @@
 [profile.default]
-src = "../chains/arc"
-test = "../chains/arc"
+src = "."
+test = "."
+skip = ["lib/**", "out/**", "cache/**", "data/**"]
 script = "script"
 out = "out"
 libs = ["lib"]
+include_paths = [".."]
+allow_paths = [".."]
 solc = "0.8.26"
 evm_version = "cancun"
 optimizer = true

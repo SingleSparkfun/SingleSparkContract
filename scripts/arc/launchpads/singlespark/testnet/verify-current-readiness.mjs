@@ -6,13 +6,13 @@ import {createPublicClient,defineChain,http,erc20Abi,parseEther,formatEther,enco
 import {privateKeyToAccount} from 'viem/accounts';
 import {artifact} from '../../../shared/deploy.mjs';
 import {persist,stringify} from '../../../shared/runtime.mjs';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
-const d=JSON.parse(readFileSync('SingleSparkContract/deployments/testnet/arc/singlespark/arc-current-testnet.json')).deployment;
+const d=JSON.parse(readFileSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-current-testnet.json')).deployment;
 assert.equal(d.chainId,5042002);assert.equal(d.launch.toLowerCase(),'0xf21c9709ab0dc8363b57060c1a9ce81499f11741');
-const dir='SingleSparkContract/arc/data/current-readiness-20260917', publicPath='SingleSparkContract/deployments/testnet/arc/singlespark/current-readiness-20260917.json';
+const dir='SingleSparkContract/chains/arc/data/current-readiness-20260917', publicPath='SingleSparkContract/chains/arc/deployments/testnet/singlespark/current-readiness-20260917.json';
 mkdirSync(dir,{recursive:true,mode:0o700});
-const account=privateKeyToAccount(JSON.parse(readFileSync('SingleSparkContract/arc/data/jet-test-wallets-20260916/wallets.json')).wallets[1].privateKey);
+const account=privateKeyToAccount(JSON.parse(readFileSync('SingleSparkContract/chains/arc/data/jet-test-wallets-20260916/wallets.json')).wallets[1].privateKey);
 assert.equal(account.address.toLowerCase(),'0x0ca76906cef08981717f81dfa1519b5a3cecca57');
 const rpc='https://rpc.testnet.arc.network';
 const chain=defineChain({id:5042002,name:'Arc Testnet',nativeCurrency:{name:'USDC',symbol:'USDC',decimals:18},rpcUrls:{default:{http:[rpc]}}});

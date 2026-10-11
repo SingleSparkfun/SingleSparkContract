@@ -18,9 +18,9 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { deployArc, artifact } from '../shared/deploy.mjs';
 import { loadProfileFile } from '../shared/profile.mjs';
 
-const root = fileURLToPath(new URL('../../../arc/', import.meta.url));
+const root = fileURLToPath(new URL('../../../chains/arc/', import.meta.url));
 const option = name => { const index = process.argv.indexOf(name); return index < 0 ? undefined : process.argv[index + 1]; };
-const profilePath = resolve(option('--profile') ?? resolve(root, '../chains/arc/test/profiles/eth-like.json'));
+const profilePath = resolve(option('--profile') ?? resolve(root, 'test/profiles/eth-like.json'));
 const outPath = option('--out');
 const profile = loadProfileFile(profilePath);
 const { halfSupplyCost, keeperGas } = profile.economics;
@@ -100,8 +100,8 @@ try {
   const recordPath = resolve(dir, 'deployment.json');
   writeFileSync(recordPath, JSON.stringify(deployment));
   const verifierEnv = { ...process.env, ARC_RPC_URL: url, ARC_CHAIN_PROFILE: profilePath };
-  execFileSync(process.execPath, [resolve(root, '../scripts/arc/launchpads/singlespark/testnet/verify-v2-testnet.mjs'), recordPath, resolve(dir, 'v2.json')], { env: verifierEnv, stdio: 'pipe' });
-  execFileSync(process.execPath, [resolve(root, '../scripts/arc/shared/verify-satisfaction-deployment.mjs'), recordPath, resolve(dir, 'satisfaction.json')], { env: verifierEnv, stdio: 'pipe' });
+  execFileSync(process.execPath, [resolve(root, '../../scripts/arc/launchpads/singlespark/testnet/verify-v2-testnet.mjs'), recordPath, resolve(dir, 'v2.json')], { env: verifierEnv, stdio: 'pipe' });
+  execFileSync(process.execPath, [resolve(root, '../../scripts/arc/shared/verify-satisfaction-deployment.mjs'), recordPath, resolve(dir, 'satisfaction.json')], { env: verifierEnv, stdio: 'pipe' });
   record('verify-v2-testnet.mjs and verify-satisfaction-deployment.mjs pass with ARC_CHAIN_PROFILE');
 
   // A meme, bought and partly sold back once the opening ladder has passed.

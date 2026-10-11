@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
-import {NativeRevenueSplitter} from "../chains/evm/legacy/NativeRevenueSplitter.sol";
+import {NativeRevenueSplitter} from "../NativeRevenueSplitter.sol";
 interface Vm {function deal(address,uint256) external; function prank(address) external;}
 contract RejectNative {receive() external payable {revert();}}
 contract NativeRevenueSplitterTest {

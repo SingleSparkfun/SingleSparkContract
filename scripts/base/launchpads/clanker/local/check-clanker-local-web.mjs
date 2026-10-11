@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createPublicClient, http, keccak256, toHex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-mkdirSync('SingleSparkContract/deployments/local/base/clanker', { recursive: true });
+mkdirSync('SingleSparkContract/chains/base/deployments/local/clanker', { recursive: true });
 const base = 'http://127.0.0.1:8092';
 const client = createPublicClient({ transport: http('http://127.0.0.1:8548') });
 assert.equal(await client.getChainId(), 8453);
@@ -54,6 +54,6 @@ try {
     sourceChainId: 8453, chainId: 8453, forkRpc: 'http://127.0.0.1:8548', api: base, siweIssuerChainId: 31338,
     adapter: 'clanker-v4-abi', funding, owner: account.address, launch: job, anonymousPost: 401, changedDraftPost: 409,
     custodyBound: true, abiFinalizedEventAndRewardsVerified: true, image: launch.draft.image, imageBytesVerified: true, foreignImagePost: invalidImage.status, notVerified: ['public-chain creation', 'reward claim and buyback', 'user browser wallet signature'] };
-  writeFileSync('SingleSparkContract/deployments/local/base/clanker/clanker-abi-image-local-web-test-20261006.json', JSON.stringify(proof, null, 2) + '\n');
+  writeFileSync('SingleSparkContract/chains/base/deployments/local/clanker/clanker-abi-image-local-web-test-20261006.json', JSON.stringify(proof, null, 2) + '\n');
   console.log(JSON.stringify(proof, null, 2));
 } finally { await request('/api/auth/logout', { method: 'POST', headers }); }

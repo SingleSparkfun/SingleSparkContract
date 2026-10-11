@@ -9,13 +9,13 @@ import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { persist, stringify } from '../../../shared/runtime.mjs';
 import { arcAbi, quoterAbi, positionManagerAbi } from '../../../../../../SingleSparkFront/front/chains/evm/arcAbi.ts';
 import { artifact } from '../../../shared/deploy.mjs';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
 const v2 = process.argv.includes('--v2');
 const capacity = v2 ? 20 : 200;
 const funding = parseEther(v2 ? '0.5' : '0.03');
 const reserve = parseEther(v2 ? '50' : '0.2');
-const dir = v2 ? 'SingleSparkContract/arc/data/economics-v2-random-wallets' : 'SingleSparkContract/arc/data/rewards-200-wallets';
+const dir = v2 ? 'SingleSparkContract/chains/arc/data/economics-v2-random-wallets' : 'SingleSparkContract/chains/arc/data/rewards-200-wallets';
 mkdirSync(dir,{recursive:true,mode:0o700});
 const planPath = `${dir}/wallets.json`;
 if (!existsSync(planPath)) {
@@ -47,11 +47,11 @@ if (v2) for (const w of plan.wallets) {
     assert(BigInt(t.buyRaw) >= parseEther('0.15') && BigInt(t.buyRaw) <= parseEther('0.2'));
     assert(Number.isInteger(t.sellBps) && t.sellBps >= 2500 && t.sellBps <= 10000); }
 }
-if (!v2) { process.loadEnvFile('SingleSparkContract/arc/.env.testnet.local'); assert.equal(Number(process.env.ARC_CHAIN_ID),5042002); }
-const verification=JSON.parse(readFileSync(v2 ? 'SingleSparkContract/deployments/testnet/arc/singlespark/arc-economics-v2-testnet.json' : 'SingleSparkContract/deployments/testnet/arc/singlespark/jet-rewards-testnet-verification.json'));
+if (!v2) { process.loadEnvFile('SingleSparkContract/chains/arc/.env.testnet.local'); assert.equal(Number(process.env.ARC_CHAIN_ID),5042002); }
+const verification=JSON.parse(readFileSync(v2 ? 'SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-economics-v2-testnet.json' : 'SingleSparkContract/chains/arc/deployments/testnet/singlespark/jet-rewards-testnet-verification.json'));
 assert.equal(verification.status,'passed');const d=verification.deployment;
 const funderKey=v2 || process.argv.includes('--faucet-funded')
-  ? JSON.parse(readFileSync('SingleSparkContract/arc/data/jet-test-wallets-20260916/wallets.json')).wallets[1].privateKey
+  ? JSON.parse(readFileSync('SingleSparkContract/chains/arc/data/jet-test-wallets-20260916/wallets.json')).wallets[1].privateKey
   : process.env.ARC_DEPLOYER_PRIVATE_KEY;
 const funder=privateKeyToAccount(funderKey);
 if (v2) assert.equal(funder.address, verification.funder);
@@ -72,7 +72,7 @@ const transport=custom({request:async args=>{
 const client=createPublicClient({chain,transport,cacheTime:0});
 assert.equal(await client.getChainId(),5042002);
 assert.equal(keccak256(await client.getCode({address:d.launch})),d.launchCodeHash);
-const reportPath=v2 ? 'SingleSparkContract/deployments/testnet/arc/singlespark/arc-v2-random-wallets.json' : 'SingleSparkContract/deployments/testnet/arc/singlespark/jet-rewards-200-wallets.json';
+const reportPath=v2 ? 'SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-v2-random-wallets.json' : 'SingleSparkContract/chains/arc/deployments/testnet/singlespark/jet-rewards-200-wallets.json';
 const report=existsSync(reportPath)?JSON.parse(readFileSync(reportPath)):{chainId:5042002,synthetic:true,launch:d.launch,token:d.platformToken,
   fundingPerWalletUSDC:formatEther(funding),funder:funder.address,wallets:plan.wallets.map(({privateKey,...w})=>w),transactions:{},startedAt:new Date().toISOString()};
 assert.equal(report.launch,d.launch);assert.equal(report.token,d.platformToken);

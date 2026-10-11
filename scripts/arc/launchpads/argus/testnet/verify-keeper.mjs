@@ -17,7 +17,7 @@ assert.equal((await c.read(factory, c.a.factory.abi, 'implementation')).toLowerC
 assert.equal((await c.read(factory, c.a.factory.abi, 'executor')).toLowerCase(), c.accounts.executor.address.toLowerCase());
 assert.equal((await c.read(factory, c.a.factory.abi, 'vaultOf', [p.token])).toLowerCase(), p.vault.toLowerCase());
 const va = c.a.implementation.abi;
-const path = resolve(root, '../deployments/testnet/arc/argus/argus-keeper-public-testnet.json');
+const path = resolve(root, 'deployments/testnet/argus/argus-keeper-public-testnet.json');
 const saved = existsSync(path) ? JSON.parse(readFileSync(path)) : null;
 const dead = '0x000000000000000000000000000000000000dEaD';
 const at = await c.client.getBlock({ blockTag: 'finalized' });

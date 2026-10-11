@@ -1,12 +1,12 @@
 [package]
-name = "singlespark-revenue"
+name = "singlespark-dao"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.84"
 publish = false
 
 [lib]
-path = "../../../chains/solana/launchpads/pump/lib.rs"
+path = "../../programs/dao/lib.rs"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
@@ -18,6 +18,7 @@ spl-token-2022 = { version = "=8.0.1", features = ["no-entrypoint"] }
 
 [features]
 no-entrypoint = []
+devnet-ten-minute-rounds = []
 
 [lints.rust]
 unexpected_cfgs = { level = "allow", check-cfg = ['cfg(target_os, values("solana"))'] }

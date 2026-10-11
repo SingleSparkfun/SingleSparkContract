@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { parseEnv } from 'node:util';
 import { createPublicClient, createWalletClient, defineChain, http, encodeDeployData, getContractAddress, keccak256, parseTransaction, recoverTransactionAddress, parseEther, zeroAddress } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-const artifact = name => JSON.parse(readFileSync(new URL(`../../../../../arc/out/${name}.sol/${name}.json`,import.meta.url)));
+const artifact = name => JSON.parse(readFileSync(new URL(`../../../../../chains/arc/out/${name}.sol/${name}.json`,import.meta.url)));
 const stringify = value => JSON.stringify(value,(_,v)=>typeof v==='bigint'?String(v):v,2);
 function persist(path,value) {
   const temp=`${path}.tmp`;writeFileSync(temp,stringify(value),{mode:0o600});

@@ -5,7 +5,7 @@ import {readFileSync, writeFileSync, existsSync} from 'node:fs';
 import {createPublicClient,createWalletClient,http,keccak256,toHex,parseAbi,parseAbiParameters,encodeAbiParameters,encodeFunctionData,erc20Abi} from 'viem';
 import {privateKeyToAccount} from 'viem/accounts';
 import {base} from 'viem/chains';
-mkdirSync('SingleSparkContract/deployments/local/base/clanker', { recursive: true });
+mkdirSync('SingleSparkContract/chains/base/deployments/local/clanker', { recursive: true });
 if(process.argv[2]==='--api'){await checkApi();process.exit(0);}
 const path=process.argv[2];
 assert.ok(path?.includes('clanker-plugin-proof-'));
@@ -38,7 +38,7 @@ const send=async(name,to,data,value=0n)=>{
   assert.equal(r.status,'success',name);return r;
 };
 if(!journal.funded){await c.request({method:'anvil_setBalance',params:[owner.address,toHex(10n**18n)]});journal.funded=true;save();}
-const artifact=JSON.parse(readFileSync('SingleSparkContract/arc/out/NativeRevenueDistributor.sol/NativeRevenueDistributor.json','utf8'));
+const artifact=JSON.parse(readFileSync('SingleSparkContract/chains/arc/out/NativeRevenueDistributor.sol/NativeRevenueDistributor.json','utf8'));
 const deployed=await send('distributor',null,artifact.bytecode.object);
 proof.distributor=deployed.contractAddress;
 assert.equal(keccak256(await c.getCode({address:proof.distributor})),readFileSync('SingleSparkBackend/api/src/native_distributor_hash.txt','utf8').trim());
@@ -118,6 +118,6 @@ async function checkApi(){
     const fees=await request('/api/launch/clanker/fees?requestId='+body.requestId,{headers});assert.equal(fees.status,200);assert.deepEqual(fees.body.plugins,body.draft.plugins);assert.equal(fees.body.token,null);assert.deepEqual(fees.body.history,[]);
     const legacy=await request('/api/launch/clanker/fees?requestId=clanker-abi-image-web-20261006',{headers});assert.equal(legacy.status,200);assert.equal(legacy.body.plugins,null);assert.equal(legacy.body.pluginExecution,'not-configured');assert.equal(legacy.body.history.length,4);
     const proof={status:'passed_local_plugin_policy_api',publicTransactions:false,api,anonymous:401,changedPolicy:409,requestId:body.requestId,policy:fees.body.plugins,launchStatus:first.body.status,legacyPolicy:legacy.body.plugins,legacyActionCount:legacy.body.history.length};
-    writeFileSync('SingleSparkContract/deployments/local/base/clanker/clanker-plugins-local-web-check-20261006.json',JSON.stringify(proof,null,2)+'\n');console.log(JSON.stringify(proof));
+    writeFileSync('SingleSparkContract/chains/base/deployments/local/clanker/clanker-plugins-local-web-check-20261006.json',JSON.stringify(proof,null,2)+'\n');console.log(JSON.stringify(proof));
   }finally{await request('/api/auth/logout',{method:'POST',headers});}
 }

@@ -7,7 +7,7 @@ import { context } from './deploy.mjs';
 import { root, json } from './build.mjs';
 
 const c = await context({ version: 2 });
-const old = JSON.parse(readFileSync(resolve(root, '../deployments/testnet/arc/argus/argus-public-testnet.json')));
+const old = JSON.parse(readFileSync(resolve(root, 'deployments/testnet/argus/argus-public-testnet.json')));
 assert.equal(old.status, 'passed');
 for (const name of ['portal', 'router']) {
   const address = name === 'portal' ? c.build.portal : old.addresses.router;

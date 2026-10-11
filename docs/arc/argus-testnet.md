@@ -2,12 +2,12 @@
 
 This is a separate deployment on ARC Testnet 5042002. It reuses the pinned independent Portal and deploys a new Router, Vault implementation and Factory. Existing contracts, V1/V2 artifacts, balances and journals remain intact. The isolated Claim Factory build uses a 10-minute delay; production Solidity remains fixed at 48 hours.
 
-**Deployment status:** the weighted Claim deployment and its public acceptance receipts are recorded in `deployments/testnet/arc/argus/argus-public-testnet-claim.json`. Earlier local or preflight reports retain their historical status. New Vaults reserve 10% platform fees and 0.5% Claim rewards, then divide 89.5% among enabled plugins with initial relative weights 1:1:1. Three independently registered contracts implement own-token burn, platform-token burn and distribution. All-disabled income remains unallocated; existing balances are retained. Community funding inside plugins remains a separate unresolved policy.
+**Deployment status:** the weighted Claim deployment and its public acceptance receipts are recorded in `chains/arc/deployments/testnet/argus/argus-public-testnet-claim.json`. Earlier local or preflight reports retain their historical status. New Vaults reserve 10% platform fees and 0.5% Claim rewards, then divide 89.5% among enabled plugins with initial relative weights 1:1:1. Three independently registered contracts implement own-token burn, platform-token burn and distribution. All-disabled income remains unallocated; existing balances are retained. Community funding inside plugins remains a separate unresolved policy.
 
 Run from the Contract repository after the design and code are final:
 
 ```sh
-forge test --root arc
+forge test --root chains/arc
 node scripts/arc/launchpads/argus/testnet/build.mjs --claim
 node scripts/arc/launchpads/argus/testnet/rehearse-claim.mjs
 node scripts/arc/launchpads/argus/testnet/deploy-claim.mjs
@@ -15,7 +15,7 @@ node scripts/arc/launchpads/argus/testnet/deploy-claim.mjs --broadcast
 node scripts/arc/launchpads/argus/testnet/verify-claim.mjs --broadcast
 ```
 
-`arc/data/argus-public-testnet-claim` contains the new build and durable signed journal. `deployments/testnet/arc/argus/argus-public-testnet-claim.json` contains public addresses, code hashes and receipts after deployment. Builds become immutable once a transaction journal exists. Never delete a journal to retry or silently recompile its signed inputs.
+`chains/arc/data/argus-public-testnet-claim` contains the new build and durable signed journal. `chains/arc/deployments/testnet/argus/argus-public-testnet-claim.json` contains public addresses, code hashes and receipts after deployment. Builds become immutable once a transaction journal exists. Never delete a journal to retry or silently recompile its signed inputs.
 
 `rehearse-claim.mjs` pins public testnet block 66440020 and writes only to a loopback Anvil fork with a separate temporary journal. It explicitly substitutes the existing test ERC20 for ARC's unsupported native-USDC precompile. Native USDC/gas mirroring and ARC blocklist behavior are therefore outside this rehearsal; only public testnet receipts can establish those. The same bounded acceptance routine runs without this substitution on public testnet. Rehearsal also checks the one-second-early rejection, activation at 600 seconds and re-running without extra transactions.
 

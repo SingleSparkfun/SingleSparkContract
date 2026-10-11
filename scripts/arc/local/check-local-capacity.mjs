@@ -7,7 +7,7 @@ import { tmpdir, cpus, totalmem } from 'node:os';
 import { resolve } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { testDatabase } from './test-database.mjs';
-mkdirSync('SingleSparkContract/deployments/local/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/local/singlespark', { recursive: true });
 
 const dir = mkdtempSync(resolve(tmpdir(), 'spark-capacity-'));
 const database = testDatabase(dir);
@@ -87,6 +87,6 @@ try {
   }
   report.checkpointCaveat = 'Single connection replacing a text JSON checkpoint with a new cursor and random synthetic payload; includes PostgreSQL WAL/TOAST, excludes Rust serialization and RPC.';
 } finally { sql(`DROP SCHEMA IF EXISTS "${schema}" CASCADE;`); }
-const path = process.env.ARC_CAPACITY_REPORT || 'SingleSparkContract/deployments/local/arc/singlespark/local-capacity-20260917.json';
+const path = process.env.ARC_CAPACITY_REPORT || 'SingleSparkContract/chains/arc/deployments/local/singlespark/local-capacity-20260917.json';
 writeFileSync(path, JSON.stringify(report,null,2)+'\n');
 console.log(`Report: ${path}`);

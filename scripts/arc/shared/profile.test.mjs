@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { hasChainProfile, loadChainProfile, loadProfileFile, parseAmount, parseProfile, profilePath, profileSummary } from './profile.mjs';
 
 const ethLikePath = fileURLToPath(new URL('../../../chains/arc/test/profiles/eth-like.json', import.meta.url));
-const arcJson = () => JSON.parse(readFileSync(new URL('../../../deployments/mainnet/arc/singlespark/profile.json', import.meta.url), 'utf8'));
+const arcJson = () => JSON.parse(readFileSync(new URL('../../../chains/arc/deployments/mainnet/singlespark/profile.json', import.meta.url), 'utf8'));
 
 test('amounts parse exactly, in integer or scientific form', () => {
   assert.equal(parseAmount('10000000000000000000000'), 10_000n * 10n ** 18n);
@@ -33,8 +33,8 @@ test('both Arc profiles carry exactly the constants the contracts used to hard-c
 });
 
 test('a chain without a committed profile is refused', () => {
-  assert.match(profilePath(5042), /deployments\/mainnet\/arc\/singlespark\/profile.json$/);
-  assert.match(profilePath(5042002), /deployments\/testnet\/arc\/singlespark\/profile.json$/);
+  assert.match(profilePath(5042), /chains\/arc\/deployments\/mainnet\/singlespark\/profile.json$/);
+  assert.match(profilePath(5042002), /chains\/arc\/deployments\/testnet\/singlespark\/profile.json$/);
   assert.equal(profilePath(8453), null);
   assert.equal(hasChainProfile(8453), false);
   assert.throws(() => loadChainProfile(8453), /No committed chain profile for chain 8453/);

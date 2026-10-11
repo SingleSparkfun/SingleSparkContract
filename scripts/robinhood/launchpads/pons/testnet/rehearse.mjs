@@ -14,7 +14,7 @@ mkdirSync(dir, { recursive: true, mode: 0o700 });
 const privateKey = generatePrivateKey(), account = privateKeyToAccount(privateKey);
 const walletPath = resolve(dir, 'wallet.json');
 writeFileSync(walletPath, json({ deployer: { privateKey, address: account.address } }), { mode: 0o600 });
-const config = readJson(resolve(root, 'deployments/testnet/robinhood/pons/config.json'));
+const config = readJson(resolve(root, 'chains/robinhood/deployments/testnet/pons/config.json'));
 const rpc = 'http://127.0.0.1:18631';
 const anvil = spawn('anvil', ['--host', '127.0.0.1', '--port', '18631', '--chain-id', '46630', '--fork-url', config.rpc, '--gas-price', '10000000', '--base-fee', '10000000', '--disable-min-priority-fee', '--silent'], { stdio: ['ignore', 'ignore', 'pipe'] });
 let failure = '';

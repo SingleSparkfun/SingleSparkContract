@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { posix, resolve } from 'node:path';
+import { posix, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { root, data, compile, hash, json, readJson } from './build.mjs';
 
@@ -10,7 +10,8 @@ export function buildGameplay() {
   function visit(path) {
     assert(!path.startsWith('../') && !posix.isAbsolute(path));
     if (sources[path]) return;
-    const content = readFileSync(resolve(root, path), 'utf8'); sources[path] = { content };
+    // Preserve frozen compiler source keys after relocating the vendored dependencies.
+    const content = readFileSync(sourcePath(path), 'utf8'); sources[path] = { content };
     for (const match of content.matchAll(/import\s+(?:[^;]*?from\s*)?["']([^"']+)["']\s*;/g)) {
       let target = match[1];
       if (target.startsWith('.')) target = posix.normalize(posix.join(posix.dirname(path), target));
@@ -47,5 +48,11 @@ export function buildGameplay() {
   mkdirSync(data, { recursive: true });
   writeFileSync(resolve(data, 'gameplay-compiler-input.json'), json(input)); writeFileSync(output, json(build));
   return build;
+}
+export function sourcePath(path) {
+  assert(!path.startsWith('../') && !posix.isAbsolute(path));
+  const target = resolve(root, path.startsWith('arc/lib/') ? `chains/${path}` : path);
+  assert(relative(root, target).startsWith('chains/'), 'Source must belong to chains/');
+  return target;
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) console.log(json({ ...buildGameplay(), artifacts: 'saved locally' }));

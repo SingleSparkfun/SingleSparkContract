@@ -23,7 +23,7 @@ try {
   const c=await context({version:3,rpc,storageDir});
   for(const account of Object.values(c.accounts))await client.request({method:'anvil_setBalance',params:[account.address,toHex(parseEther('30'))]});
   // Anvil cannot execute ARC's native-USDC precompile. This fixture tests its ERC20 surface only.
-  const quote=JSON.parse(readFileSync(new URL('../../../../../arc/out/ArgusGovernance.t.sol/ArgusTestQuote.json',import.meta.url)));
+  const quote=JSON.parse(readFileSync(new URL('../../../../../chains/arc/out/ArgusGovernance.t.sol/ArgusTestQuote.json',import.meta.url)));
   await client.request({method:'anvil_setCode',params:[QUOTE,quote.deployedBytecode.object]});
   const wallet=createWalletClient({account:c.accounts.deployer,chain:c.client.chain,transport:http(rpc)});
   const mint=await wallet.writeContract({address:QUOTE,abi:quote.abi,functionName:'mint',args:[c.accounts.deployer.address,30000000n]});

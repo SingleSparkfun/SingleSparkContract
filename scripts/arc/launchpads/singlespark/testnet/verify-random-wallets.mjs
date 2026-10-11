@@ -5,11 +5,11 @@ import { readFileSync } from 'node:fs';
 import { createPublicClient, http, fallback, erc20Abi, parseEther, formatEther, keccak256, zeroAddress } from 'viem';
 import { artifact } from '../../../shared/deploy.mjs';
 import { persist } from '../../../shared/runtime.mjs';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
-const report = JSON.parse(readFileSync('SingleSparkContract/deployments/testnet/arc/singlespark/arc-v2-random-wallets.json'));
+const report = JSON.parse(readFileSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-v2-random-wallets.json'));
 assert.equal(report.status, 'transactions_confirmed');
-const d = JSON.parse(readFileSync('SingleSparkContract/deployments/testnet/arc/singlespark/arc-economics-v2-testnet.json')).deployment;
+const d = JSON.parse(readFileSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-economics-v2-testnet.json')).deployment;
 assert.equal(report.launch, d.launch);
 const client = createPublicClient({ transport: fallback(['https://rpc.blockdaemon.testnet.arc.network', 'https://rpc.testnet.arc.network']
   .map(url => http(url, { timeout: 15000, retryCount: 1 })), { retryCount: 1 }), cacheTime: 0 });
@@ -107,4 +107,4 @@ const result = { status: 'passed', syntheticTestActivity: true, chainId: 5042002
   wallets: wallets.length, fundedUSDC: String(wallets.length / 2), trades: wallets.length * 4, confirmedTransactions: Object.keys(report.transactions).length,
   confirmedFailures: Object.keys(report.failedTransactions ?? {}).length, transactionGasUSDC: report.gasUSDC, funderBalanceUSDC: formatEther(await client.getBalance({ address: report.funder })), projects: checks,
   checks: ['same-block wallet native/token balances', 'exact approvals consumed', '80 actual trade events', 'Transfer-derived holders and supply', '83/7/5/4/1 fee allocation', 'burn history', 'reward budget conservation and recipient deduplication', 'factory USDC accounting'] };
-persist('SingleSparkContract/deployments/testnet/arc/singlespark/arc-v2-random-wallets-validation.json', result); console.log(JSON.stringify(result));
+persist('SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-v2-random-wallets-validation.json', result); console.log(JSON.stringify(result));

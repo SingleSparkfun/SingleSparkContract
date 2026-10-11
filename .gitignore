@@ -7,6 +7,6 @@ node_modules/
 out/
 cache/
 
-arc/data/
-solana/target/
+chains/*/data/
+chains/solana/target/
 .data/

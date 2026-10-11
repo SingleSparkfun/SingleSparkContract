@@ -10,7 +10,7 @@ import { createPublicClient, createWalletClient, defineChain, erc20Abi, http, ke
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { artifact, deployArc } from '../shared/deploy.mjs';
 import { arcAbi } from '../../../../SingleSparkFront/front/chains/evm/arcAbi.ts';
-mkdirSync('SingleSparkContract/deployments/local/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/local/singlespark', { recursive: true });
 
 const key = [
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
@@ -43,7 +43,7 @@ const deploy = async (name, args) => {
   assert(result.contractAddress);
   return result.contractAddress;
 };
-const reportPath = resolve('SingleSparkContract/deployments/local/arc/singlespark/arc-project-treasury-factory-anvil-proof.json');
+const reportPath = resolve('SingleSparkContract/chains/arc/deployments/local/singlespark/arc-project-treasury-factory-anvil-proof.json');
 
 try {
   for (let i = 0; ; i++) {

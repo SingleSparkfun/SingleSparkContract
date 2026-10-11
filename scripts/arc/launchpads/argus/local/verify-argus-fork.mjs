@@ -10,17 +10,17 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { artifact } from '../../../shared/deploy.mjs';
-mkdirSync('SingleSparkContract/deployments/local/arc/argus', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/local/argus', { recursive: true });
 const PORTAL='0xB021Be536808f551b31789422Fd28a6c9c6e97Da',QUOTE='0x3600000000000000000000000000000000000000',DEAD='0x000000000000000000000000000000000000dEaD';
 const checkPlugins=process.argv.includes('--plugins');
 const serve=process.argv.includes('--serve');
 const vaults=process.argv.includes('--vaults');
 const independent=vaults||process.argv.includes('--independent-wallets')||process.argv.includes('--launch-gas');
 assert(!(serve&&independent));
-const serveDir=resolve('SingleSparkContract/arc/data/argus-local-fork');
+const serveDir=resolve('SingleSparkContract/chains/arc/data/argus-local-fork');
 if(serve)mkdirSync(serveDir,{recursive:true,mode:0o700});
-const portalAbi=JSON.parse(readFileSync(new URL('../../../../../arc/abi/argus-portal-v7.json',import.meta.url)));
-const splitterAbi=JSON.parse(readFileSync(new URL('../../../../../arc/abi/argus-splitter-v7.json',import.meta.url)));
+const portalAbi=JSON.parse(readFileSync(new URL('../../../../../chains/arc/launchpads/argus/abi/argus-portal-v7.json',import.meta.url)));
+const splitterAbi=JSON.parse(readFileSync(new URL('../../../../../chains/arc/launchpads/argus/abi/argus-splitter-v7.json',import.meta.url)));
 const router=artifact('ArgusCustodyRouter'),gov=artifact('ArgusGovernance','ArgusSatisfaction'),project=artifact('ArgusGovernance','ArgusProjectTreasury');
 const custody=privateKeyToAccount(keccak256(toHex('singlespark/argus-fork/custody'))),trader=privateKeyToAccount(keccak256(toHex('singlespark/argus-fork/trader')));
 const reserve=createServer();await new Promise(r=>reserve.listen(serve?8547:0,'127.0.0.1',r));const port=reserve.address().port;await new Promise(r=>reserve.close(r));
@@ -302,9 +302,9 @@ try{
 
   }}
 }catch(e){failure=e.message;console.error(e.message);if(err)console.error(err.slice(-2000));}finally{
-  api?.kill('SIGTERM');anvil.kill('SIGTERM');mkdirSync('SingleSparkContract/deployments/local/arc/argus',{recursive:true});
+  api?.kill('SIGTERM');anvil.kill('SIGTERM');mkdirSync('SingleSparkContract/chains/arc/deployments/local/argus',{recursive:true});
   if(!serve&&!independent)
-  writeFileSync(checkPlugins?'SingleSparkContract/deployments/local/arc/argus/arc-revenue-plugins-immutable-fork-20261005.json':'SingleSparkContract/deployments/local/arc/argus/argus-custody-fork-20260930.json',JSON.stringify({status:failure?'failed':'passed',failure,generatedAt:new Date().toISOString(),chainId:5042,forkBlock:process.env.ARC_MAINNET_FORK_BLOCK??'23563119',publicTransactions:false,
+  writeFileSync(checkPlugins?'SingleSparkContract/chains/arc/deployments/local/argus/arc-revenue-plugins-immutable-fork-20261005.json':'SingleSparkContract/chains/arc/deployments/local/argus/argus-custody-fork-20260930.json',JSON.stringify({status:failure?'failed':'passed',failure,generatedAt:new Date().toISOString(),chainId:5042,forkBlock:process.env.ARC_MAINNET_FORK_BLOCK??'23563119',publicTransactions:false,
     quotePrecompile:'explicit test ERC20 mock; native USDC/gas sharing and Arc blocklist not emulated',distributionRecipients:'synthetic fixtures',governanceFunding:'explicit test funding, not trading fees',steps},null,2)+'\n');
 }
 if(failure)process.exitCode=1;

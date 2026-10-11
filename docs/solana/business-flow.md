@@ -1,6 +1,6 @@
 # Solana business-flow rules and remaining work
 
-> 2026-10-09: new projects use **per-project PDA vaults, a shared revenue program and a non-upgradeable 48-hour timelock controller**. This document describes the current architecture and explicitly identifies unfinished product work. Deployment and ABI details follow the [README](../../solana/README.md).
+> 2026-10-09: new projects use **per-project PDA vaults, a shared revenue program and a non-upgradeable 48-hour timelock controller**. This document describes the current architecture and explicitly identifies unfinished product work. Deployment and ABI details follow the [README](../../chains/solana/README.md).
 
 Scope: Solana / Pump and PumpSwap revenue, Claim plugins and platform-token DAO. Each mint/config has an independent PDA vault and ledger. Buyback, burn and distribution share the revenue program; no per-Meme plugin deployment is required. Global pause covers old and new vaults under the same revenue configuration, with funds and budgets always isolated. DAO is separately deployed and does not share revenue vaults.
 

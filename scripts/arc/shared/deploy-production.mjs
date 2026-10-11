@@ -1,12 +1,12 @@
 // One command for a fresh deployment: read-only preflight, build and tests, then the existing journaled
 // deployer, a read-only verification and an address file for the backend. Nothing is broadcast without
 // --broadcast, and a chain whose profile is not a testnet (Arc mainnet, 5042) additionally needs --mainnet.
-// Every number and V4 address comes from the committed chain profile SingleSparkContract/deployments/<environment>/arc/singlespark/profile.json; a
+// Every number and V4 address comes from the committed chain profile SingleSparkContract/chains/arc/deployments/<environment>/singlespark/profile.json; a
 // chain without one is refused. Keys are read from the env file and never printed.
 //
-//   node SingleSparkContract/scripts/arc/shared/deploy-production.mjs --env SingleSparkContract/arc/.env.production.local                         # rehearsal
-//   node SingleSparkContract/scripts/arc/shared/deploy-production.mjs --env SingleSparkContract/arc/.env.production.local --broadcast             # Arc Testnet
-//   node SingleSparkContract/scripts/arc/shared/deploy-production.mjs --env SingleSparkContract/arc/.env.production.local --mainnet --broadcast   # Arc mainnet
+//   node SingleSparkContract/scripts/arc/shared/deploy-production.mjs --env SingleSparkContract/chains/arc/.env.production.local                         # rehearsal
+//   node SingleSparkContract/scripts/arc/shared/deploy-production.mjs --env SingleSparkContract/chains/arc/.env.production.local --broadcast             # Arc Testnet
+//   node SingleSparkContract/scripts/arc/shared/deploy-production.mjs --env SingleSparkContract/chains/arc/.env.production.local --mainnet --broadcast   # Arc mainnet
 //
 // Other flags: --skip-tests (the contract tests already ran for this commit), --allow-eoa-admin (mainnet only:
 // accept a plain address as team or keeper owner instead of a multisig; not recommended).
@@ -18,7 +18,7 @@ import { createPublicClient, defineChain, formatEther, getAddress, http, isAddre
 import { privateKeyToAccount } from 'viem/accounts';
 import { hasChainProfile, loadChainProfile } from './profile.mjs';
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../arc');
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../chains/arc');
 const flag = name => process.argv.includes(name);
 const option = name => { const index = process.argv.indexOf(name); return index < 0 ? undefined : process.argv[index + 1]; };
 const envFile = resolve(option('--env') || resolve(root, '.env.production.local'));
@@ -38,11 +38,11 @@ const stop = () => {
 };
 
 section('Environment file');
-if (!existsSync(envFile)) { fail(`${envFile} does not exist; copy SingleSparkContract/arc/.env.example and fill it in`); stop(); }
+if (!existsSync(envFile)) { fail(`${envFile} does not exist; copy SingleSparkContract/chains/arc/deployments/mainnet/argus/.env.example and fill it in`); stop(); }
 if (statSync(envFile).mode & 0o077) fail(`${envFile} is readable by other users; run: chmod 600 ${envFile}`);
 else pass('only the owner can read it');
-if (!envFile.startsWith(`${resolve(root, '..')}/`)) pass('outside the repository');
-else if (spawnSync('git', ['check-ignore', '-q', envFile], { cwd: resolve(root, '..') }).status === 0) pass('ignored by git');
+if (!envFile.startsWith(`${resolve(root, '../..')}/`)) pass('outside the repository');
+else if (spawnSync('git', ['check-ignore', '-q', envFile], { cwd: resolve(root, '../..') }).status === 0) pass('ignored by git');
 else fail('not ignored by git; a private key must never be committable');
 process.loadEnvFile(envFile);
 const env = process.env;
@@ -52,7 +52,7 @@ const need = key => { if (!env[key]) fail(`${key} is missing`); return env[key];
 const chainId = Number(need('ARC_CHAIN_ID'));
 const rpc = need('ARC_RPC_URL');
 let profile;
-if (!hasChainProfile(chainId)) { fail(`chain ${chainId} has no committed profile (SingleSparkContract/deployments/<environment>/arc/singlespark/profile.json); numbers for a new chain are worked out and committed first, never guessed`); stop(); }
+if (!hasChainProfile(chainId)) { fail(`chain ${chainId} has no committed profile (SingleSparkContract/chains/arc/deployments/<environment>/singlespark/profile.json); numbers for a new chain are worked out and committed first, never guessed`); stop(); }
 try { profile = loadChainProfile(chainId); } catch (error) { fail(error.message); stop(); }
 const mainnet = !profile.testnet;
 const currency = profile.nativeCurrency.symbol;
@@ -81,7 +81,7 @@ const address = (name, required = true) => {
 const positionManager = profile.uniswapV4.positionManager;
 const poolManager = profile.uniswapV4.poolManager;
 if (env.ARC_POSITION_MANAGER && (!isAddress(env.ARC_POSITION_MANAGER) || getAddress(env.ARC_POSITION_MANAGER) !== positionManager)) {
-  fail(`ARC_POSITION_MANAGER differs from the ${profile.name} profile (${positionManager}); remove it or fix SingleSparkContract/deployments/<environment>/arc/singlespark/profile.json`);
+  fail(`ARC_POSITION_MANAGER differs from the ${profile.name} profile (${positionManager}); remove it or fix SingleSparkContract/chains/arc/deployments/<environment>/singlespark/profile.json`);
 }
 if (env.ARC_COMMUNITY_ADDRESS) fail('ARC_COMMUNITY_ADDRESS is obsolete: SPARK has no project treasury; its 4% joins its buyback budget');
 need('ARC_PLATFORM_NAME');
@@ -93,7 +93,7 @@ for (const name of ['ARC_PLATFORM_BUY_FEE', 'ARC_PLATFORM_SELL_FEE']) {
 if (env.ARC_PLATFORM_FEE != null) fail('ARC_PLATFORM_FEE is obsolete; use ARC_PLATFORM_BUY_FEE and ARC_PLATFORM_SELL_FEE');
 if (env.ARC_MIN_BUYBACK_USDC && (!/^\d+(\.\d{1,18})?$/.test(env.ARC_MIN_BUYBACK_USDC)
   || parseEther(env.ARC_MIN_BUYBACK_USDC) !== profile.economics.minBuyback)) {
-  fail(`ARC_MIN_BUYBACK_USDC differs from the profile's ${formatEther(profile.economics.minBuyback)} ${currency}; remove it or fix SingleSparkContract/deployments/<environment>/arc/singlespark/profile.json`);
+  fail(`ARC_MIN_BUYBACK_USDC differs from the profile's ${formatEther(profile.economics.minBuyback)} ${currency}; remove it or fix SingleSparkContract/chains/arc/deployments/<environment>/singlespark/profile.json`);
 }
 
 // The vault replaces the plain operations address and the executor replaces the plain keeper address.
@@ -219,7 +219,8 @@ if (problems.length) stop();
 
 const run = (title, command, args, extraEnv) => {
   section(title);
-  const result = spawnSync(command, args, { cwd: resolve(root, '..'), stdio: 'inherit', env: { ...env, ...extraEnv } });
+  // Child commands must use the same absolute journal directory checked above.
+  const result = spawnSync(command, args, { cwd: resolve(root, '../..'), stdio: 'inherit', env: { ...env, ARC_DATA_DIR: dataDir, ...extraEnv } });
   if (result.status !== 0) { fail(`${command} ${args[0]} exited with ${result.status ?? result.signal}`); stop(); }
 };
 run('Build', 'forge', ['build', '--root', root]);
@@ -231,10 +232,10 @@ if (!flag('--broadcast')) {
   process.exit(0);
 }
 
-run(`Deploying to ${profile.name}${mainnet ? ' MAINNET' : ''}`, process.execPath, [resolve(root, '../scripts/arc/shared/deploy.mjs'), '--broadcast', ...(mainnet ? [] : ['--testnet'])]);
+run(`Deploying to ${profile.name}${mainnet ? ' MAINNET' : ''}`, process.execPath, [resolve(root, '../../scripts/arc/shared/deploy.mjs'), '--broadcast', ...(mainnet ? [] : ['--testnet'])]);
 const deployment = JSON.parse(readFileSync(deploymentPath, 'utf8'));
 if (deployment.satisfaction || deployment.keeperExecutor) {
-  run('Verification (read-only)', process.execPath, [resolve(root, '../scripts/arc/shared/verify-satisfaction-deployment.mjs'), deploymentPath, resolve(dataDir, 'deployment-verification.json')]);
+  run('Verification (read-only)', process.execPath, [resolve(root, '../../scripts/arc/shared/verify-satisfaction-deployment.mjs'), deploymentPath, resolve(dataDir, 'deployment-verification.json')]);
 }
 
 // Public values only. Secrets for the running backend (keeper key, config signing key, treasury encryption key)

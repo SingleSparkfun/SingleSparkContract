@@ -99,7 +99,7 @@ The EVM vault model holds project funds in smart contracts, with spending govern
 
 Existing EVM integrations also include custody-wallet revenue paths and separate treasury vaults. A treasury vault does not mean all plugin funds are held there. Check the deployment’s actual funds address; no automatic migration is implied.
 
-Contract details and deployment boundaries: [Solana programs](../solana/README.md).
+Contract details and deployment boundaries: [Solana programs](../chains/solana/README.md).
 
 ## Plugin playbook
 
@@ -179,13 +179,13 @@ Use the token page and public activity records to check what a project has actua
 
 New projects use `ArgusVaultFactory` + `ArgusRevenueVault`: separate balances and on-chain budgets, shared code, immediate pause, fixed 48-hour policy/resume/upgrade delay. The existing router and legacy EOA launches remain bound to their original deployment. Deployment, durable recovery and local-fork verification are documented in [docs/arc/vaults.md](arc/vaults.md). Deployment is explicit; changing code alone does not alter any mainnet recipient.
 
-The independent [EVM gameplay protocol](evm/protocol.md) adds `GameplayVaultFactory` for registering already deployed project tokens, with one native/ERC20 funding asset per project Vault, isolated plugin budgets, delayed code registration and user-paid Claim execution. `forge test --root evm` verifies the contracts, including native-currency Uniswap v4 swaps without WETH. This is a local contract/interface delivery; it does not replace deployed Argus contracts, migrate fees or enable additional public chains/platforms.
+The independent [EVM gameplay protocol](evm/protocol.md) adds `GameplayVaultFactory` for registering already deployed project tokens, with one native/ERC20 funding asset per project Vault, isolated plugin budgets, delayed code registration and user-paid Claim execution. `forge test --root chains/evm` verifies the contracts, including native-currency Uniswap v4 swaps without WETH. This is a local contract/interface delivery; it does not replace deployed Argus contracts, migrate fees or enable additional public chains/platforms.
 
 ## Source ownership and build entrypoints
 
 Contract implementations follow chain-common and launchpad-specific ownership under `chains/`. `chains/evm` holds shared EVM governance, execution and revenue contracts; `chains/arc/launchpads/{argus,singlespark}` holds protocol-specific contracts. Solana shared state, governance and DAO/timelock entrypoints live under `chains/solana`; Pump revenue lives in `chains/solana/launchpads/pump`. `chains/bsc/launchpads/four-meme` contains interface metadata only.
 
-`arc/` and `solana/` retain the existing build/deployment/ABI-export entrypoints. Foundry and Cargo point at the canonical source; artifact output paths and deployed bindings do not change. No contract is redeployed or vault migrated by moving source. Run the workspace architecture check plus `test:contracts`, `test:arc-contracts` and `test:sol-contracts` after source moves.
+`chains/arc/` and `chains/solana/` own the build profiles and ABI exports. Maintained callers use the relocated artifact roots; deployed bindings and frozen compiler source keys do not change. No contract is redeployed or vault migrated by moving source. Run the workspace architecture check plus `test:contracts`, `test:arc-contracts` and `test:sol-contracts` after source moves.
 ## Robinhood / Pons environments
 
-Verified on-chain sources are pinned in `chains/robinhood/launchpads/pons/sources.json`, with operational entrypoints in `scripts/robinhood/launchpads/pons/testnet/`. Public records separate `deployments/testnet/`, `deployments/mainnet/` and `deployments/local/`; deployed addresses and private signed recovery journals retain their original bindings and paths. See [deployment environments](../deployments/README.md) and [Pons test deployment](robinhood/pons.md).
+Verified on-chain sources are pinned in `chains/robinhood/launchpads/pons/sources.json`, with operational entrypoints in `scripts/robinhood/launchpads/pons/testnet/`. Public records separate `chains/<chain>/deployments/testnet/`, `mainnet/` and `local/`; deployed addresses and private signed recovery journals retain their original bindings and contents. See [deployment environments](deployments.md) and [Pons test deployment](robinhood/pons.md).

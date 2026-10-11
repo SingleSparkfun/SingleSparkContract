@@ -7,22 +7,22 @@ import { readFileSync, writeFileSync, mkdirSync, cpSync, readdirSync } from 'nod
 import { resolve, join, relative } from 'node:path';
 import { parseEnv } from 'node:util';
 import { privateKeyToAccount } from 'viem/accounts';
-mkdirSync('SingleSparkContract/deployments/local/arc/singlespark', { recursive: true });
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/local/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
 process.umask(0o077);
 const config = parseEnv(readFileSync(process.argv[2], 'utf8'));
-const current = JSON.parse(readFileSync('SingleSparkContract/deployments/testnet/arc/singlespark/arc-current-testnet.json')).deployment;
+const current = JSON.parse(readFileSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-current-testnet.json')).deployment;
 assert.equal(config.ARC_LAUNCH_ADDRESS.toLowerCase(), current.launch.toLowerCase());
 const schema = config.ARC_DATABASE_SCHEMA;
 assert.equal(schema, `arc_${current.launch.slice(2).toLowerCase()}`);
-const url = new URL(config.ARC_DATABASE_URL || parseEnv(readFileSync('SingleSparkContract/arc/.env.postgres.local', 'utf8')).ARC_DATABASE_URL);
+const url = new URL(config.ARC_DATABASE_URL || parseEnv(readFileSync('SingleSparkContract/chains/arc/.env.postgres.local', 'utf8')).ARC_DATABASE_URL);
 assert.equal(url.hostname, '127.0.0.1', 'This restore drill is for the existing local database');
 assert.equal(url.pathname, '/singlespark');
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-const directory = resolve(`SingleSparkContract/arc/data/readiness-${stamp}/backup`);
+const directory = resolve(`SingleSparkContract/chains/arc/data/readiness-${stamp}/backup`);
 mkdirSync(directory, { recursive: true, mode: 0o700 });
-const socket = resolve('SingleSparkContract/arc/data/postgres/socket');
+const socket = resolve('SingleSparkContract/chains/arc/data/postgres/socket');
 const db = `spark_restore_${randomBytes(6).toString('hex')}_test`;
 const env = { ...process.env, PGHOST: url.hostname, PGPORT: url.port || '5432', PGDATABASE: 'singlespark',
   PGUSER: decodeURIComponent(url.username), PGPASSWORD: decodeURIComponent(url.password) };
@@ -94,6 +94,6 @@ try {
   if (created) run('dropdb', ['-h', socket, '-U', process.env.USER, db]);
   report.completedAt = new Date().toISOString();
   writeFileSync(join(directory, 'verification.json'), JSON.stringify(report, null, 2) + '\n');
-  writeFileSync('SingleSparkContract/deployments/local/arc/singlespark/backup-restore-20260918.json', JSON.stringify(report, null, 2) + '\n');
+  writeFileSync('SingleSparkContract/chains/arc/deployments/local/singlespark/backup-restore-20260918.json', JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report));
 }

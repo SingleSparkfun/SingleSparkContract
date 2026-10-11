@@ -31,7 +31,7 @@ function loadEnv(path) {
   if (!path) fail('Missing --env <runtime.env>');
   const env = parseEnv(readFileSync(path, 'utf8'));
   const url = process.env.ARC_DATABASE_URL
-    || parseEnv(readFileSync(new URL('../../../arc/.env.postgres.local', import.meta.url), 'utf8')).ARC_DATABASE_URL;
+    || parseEnv(readFileSync(new URL('../../../chains/arc/.env.postgres.local', import.meta.url), 'utf8')).ARC_DATABASE_URL;
   if (!url) fail('Missing ARC_DATABASE_URL');
   const schema = env.ARC_DATABASE_SCHEMA || 'singlespark';
   if (!/^[a-z0-9_]{1,63}$/.test(schema)) fail('Invalid ARC_DATABASE_SCHEMA');

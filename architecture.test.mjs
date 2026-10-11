@@ -6,6 +6,7 @@ import { test } from 'node:test';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const files = dir => readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
+  if (['lib', 'out', 'cache', 'target', 'data', 'node_modules'].includes(entry.name)) return [];
   const path = resolve(dir, entry.name);
   return entry.isDirectory() ? files(path) : [path];
 });
@@ -20,10 +21,10 @@ function violation(from, to) {
 }
 
 test('contract implementations belong to a chain; build entrypoints contain no duplicate source', () => {
-  for (const old of ['src', 'arc/src', 'arc/test', 'solana/src', 'solana/programs/dao/src', 'solana/programs/revenue/src', 'solana/programs/timelock/src']) {
+  for (const old of ['src', 'arc', 'evm', 'robinhood', 'solana', 'deployments']) {
     assert.equal(existsSync(resolve(root, old)), false, old);
   }
-  for (const profile of ['solana', 'solana/programs/dao', 'solana/programs/revenue', 'solana/programs/timelock']) {
+  for (const profile of ['chains/solana', 'chains/solana/programs/dao', 'chains/solana/programs/revenue', 'chains/solana/programs/timelock']) {
     const config = readFileSync(resolve(root, profile, 'Cargo.toml'), 'utf8');
     const path = /^path = "([^"]+)"/m.exec(config)?.[1];
     assert(path, profile);
@@ -69,15 +70,15 @@ test('operational scripts resolve their imports after organization', () => {
 });
 
 test('build roots contain no misplaced browser checks or asset generators', () => {
-  for (const entry of readdirSync(resolve(root, 'arc'))) {
+  for (const entry of readdirSync(resolve(root, 'chains/arc'))) {
     assert(!/^(?:check-.*-ui|build-(?:geo|globe)-.*|render-.*)\.mjs$/.test(entry), entry);
   }
-  for (const environment of ['mainnet', 'testnet', 'local']) assert(existsSync(resolve(root, 'deployments', environment)));
+  for (const environment of ['mainnet', 'testnet', 'local']) assert(existsSync(resolve(root, 'chains/arc/deployments', environment)));
 });
 
 test('contract documentation links resolve after moving guides', () => {
   const failures = [];
-  const guides = [resolve(root, 'README.md'), ...files(resolve(root, 'docs')), resolve(root, 'deployments/README.md'), resolve(root, 'solana/README.md')];
+  const guides = [resolve(root, 'README.md'), ...files(resolve(root, 'docs')), resolve(root, 'chains/solana/README.md')];
   for (const file of guides.filter(path => path.endsWith('.md'))) {
     for (const [, link] of readFileSync(file, 'utf8').matchAll(/\]\(([^)]+)\)/g)) {
       if (link.startsWith('#') || /^[a-z]+:/i.test(link)) continue;

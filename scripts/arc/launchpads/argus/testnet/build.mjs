@@ -8,13 +8,20 @@ import { createHash } from 'node:crypto';
 import { homedir } from 'node:os';
 import { getContractAddress } from 'viem';
 
-export const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../../../arc');
+export const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../../../chains/arc');
 export const dir = resolve(root, 'data/argus-public-testnet');
 export const v2dir = resolve(root, 'data/argus-public-testnet-v2');
 export const claimDir = resolve(root, 'data/argus-public-testnet-claim');
 export const json = value => JSON.stringify(value, (_, v) => typeof v === 'bigint' ? String(v) : v, 2);
 export const hash = value => createHash('sha256').update(typeof value === 'string' ? value : JSON.stringify(value)).digest('hex');
 const sortedSources = sources => Object.fromEntries(Object.entries(sources).sort(([a], [b]) => a.localeCompare(b)));
+export function sourcePath(path) {
+  assert(!posix.isAbsolute(path));
+  // Preserve the source keys in frozen compiler inputs while relocating physical files.
+  const target = path.startsWith('lib/') ? resolve(root, path) : resolve(root, '../../arc', path);
+  assert(relative(resolve(root, '../..'), target).startsWith('chains/'), 'Source must belong to chains/');
+  return target;
+}
 export function compile(input, version) {
   const candidates = [process.env[`SOLC_${version.replaceAll('.', '_')}`],
     resolve(homedir(), `Library/Application Support/svm/${version}/solc-${version}`),
@@ -74,10 +81,9 @@ export async function build({ version = 1 } = {}) {
   const remappings = { '@openzeppelin/': 'lib/openzeppelin-contracts/', '@uniswap/v4-core/': 'lib/v4-core/', '@uniswap/v4-periphery/': 'lib/v4-periphery/', 'solmate/': 'lib/solmate/', 'solady/': 'lib/solady/src/', 'permit2/': 'lib/permit2/' };
   const sources = {};
   function visit(path) {
-    const localPath = relative(resolve(root, '..'), resolve(root, path));
-    assert(!posix.isAbsolute(path) && localPath !== '..' && !localPath.startsWith('../'));
+    const target = sourcePath(path);
     if (sources[path]) return;
-    const content = readFileSync(resolve(root, path), 'utf8');
+    const content = readFileSync(target, 'utf8');
     sources[path] = { content };
     for (const match of content.matchAll(/import\s+(?:[^;]*?from\s*)?["']([^"']+)["']\s*;/g)) {
       let target = match[1];

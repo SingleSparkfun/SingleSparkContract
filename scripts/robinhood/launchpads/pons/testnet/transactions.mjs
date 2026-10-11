@@ -23,7 +23,7 @@ export function requireTestnet(config, chainId) {
 export async function context({ walletPath, rpc, storageDir, local = false, broadcast = false, deploymentName, artifacts }) {
   assert(!deploymentName || ['vault-launch', 'gameplay'].includes(deploymentName), 'Unknown deployment journal');
   assert.equal(Boolean(deploymentName), Boolean(artifacts), 'A separate deployment must pin its own artifacts');
-  const config = readJson(resolve(root, 'deployments/testnet/robinhood/pons/config.json'));
+  const config = readJson(resolve(root, 'chains/robinhood/deployments/testnet/pons/config.json'));
   rpc ??= config.rpc;
   const url = new URL(rpc);
   const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
@@ -49,7 +49,7 @@ export async function context({ walletPath, rpc, storageDir, local = false, broa
   const journalPath = resolve(storageDir, 'transactions.json');
   const journal = existsSync(journalPath) ? readJson(journalPath) : { identity, steps: {} };
   assert.equal(journal.identity, identity, 'Build/config/wallet changed; preserve this journal and create a reviewed deployment');
-  const reportPath = local ? resolve(storageDir, 'deployment.json') : resolve(root, `deployments/testnet/robinhood/pons/${deploymentName ?? 'deployment'}.json`);
+  const reportPath = local ? resolve(storageDir, 'deployment.json') : resolve(root, `chains/robinhood/deployments/testnet/pons/${deploymentName ?? 'deployment'}.json`);
   const report = existsSync(reportPath) ? readJson(reportPath) : { identity, status: 'prepared', chainId: 46630, local,
     independentDeployment: true, officialPonsDeployment: false, deployer: account.address, addresses: {}, codeHashes: {}, transactions: {}, testnetDifferences: config.testnetDifferences };
   assert.equal(report.identity, identity, 'Deployment report belongs to another build');

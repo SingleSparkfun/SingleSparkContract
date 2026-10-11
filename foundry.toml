@@ -1,7 +1,8 @@
 [profile.default]
 src = "chains/evm/legacy"
-test = "test"
-out = "out"
+test = "chains/evm/legacy/test"
+out = "chains/evm/legacy/out"
+cache_path = "chains/evm/legacy/cache"
 libs = []
 solc_version = "0.8.30"
 optimizer = true

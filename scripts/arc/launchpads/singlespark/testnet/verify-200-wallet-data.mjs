@@ -5,14 +5,14 @@ import { createPublicClient,http,erc20Abi,parseEther,formatEther } from 'viem';
 import { arcAbi } from '../../../../../../SingleSparkFront/front/chains/evm/arcAbi.ts';
 import { artifact } from '../../../shared/deploy.mjs';
 import { persist } from '../../../shared/runtime.mjs';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
-const report=JSON.parse(readFileSync('SingleSparkContract/deployments/testnet/arc/singlespark/jet-rewards-200-wallets.json'));
+const report=JSON.parse(readFileSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark/jet-rewards-200-wallets.json'));
 assert.equal(report.status,'transactions_confirmed');
 const count=report.testWalletCount??200;
 const wallets=report.wallets.slice(0,count);
 for(const prefix of ['buy-','sell-','approve-'])assert.equal(Object.keys(report.transactions).filter(k=>k.startsWith(prefix)).length,count);
-const d=JSON.parse(readFileSync('SingleSparkContract/deployments/testnet/arc/singlespark/jet-rewards-testnet-verification.json')).deployment;
+const d=JSON.parse(readFileSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark/jet-rewards-testnet-verification.json')).deployment;
 const client=createPublicClient({transport:http('https://rpc.testnet.arc.network',{timeout:15000,retryCount:3,retryDelay:5000}),cacheTime:0});
 assert.equal(await client.getChainId(),5042002);
 const snapshot=await(await fetch('http://127.0.0.1:8090/api/arc/snapshot')).json();
@@ -59,4 +59,4 @@ const data={status:'passed',chainId:5042002,checkedAt:new Date().toISOString(),b
  trades:count*2,confirmedTransactions:Object.keys(report.transactions).length,holders,burnCycles:burns.length,burnedJET:formatEther(burned),buybackUSDC:formatEther(buyback),
  rewardRecipients:paid.length,availableJET:formatEther(available),reservedJET:formatEther(reserved),totalSupply:String(supply),
  checks:[`${count} wallet balances + exact allowances`,`${count*2} chain trades vs transaction receipts`,'indexed holder count vs balances at one block','burn totals + total supply','buyback reward allocation conservation','cross-round recipient deduplication']};
-persist('SingleSparkContract/deployments/testnet/arc/singlespark/jet-rewards-200-wallets-validation.json',data);console.log(JSON.stringify(data));
+persist('SingleSparkContract/chains/arc/deployments/testnet/singlespark/jet-rewards-200-wallets-validation.json',data);console.log(JSON.stringify(data));

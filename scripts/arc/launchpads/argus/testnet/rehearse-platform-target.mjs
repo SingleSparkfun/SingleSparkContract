@@ -55,6 +55,6 @@ try {
     sourceBlock: String(block.number), factory, previous: change.previous, next: change.next, publicReadyAt: change.readyAtISO,
     oneSecondEarlyRejected: true, afterDelayExecuted: true, replayRejected: true, projectsPreserved: before,
     publicTargetUnchanged: true, verifiedAt: new Date().toISOString() };
-  persist(resolve(root, '../deployments/local/arc/argus/argus-platform-target-rehearsal.json'), report);
+  persist(resolve(root, 'deployments/local/argus/argus-platform-target-rehearsal.json'), report);
   console.log(json(report));
 } finally { anvil.kill('SIGTERM'); }

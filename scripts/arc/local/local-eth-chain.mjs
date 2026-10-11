@@ -6,7 +6,7 @@
 //   node SingleSparkContract/scripts/arc/local/local-eth-chain.mjs            start (or reuse) the node, deploy once, write the backend env
 //   node SingleSparkContract/scripts/arc/local/local-eth-chain.mjs --stop     stop the node (its state is kept for the next start)
 //
-// The backend then runs with:  SingleSparkContract/arc/data/local-eth-31337/backend SingleSparkContract/arc/data/local-eth-31337/runtime.env
+// The backend then runs with:  SingleSparkContract/chains/arc/data/local-eth-31337/backend SingleSparkContract/chains/arc/data/local-eth-31337/runtime.env
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
@@ -18,11 +18,11 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { artifact, deployArc } from '../shared/deploy.mjs';
 import { loadProfileFile } from '../shared/profile.mjs';
 
-const root = fileURLToPath(new URL('../../../arc/', import.meta.url));
+const root = fileURLToPath(new URL('../../../chains/arc/', import.meta.url));
 const dir = resolve(root, 'data/local-eth-31337');
 const PORT = 8546, API_PORT = 8091;
 const url = `http://127.0.0.1:${PORT}`;
-const profilePath = resolve(root, '../chains/arc/test/profiles/eth-like.json');
+const profilePath = resolve(root, 'test/profiles/eth-like.json');
 const profile = loadProfileFile(profilePath);
 mkdirSync(dir, { recursive: true, mode: 0o700 });
 const pidFile = resolve(dir, 'anvil.pid');

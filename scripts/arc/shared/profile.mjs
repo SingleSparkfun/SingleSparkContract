@@ -1,12 +1,12 @@
 // Chain profiles: every number and address a SingleSpark deployment takes from the chain it runs on.
-// `deployments/<environment>/arc/singlespark/profile.json` is committed per chain; nothing is guessed for a chain without one.
+// `chains/arc/deployments/<environment>/singlespark/profile.json` is committed per chain; nothing is guessed for a chain without one.
 // Amounts are in the chain's native currency (18 decimals) and come back as BigInt.
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getAddress, isAddress } from 'viem';
 
-const directory = fileURLToPath(new URL('../../../deployments/', import.meta.url));
+const directory = fileURLToPath(new URL('../../../chains/arc/deployments/', import.meta.url));
 // The strategy's own bounds (TICK_SPACING, the upper end of the opening-tick search, v4's MIN_TICK).
 const TICK_SPACING = 25;
 const MAX_OPENING_TICK = 251_325;
@@ -105,7 +105,7 @@ export function loadProfileFile(path) {
 
 export const profilePath = chainId => {
   const environment = Number(chainId) === 5042 ? 'mainnet' : Number(chainId) === 5042002 ? 'testnet' : null;
-  return environment ? resolve(directory, environment, 'arc/singlespark/profile.json') : null;
+  return environment ? resolve(directory, environment, 'singlespark/profile.json') : null;
 };
 export const hasChainProfile = chainId => Number.isSafeInteger(Number(chainId)) && profilePath(chainId) !== null && existsSync(profilePath(chainId));
 

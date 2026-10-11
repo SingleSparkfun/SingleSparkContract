@@ -16,7 +16,7 @@ import { createPublicClient, defineChain, http, custom, erc20Abi, parseEther, fo
 import { privateKeyToAccount } from 'viem/accounts';
 import { artifact } from '../../../shared/deploy.mjs';
 import { persist, stringify } from '../../../shared/runtime.mjs';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
 // FeesAllocated keeps five fields. SPARK's two buyback fields sum to 90% on archived deployments
 // or 94% on new deployments without a platform project treasury.
@@ -53,15 +53,15 @@ if (process.argv.includes('--self-check')) {
   process.exit(0);
 }
 
-process.loadEnvFile('SingleSparkContract/arc/.env.testnet.local');
-process.loadEnvFile('SingleSparkContract/arc/.env.postgres.local');
-const record = JSON.parse(readFileSync('SingleSparkContract/deployments/testnet/arc/singlespark/arc-current-testnet.json'));
+process.loadEnvFile('SingleSparkContract/chains/arc/.env.testnet.local');
+process.loadEnvFile('SingleSparkContract/chains/arc/.env.postgres.local');
+const record = JSON.parse(readFileSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-current-testnet.json'));
 const deployment = record.deployment;
 const schema = record.runtime.databaseSchema;
 assert(/^[a-z0-9_]+$/.test(schema));
 const API = record.runtime.api;
 const RPC_URL = 'https://rpc.testnet.arc.network';
-const batchDir = 'SingleSparkContract/arc/data/spark-test-wallets-20260917-gpEgqt';
+const batchDir = 'SingleSparkContract/chains/arc/data/spark-test-wallets-20260917-gpEgqt';
 const dir = `${batchDir}/stress-${deployment.launch.slice(2, 10)}`;
 mkdirSync(dir, { recursive: true, mode: 0o700 });
 
@@ -687,8 +687,8 @@ async function sampleApi() {
 const exec = promisify(execFile);
 async function sampleProc() {
   const end = untilArg();
-  const pidPath = 'SingleSparkContract/arc/data/spark-satisfaction-testnet-20260919/backend.pid';
-  const logPath = 'SingleSparkContract/arc/data/spark-satisfaction-testnet-20260919/backend.log';
+  const pidPath = 'SingleSparkContract/chains/arc/data/spark-satisfaction-testnet-20260919/backend.pid';
+  const logPath = 'SingleSparkContract/chains/arc/data/spark-satisfaction-testnet-20260919/backend.log';
   const pid = readFileSync(pidPath, 'utf8').trim().split(/\s+/)[0];
   assert(/^\d+$/.test(pid));
   const dbUrl = new URL(process.env.ARC_DATABASE_URL);

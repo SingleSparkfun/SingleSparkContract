@@ -3,9 +3,9 @@ import { mkdirSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createPublicClient, erc20Abi, http } from 'viem';
-mkdirSync('SingleSparkContract/deployments/local/base/clanker', { recursive: true });
+mkdirSync('SingleSparkContract/chains/base/deployments/local/clanker', { recursive: true });
 
-const launch = JSON.parse(readFileSync('SingleSparkContract/deployments/local/base/clanker/clanker-abi-image-local-web-test-20261006.json', 'utf8')).launch;
+const launch = JSON.parse(readFileSync('SingleSparkContract/chains/base/deployments/local/clanker/clanker-abi-image-local-web-test-20261006.json', 'utf8')).launch;
 const api = 'http://127.0.0.1:8092';
 const rpc = createPublicClient({ transport: http('http://127.0.0.1:8548') });
 const response = await fetch(`${api}/api/launch/clanker/token?chainId=8453&token=${launch.token}`);
@@ -28,7 +28,7 @@ assert.equal(view.gasBalance, gas.toString());
 assert.equal((await fetch(`${api}/api/launch/clanker/token?chainId=8453&token=0x0000000000000000000000000000000000000001`)).status, 404);
 assert.equal((await fetch(`${api}/api/launch/clanker/token?chainId=8453&token=invalid`)).status, 400);
 for (const key of ['owner', 'requestId', 'encryptedMaterial', 'nonce', 'rawTx', 'privateKey']) assert.equal(key in view, false);
-writeFileSync('SingleSparkContract/deployments/local/base/clanker/project-balances-local-20261006.json', JSON.stringify({
+writeFileSync('SingleSparkContract/chains/base/deployments/local/clanker/project-balances-local-20261006.json', JSON.stringify({
   status: 'passed_read_only_local_balances', generatedAt: new Date().toISOString(), publicTransactions: false,
   checks: ['anonymous confirmed token read', 'wallet binding', 'three balances at the same finalized block', 'unknown token 404', 'invalid token 400', 'no custody secrets'], view,
 }, null, 2) + '\n');

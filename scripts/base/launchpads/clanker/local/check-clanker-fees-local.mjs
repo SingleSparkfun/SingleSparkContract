@@ -5,19 +5,19 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { createPublicClient, createWalletClient, http, keccak256, toHex, parseAbi, parseAbiParameters, encodeAbiParameters, encodeFunctionData, erc20Abi } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { base } from 'viem/chains';
-mkdirSync('SingleSparkContract/deployments/local/base/clanker', { recursive: true });
+mkdirSync('SingleSparkContract/chains/base/deployments/local/clanker', { recursive: true });
 const rpc = 'http://127.0.0.1:8548';
 const client = createPublicClient({chain:base,transport:http(rpc,{timeout:60000}),cacheTime:0});
 assert.equal(await client.getChainId(),8453);
 assert.equal((await client.request({method:'anvil_nodeInfo'})).forkConfig.forkBlockNumber,52245507);
-const launch = JSON.parse(readFileSync('SingleSparkContract/deployments/local/base/clanker/clanker-abi-image-local-web-test-20261006.json','utf8')).launch;
+const launch = JSON.parse(readFileSync('SingleSparkContract/chains/base/deployments/local/clanker/clanker-abi-image-local-web-test-20261006.json','utf8')).launch;
 assert.equal(launch.status,'confirmed');
 assert.equal((await client.getTransactionReceipt({hash:launch.transactionHash})).status,'success');
 const token = launch.token, custody = launch.address;
 const WETH = '0x4200000000000000000000000000000000000006';
 const LOCKER = '0xffA37784D619F228D8B379d287a4D7282e500762';
 const FEES = '0xF3622742b1E446D92e45E22923Ef11C2fcD55D68';
-const progressPath = 'SingleSparkContract/arc/data/clanker-sdk-local-fork/fees-check-progress.json';
+const progressPath = 'SingleSparkContract/chains/arc/data/clanker-sdk-local-fork/fees-check-progress.json';
 const progress = existsSync(progressPath) ? JSON.parse(readFileSync(progressPath,'utf8')) : {token,custody,transactions:{}};
 assert.equal(progress.token,token); assert.equal(progress.custody,custody);
 const save = () => writeFileSync(progressPath,JSON.stringify(progress,null,2)+'\n');
@@ -100,7 +100,7 @@ if (process.argv.includes('--prepare')) {
   const nonce = await request(`/api/auth/nonce?address=${owner.address}&chainId=31338`); assert.equal(nonce.status,200);
   const login = await request('/api/auth/login',{method:'POST',body:JSON.stringify({message:nonce.body.message,signature:await owner.signMessage({message:nonce.body.message}),chainId:31338})}); assert.equal(login.status,200);
   const headers={Authorization:`Bearer ${login.body.token}`};
-  const beforeRestart = process.argv.includes('--verify-restart') ? JSON.parse(readFileSync('SingleSparkContract/deployments/local/base/clanker/clanker-fees-local-proof-20261006.json','utf8')) : null;
+  const beforeRestart = process.argv.includes('--verify-restart') ? JSON.parse(readFileSync('SingleSparkContract/chains/base/deployments/local/clanker/clanker-fees-local-proof-20261006.json','utf8')) : null;
   try {
     let status;
     const mined = new Set();
@@ -139,7 +139,7 @@ if (process.argv.includes('--prepare')) {
       income:status,restartVerified:!!beforeRestart,checks:['real buy and sell fees','automatic last-swap LP collection','automatic WETH and token claims','fixed per-token recipient',
         'external permissionless claim indexed','ordinary transfers excluded','finalized receipts','repeat reads do not double credit'],
       notVerified:['public-chain execution','buyback and distribution spending','production Gas policy']};
-    writeFileSync('SingleSparkContract/deployments/local/base/clanker/clanker-fees-local-proof-20261006.json',JSON.stringify(proof,null,2)+'\n');
+    writeFileSync('SingleSparkContract/chains/base/deployments/local/clanker/clanker-fees-local-proof-20261006.json',JSON.stringify(proof,null,2)+'\n');
     console.log(JSON.stringify(proof,null,2));
   } finally { await request('/api/auth/logout',{method:'POST',headers}); }
 }

@@ -7,13 +7,13 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { deployArc, artifact } from '../../../shared/deploy.mjs';
 import { persist, stringify } from '../../../shared/runtime.mjs';
 import { arcAbi, quoterAbi } from '../../../../../../SingleSparkFront/front/chains/evm/arcAbi.ts';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
-const dir = 'SingleSparkContract/arc/data/jet-rewards-verification';
+const dir = 'SingleSparkContract/chains/arc/data/jet-rewards-verification';
 mkdirSync(dir, { recursive: true, mode: 0o700 });
-process.loadEnvFile('SingleSparkContract/arc/.env.testnet.local');
+process.loadEnvFile('SingleSparkContract/chains/arc/.env.testnet.local');
 assert.equal(Number(process.env.ARC_CHAIN_ID), 5042002);
-const account = privateKeyToAccount(JSON.parse(readFileSync('SingleSparkContract/arc/data/jet-test-wallets-20260916/wallets.json')).wallets[0].privateKey);
+const account = privateKeyToAccount(JSON.parse(readFileSync('SingleSparkContract/chains/arc/data/jet-test-wallets-20260916/wallets.json')).wallets[0].privateKey);
 const funder = privateKeyToAccount(process.env.ARC_DEPLOYER_PRIVATE_KEY);
 const chain = defineChain({ id: 5042002, name: 'Arc Testnet', nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
   rpcUrls: { default: { http: [process.env.ARC_RPC_URL] } } });
@@ -21,7 +21,7 @@ const transport = http(process.env.ARC_RPC_URL, { timeout: 15000, retryCount: 1 
 const client = createPublicClient({ chain, transport, cacheTime: 0 });
 const wallet = createWalletClient({ account, chain, transport });
 assert.equal(await client.getChainId(), 5042002);
-const reportPath = 'SingleSparkContract/deployments/testnet/arc/singlespark/jet-rewards-testnet-verification.json';
+const reportPath = 'SingleSparkContract/chains/arc/deployments/testnet/singlespark/jet-rewards-testnet-verification.json';
 let report = existsSync(reportPath) ? JSON.parse(readFileSync(reportPath)) : {
   chainId: 5042002, purpose: 'Isolated mechanism verification; not the live JET deployment',
   minBuybackUSDC: '0.001', productionMinimumUnchanged: '5', testWallet: account.address, transactions: {},

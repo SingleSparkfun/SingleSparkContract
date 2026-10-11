@@ -7,13 +7,13 @@ import { stringify, persist } from './runtime.mjs';
 import { arcAbi } from '../../../../SingleSparkFront/front/chains/evm/arcAbi.ts';
 import { loadChainProfile, keeperGasArgument, profileSummary } from './profile.mjs';
 
-const root = fileURLToPath(new URL('../../../arc/', import.meta.url));
+const root = fileURLToPath(new URL('../../../chains/arc/', import.meta.url));
 export function artifact(file, contract = file) {
   return JSON.parse(readFileSync(resolve(root, `out/${file}.sol/${contract}.json`), 'utf8'));
 }
 
 // Every number the contracts take from the chain (curve, keeper gas, minimum buyback, V4 addresses) comes from
-// the chain profile, `SingleSparkContract/deployments/<environment>/arc/singlespark/profile.json` for the connected chain unless `profile` is passed (a
+// the chain profile, `SingleSparkContract/chains/arc/deployments/<environment>/singlespark/profile.json` for the connected chain unless `profile` is passed (a
 // parsed profile, e.g. the synthetic test profile on a local anvil). `positionManager` and `minBuyback` (a
 // decimal native amount) may still be given explicitly: local checks deploy their own V4 and use tiny
 // thresholds; the CLI below and deploy-production.mjs refuse any value that differs from the profile.
@@ -27,7 +27,7 @@ export async function deployArc(client, wallet, { positionManager, keeper, opera
   if ((satisfaction || executor) && version !== 3) throw new Error('Satisfaction vault and keeper executor require the USDC fee model');
   // `satisfaction` carries no default here on purpose: the caller must state the durations, and the
   // schedule the owner chose for future deployments is roundDuration 604800 s with votingDuration
-  // 601200 s (6 d 23 h). The vault is immutable, so read what that implies in SingleSparkContract/arc/README.md first:
+  // 601200 s (6 d 23 h). The vault is immutable, so read what that implies in SingleSparkContract/docs/arc/vaults.md first:
   // the pot is fixed about an hour into the round, and a quorum-sized stake must be in by mid-window
   // or the round is Void. A local or fast testnet run passes its own short durations instead.
   if (satisfaction) {
@@ -225,10 +225,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   if (process.argv.includes('--testnet') && !profile.testnet) throw new Error(`--testnet was passed but ${profile.name} (${chainId}) is not a testnet`);
   // The profile is the only source of these numbers for a real deployment.
   if (process.env.ARC_POSITION_MANAGER && getAddress(process.env.ARC_POSITION_MANAGER) !== profile.uniswapV4.positionManager) {
-    throw new Error(`ARC_POSITION_MANAGER differs from the ${profile.name} profile; fix SingleSparkContract/deployments/<environment>/arc/singlespark/profile.json or unset it`);
+    throw new Error(`ARC_POSITION_MANAGER differs from the ${profile.name} profile; fix SingleSparkContract/chains/arc/deployments/<environment>/singlespark/profile.json or unset it`);
   }
   if (process.env.ARC_MIN_BUYBACK_USDC && parseUnits(process.env.ARC_MIN_BUYBACK_USDC, 18) !== profile.economics.minBuyback) {
-    throw new Error(`ARC_MIN_BUYBACK_USDC differs from the ${profile.name} profile; fix SingleSparkContract/deployments/<environment>/arc/singlespark/profile.json or unset it`);
+    throw new Error(`ARC_MIN_BUYBACK_USDC differs from the ${profile.name} profile; fix SingleSparkContract/chains/arc/deployments/<environment>/singlespark/profile.json or unset it`);
   }
   const rpc = required('ARC_RPC_URL');
   const account = privateKeyToAccount(required('ARC_DEPLOYER_PRIVATE_KEY'));

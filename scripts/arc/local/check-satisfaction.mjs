@@ -25,7 +25,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { deployArc, artifact } from '../shared/deploy.mjs';
 import { testDatabase, testSql, sqlString, localApiLimits } from './test-database.mjs';
 import { arcAbi } from '../../../../SingleSparkFront/front/chains/evm/arcAbi.ts';
-mkdirSync('SingleSparkContract/deployments/local/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/local/singlespark', { recursive: true });
 
 const launchAbi = artifact('ArcLaunchV2').abi;
 const vaultAbi = artifact('ArcSatisfaction').abi;
@@ -901,7 +901,7 @@ try {
         round: 0, normal: opinions.yes, hidden: opinions.sniper, injection: opinions.noEarly }) } });
     notes.push(`--ui run: round ${uiRound} was opened at chain time ${opensAt} and voted Yes (300 SPARK) and `
       + 'No (120 SPARK) sixty seconds apart; the three round 0 opinions the page shows are the ones submitted '
-      + 'through the API inside round 0\'s wall-clock window. Screenshots: SingleSparkContract/arc/data/satisfaction-ui-check.');
+      + 'through the API inside round 0\'s wall-clock window. Screenshots: SingleSparkContract/chains/arc/data/satisfaction-ui-check.');
   }
 
   deviations.push(
@@ -948,7 +948,7 @@ try {
     vault: { roundDuration: ROUND_SECONDS, votingDuration: VOTING_SECONDS, quorum: QUORUM,
       weightQuorum: WEIGHT_QUORUM.toString() },
     deployment, distribution: measuredDistribution, scenarios: results, deviations, notes };
-  const outputPath = resolve('SingleSparkContract/deployments/local/arc/singlespark/satisfaction-local-acceptance-20260919.json');
+  const outputPath = resolve('SingleSparkContract/chains/arc/deployments/local/singlespark/satisfaction-local-acceptance-20260919.json');
   writeFileSync(outputPath, JSON.stringify(report, null, 2) + '\n');
   console.log(`${report.status.toUpperCase()}: ${results.filter(r => r.status === 'passed').length}/${results.length} scenarios in ${outputPath}`);
   if (!passed) process.exitCode = 1;

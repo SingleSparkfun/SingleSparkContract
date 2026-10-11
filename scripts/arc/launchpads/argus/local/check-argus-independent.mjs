@@ -7,7 +7,7 @@ import {mkdtempSync,writeFileSync,readFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createWalletClient,http,erc20Abi,parseAbi,toHex,zeroAddress} from 'viem';
-mkdirSync('SingleSparkContract/deployments/local/arc/argus', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/local/argus', { recursive: true });
 
 export async function checkIndependentWallets({env,client,chain,dbUrl,route,router,portalAbi,splitterAbi,trader,send,read,warp,now,mark,steps}) {
   const gasOnly=process.argv.includes('--launch-gas');
@@ -88,7 +88,7 @@ export async function checkIndependentWallets({env,client,chain,dbUrl,route,rout
         assert.equal(job.status,'confirmed');assert.equal(job.transactionHash,p.transactionHash);assert.equal(job.gasQuote,undefined);
         assert.equal(sql(`SELECT count(*) FROM argus_launch_requests WHERE request_id='${p.draft.requestId}'`),'1');
       }
-      writeFileSync('SingleSparkContract/deployments/local/arc/argus/argus-launch-gas-local-20261007.json',JSON.stringify({status:'passed_launch_gas_local_fork',generatedAt:new Date().toISOString(),chainId:31338,publicTransactions:false,
+      writeFileSync('SingleSparkContract/chains/arc/deployments/local/argus/argus-launch-gas-local-20261007.json',JSON.stringify({status:'passed_launch_gas_local_fork',generatedAt:new Date().toISOString(),chainId:31338,publicTransactions:false,
         scope:'Synthetic creator pays live launch estimate only. Mock ERC20 USDC and separate native gas on isolated Anvil; not public Arc gas accounting.',projects,steps},null,2)+'\n');
       return;
     }
@@ -141,6 +141,6 @@ export async function checkIndependentWallets({env,client,chain,dbUrl,route,rout
       actions:JSON.parse(sql("SELECT coalesce(json_agg(r),'[]') FROM (SELECT source,kind,amount,sender,tx_hash FROM argus_actions WHERE status='applied' ORDER BY id) r;"))});
     const proof={status:'passed_independent_wallets_local_fork',generatedAt:new Date().toISOString(),chainId:31338,publicTransactions:false,
       scope:'Isolated Arc fork; mock ERC20 USDC; explicit synthetic native gas. Existing services and wallets untouched.',steps};
-    writeFileSync('SingleSparkContract/deployments/local/arc/argus/argus-independent-wallets-local-20261006.json',JSON.stringify(proof,null,2)+'\n');
+    writeFileSync('SingleSparkContract/chains/arc/deployments/local/argus/argus-independent-wallets-local-20261006.json',JSON.stringify(proof,null,2)+'\n');
   } finally {await stop();}
 }

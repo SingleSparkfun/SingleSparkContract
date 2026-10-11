@@ -80,7 +80,7 @@ export async function context(options = {}) {
     }
   };
   assert.equal(await read(QUOTE, erc20Abi, 'decimals'), 6);
-  const profile = JSON.parse(readFileSync(resolve(root, '../deployments/testnet/arc/singlespark/profile.json')));
+  const profile = JSON.parse(readFileSync(resolve(root, 'deployments/testnet/singlespark/profile.json')));
   const pool = profile.uniswapV4.poolManager, position = profile.uniswapV4.positionManager;
   for (const address of [pool, position]) assert((await client.getCode({ address }))?.length > 2);
   const a = build.artifacts;
@@ -89,7 +89,7 @@ export async function context(options = {}) {
   const identity = hash({ chainId: chain.id, build, accounts: Object.fromEntries(Object.entries(accounts).map(([role, account]) => [role, account.address])) });
   const journal = existsSync(journalPath) ? JSON.parse(readFileSync(journalPath)) : { identity, steps: {} };
   assert.equal(journal.identity, identity, 'Build or wallet identity changed; preserve original deployment');
-  const reportPath = local ? resolve(storageDir, 'report.json') : resolve(root, options.version === 3 ? '../deployments/testnet/arc/argus/argus-public-testnet-claim.json' : options.version === 2 ? '../deployments/testnet/arc/argus/argus-public-testnet-v2.json' : '../deployments/testnet/arc/argus/argus-public-testnet.json');
+  const reportPath = local ? resolve(storageDir, 'report.json') : resolve(root, options.version === 3 ? 'deployments/testnet/argus/argus-public-testnet-claim.json' : options.version === 2 ? 'deployments/testnet/argus/argus-public-testnet-v2.json' : 'deployments/testnet/argus/argus-public-testnet.json');
   const report = existsSync(reportPath) ? JSON.parse(readFileSync(reportPath)) : { status: 'prepared', chainId: chain.id, rpc, independentTestDeployment: true, publicTransactions: false,
     accounts: Object.fromEntries(Object.entries(accounts).map(([k, v]) => [k, v.address])), provenance: build.provenance, testnetChanges: build.testnetChanges,
     addresses: {}, transactions: {}, codeHashes: {}, limitations: ['USDC only; other quote routes and conversions disabled', `Real ${options.version === 3 ? '10-minute' : '48-hour'} delay cannot be fast-forwarded on public testnet`, 'Application frontend/backend rollout is separate from this contract deployment'] };

@@ -7,11 +7,11 @@ import { createPublicClient, createWalletClient, defineChain, http, encodeFuncti
 import { privateKeyToAccount } from 'viem/accounts';
 import { arcAbi } from '../../../../../../SingleSparkFront/front/chains/evm/arcAbi.ts';
 import { persist, stringify } from '../../../shared/runtime.mjs';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
 // One fixed, resumable testnet batch. The default invocation only estimates costs.
-process.loadEnvFile('SingleSparkContract/arc/.env.testnet.local');
-const deployment = JSON.parse(readFileSync('SingleSparkContract/deployments/testnet/arc/singlespark/jet-arc-testnet.json'));
+process.loadEnvFile('SingleSparkContract/chains/arc/.env.testnet.local');
+const deployment = JSON.parse(readFileSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark/jet-arc-testnet.json'));
 assert.equal(Number(process.env.ARC_CHAIN_ID), 5042002);
 assert.equal(deployment.chainId, 5042002);
 assert.equal(process.env.ARC_LAUNCH_ADDRESS.toLowerCase(), deployment.launch.toLowerCase());
@@ -91,6 +91,6 @@ try {
     report.tokens.push({ name, symbol, token: event.token, positionId: String(event.positionId), transactionHash: receipt.transactionHash,
       blockNumber: String(receipt.blockNumber), gasUsed: String(receipt.gasUsed), gasCostUSDC: formatEther(receipt.gasUsed * receipt.effectiveGasPrice) });
     console.log(stringify(report.tokens.at(-1)));
-    if (broadcast) persist('SingleSparkContract/deployments/testnet/arc/singlespark/jet-arc-testnet-demo-tokens.json', report);
+    if (broadcast) persist('SingleSparkContract/chains/arc/deployments/testnet/singlespark/jet-arc-testnet-demo-tokens.json', report);
   }
 } finally { closeSync(lock); unlinkSync(lockPath); }

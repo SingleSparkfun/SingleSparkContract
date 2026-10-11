@@ -14,7 +14,7 @@ const walletPath = resolve(process.argv[index + 1]);
 const foundation = await context({ walletPath }); await deploy(foundation);
 const build = readJson(resolve(data, 'gameplay-build.json'));
 assert.equal(build.chainId, 46630); assert.equal(build.policyDelaySeconds, 600);
-const roles = readJson(resolve(root, 'deployments/testnet/robinhood/pons/vault-config.json'));
+const roles = readJson(resolve(root, 'chains/robinhood/deployments/testnet/pons/vault-config.json'));
 const c = await context({ walletPath, broadcast: process.argv.includes('--broadcast'), deploymentName: 'gameplay', artifacts: { ...build, roles } });
 if (!c.broadcast) { console.log(json({ status: 'prepared', chainId:46630, policyDelaySeconds:600, name:'SingleSpark',symbol:'SPARK',
   maximumCostWei:c.config.maximumTotalCostWei, isolatedTestnet:true, mainnet:false })); process.exit(0); }

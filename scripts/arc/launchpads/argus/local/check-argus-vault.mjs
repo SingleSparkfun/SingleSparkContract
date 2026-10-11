@@ -6,8 +6,8 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createWalletClient,http,erc20Abi,keccak256,toHex,getCreate2Address,encodeAbiParameters,parseAbiParameters,parseEventLogs,zeroAddress,parseEther} from 'viem';
 import {deployArgusVaults} from '../production/deploy-argus-vault.mjs';
-mkdirSync('SingleSparkContract/deployments/local/arc/argus', { recursive: true });
-const artifact=name=>JSON.parse(readFileSync(new URL(`../../../../../arc/out/${name}.sol/${name}.json`,import.meta.url)));
+mkdirSync('SingleSparkContract/chains/arc/deployments/local/argus', { recursive: true });
+const artifact=name=>JSON.parse(readFileSync(new URL(`../../../../../chains/arc/out/${name}.sol/${name}.json`,import.meta.url)));
 export async function checkVaults({env,client,chain,dbUrl,route,router,portalAbi,splitterAbi,trader,custody,send,read,warp,now,mark,steps}) {
   const dir=mkdtempSync(join(tmpdir(),'argus-vault-'));
   await client.request({method:'anvil_setChainId',params:[5042]});chain.id=5042;
@@ -121,7 +121,7 @@ export async function checkVaults({env,client,chain,dbUrl,route,router,portalAbi
     assert.equal((await read(p.vault,va,'token')).toLowerCase(),p.token.toLowerCase());
   }
   mark('one delayed platform target update reaches both unchanged vaults and stale intents fail',{previousTarget,nextTarget,updatedBurn});
-  mkdirSync('SingleSparkContract/deployments/local/arc/argus',{recursive:true});
-  writeFileSync('SingleSparkContract/deployments/local/arc/argus/argus-vault-local.json',JSON.stringify({status:'passed',generatedAt:new Date().toISOString(),publicTransactions:false,
+  mkdirSync('SingleSparkContract/chains/arc/deployments/local/argus',{recursive:true});
+  writeFileSync('SingleSparkContract/chains/arc/deployments/local/argus/argus-vault-local.json',JSON.stringify({status:'passed',generatedAt:new Date().toISOString(),publicTransactions:false,
     limitations:'Anvil mock ERC20 USDC; native USDC precompile/blocklist not emulated; synthetic recipient fixture',steps},null,2)+'\n');
 }

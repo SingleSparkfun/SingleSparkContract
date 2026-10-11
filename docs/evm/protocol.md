@@ -127,7 +127,7 @@ npm run build:evm-gameplay
 npm run check:architecture
 ```
 
-Standalone equivalents are `forge test --root evm` and `forge build --root evm --sizes`. Builds use only existing `arc/lib` dependencies in this repository, without neighboring-project tools or contracts. ABI, bytecode and metadata go to ignored `evm/out/<Source.sol>/<Contract>.json`.
+Standalone equivalents are `forge test --root chains/evm` and `forge build --root chains/evm --sizes`. Builds use only existing `chains/arc/lib` dependencies in this repository, without neighboring-project tools or contracts. ABI, bytecode and metadata go to ignored `chains/evm/out/<Source.sol>/<Contract>.json`.
 
 Tests cover native/ERC20 funding, no-return ERC20, varying decimals, restricted stock-token behavior, historical-token registration, isolated budgets, delayed policy/code registration, replay/cross-chain/cross-Vault rejection, atomic distribution, permanent cross-plugin deduplication and real Uniswap v4 bidirectional native swaps deployed in a local EVM. Real V4 means actual protocol contract code, not public-network or funded transactions.
 

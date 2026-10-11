@@ -13,10 +13,10 @@ const foundation = await context({ walletPath });
 await deploy(foundation);
 const names = ['PonsVaultFactory', 'PonsGameplayVault'];
 const artifacts = Object.fromEntries(names.map(name => {
-  const a = readJson(resolve(root, `robinhood/out/${name}.sol/${name}.json`));
+  const a = readJson(resolve(root, `chains/robinhood/out/${name}.sol/${name}.json`));
   return [name, { abi: a.abi, bytecode: a.bytecode, deployedBytecode: a.deployedBytecode }];
 }));
-const roles = readJson(resolve(root, 'deployments/testnet/robinhood/pons/vault-config.json'));
+const roles = readJson(resolve(root, 'chains/robinhood/deployments/testnet/pons/vault-config.json'));
 assert.equal(roles.chainId, 46630);
 artifacts.roles = roles;
 const c = await context({ walletPath, broadcast: process.argv.includes('--broadcast'), deploymentName: 'vault-launch', artifacts });

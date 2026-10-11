@@ -6,7 +6,7 @@ rust-version = "1.84"
 publish = false
 
 [lib]
-path = "../chains/solana/legacy/lib.rs"
+path = "legacy/lib.rs"
 crate-type = ["cdylib", "lib"]
 
 [workspace]

@@ -6,7 +6,7 @@ import { createPublicClient, defineChain, http, erc20Abi, parseEther, formatEthe
 import { privateKeyToAccount } from 'viem/accounts';
 import { artifact } from '../../../shared/deploy.mjs';
 import { persist, stringify } from '../../../shared/runtime.mjs';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
 const minimum = quote => quote * 99n / 100n;
 const tax = (gross, fee) => (gross * BigInt(fee) + 999999n) / 1000000n;
@@ -25,14 +25,14 @@ if (process.argv.includes('--self-check')) {
   console.log('PASS: integer allocation conserves funds and minimum output retains 1% slippage.');
   process.exit(0);
 }
-const record = JSON.parse(readFileSync('SingleSparkContract/deployments/testnet/arc/singlespark/arc-current-testnet.json'));
+const record = JSON.parse(readFileSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-current-testnet.json'));
 const d = record.deployment;
 assert.equal(d.chainId, 5042002);
 assert.equal(d.launch.toLowerCase(), '0xd6a56abcddc83d4b780ef4cbfb8f6b7fc093ecf4');
-const dir = 'SingleSparkContract/arc/data/current-arc-acceptance-20261005';
-const reportPath = 'SingleSparkContract/deployments/testnet/arc/singlespark/current-arc-acceptance-20261005.json';
+const dir = 'SingleSparkContract/chains/arc/data/current-arc-acceptance-20261005';
+const reportPath = 'SingleSparkContract/chains/arc/deployments/testnet/singlespark/current-arc-acceptance-20261005.json';
 mkdirSync(dir, { recursive: true, mode: 0o700 });
-const wallets = JSON.parse(readFileSync('SingleSparkContract/arc/data/jet-test-wallets-20260916/wallets.json')).wallets;
+const wallets = JSON.parse(readFileSync('SingleSparkContract/chains/arc/data/jet-test-wallets-20260916/wallets.json')).wallets;
 const funder = privateKeyToAccount(wallets[1].privateKey), tester = privateKeyToAccount(wallets[0].privateKey);
 assert.equal(funder.address.toLowerCase(), '0x0ca76906cef08981717f81dfa1519b5a3cecca57');
 assert.equal(tester.address.toLowerCase(), '0xdb8953d77d1948c3be9920dfada33a0639045134');

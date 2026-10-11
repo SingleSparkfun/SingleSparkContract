@@ -1,10 +1,12 @@
 [profile.default]
-src = "../chains/robinhood/launchpads/pons"
-test = "../chains/robinhood/launchpads/pons/test"
+src = "./launchpads/pons"
+test = "./launchpads/pons/test"
 skip = ["PonsTestRevenueVault.sol"]
 out = "out"
 cache_path = "cache"
 libs = ["../arc/lib"]
+include_paths = [".."]
+allow_paths = [".."]
 solc = "0.8.26"
 evm_version = "cancun"
 optimizer = true

@@ -3,7 +3,7 @@
 // are test funds, never revenue, and the addresses that receive distributions are synthetic. What
 // this does prove is that these contracts deploy and run against mainnet's actual v4 deployment.
 //
-//   node SingleSparkContract/scripts/arc/local/verify-mainnet-fork.mjs [--out SingleSparkContract/deployments/local/arc/singlespark/mainnet-fork-20260920.json]
+//   node SingleSparkContract/scripts/arc/local/verify-mainnet-fork.mjs [--out SingleSparkContract/chains/arc/deployments/local/singlespark/mainnet-fork-20260920.json]
 //
 // No key here is ever funded on a public network: they are Anvil's published development keys.
 import assert from 'node:assert/strict';
@@ -18,8 +18,8 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { deployArc, artifact } from '../shared/deploy.mjs';
 import { arcAbi } from '../../../../SingleSparkFront/front/chains/evm/arcAbi.ts';
 import { loadChainProfile } from '../shared/profile.mjs';
-mkdirSync('SingleSparkContract/deployments/local/arc/singlespark', { recursive: true });
-mkdirSync('SingleSparkContract/deployments/mainnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/local/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/mainnet/singlespark', { recursive: true });
 
 const FORK_RPC = process.env.ARC_MAINNET_RPC ?? 'https://rpc.mainnet.arc.io';
 const CHAIN_ID = 5042;
@@ -28,7 +28,7 @@ const PROFILE = loadChainProfile(CHAIN_ID);
 // Pinned so the run is reproducible and Anvil can serve most state from its own fork cache
 // instead of asking the public endpoint again, which rate-limits.
 const FORK_BLOCK = process.env.ARC_MAINNET_FORK_BLOCK ?? '21846439';
-// Published by Uniswap for Arc and committed in SingleSparkContract/deployments/mainnet/arc/singlespark/profile.json (the UniversalRouter is not part of
+// Published by Uniswap for Arc and committed in SingleSparkContract/chains/arc/deployments/mainnet/singlespark/profile.json (the UniversalRouter is not part of
 // the profile, since nothing deploys against it); every one is re-checked on the fork before anything is deployed.
 const V4 = {
   ...Object.fromEntries(Object.entries(PROFILE.uniswapV4).filter(([, address]) => address)),
@@ -40,7 +40,7 @@ const ROUND_SECONDS = 604_800;
 const VOTING_SECONDS = 601_200;
 
 const outFlag = process.argv.indexOf('--out');
-const outPath = resolve(outFlag === -1 ? 'SingleSparkContract/deployments/local/arc/singlespark/mainnet-fork-20260920.json' : process.argv[outFlag + 1]);
+const outPath = resolve(outFlag === -1 ? 'SingleSparkContract/chains/arc/deployments/local/singlespark/mainnet-fork-20260920.json' : process.argv[outFlag + 1]);
 const steps = [];
 const record = (name, detail) => { steps.push({ name, ...detail }); console.log(`✔ ${name}`); };
 

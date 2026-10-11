@@ -9,10 +9,10 @@ import { createPublicClient, createWalletClient, defineChain, http, encodeFuncti
 import { privateKeyToAccount } from 'viem/accounts';
 import { artifact } from '../../../shared/deploy.mjs';
 import { persist } from '../../../shared/runtime.mjs';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
-const dir = 'SingleSparkContract/arc/data/economics-v2-testnet';
-const reportPath = 'SingleSparkContract/deployments/testnet/arc/singlespark/arc-economics-v2-testnet.json';
+const dir = 'SingleSparkContract/chains/arc/data/economics-v2-testnet';
+const reportPath = 'SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-economics-v2-testnet.json';
 const report = JSON.parse(readFileSync(reportPath));
 const address = report.project.rewards;
 // Frozen ABI for this archived drand deployment; current rewards use distribute().

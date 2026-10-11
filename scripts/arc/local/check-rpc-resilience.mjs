@@ -31,7 +31,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { deployArc, artifact } from '../shared/deploy.mjs';
 import { testDatabase, testSql, localApiLimits } from './test-database.mjs';
 import { arcAbi } from '../../../../SingleSparkFront/front/chains/evm/arcAbi.ts';
-mkdirSync('SingleSparkContract/deployments/local/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/local/singlespark', { recursive: true });
 
 /** A fake key in every URL the backend is given. It must never appear in the backend's output. */
 const SECRET = 'SECRET123';
@@ -754,7 +754,7 @@ try {
       indexUnderFloodP95Ms: flooded.indexUnderFloodP95Ms, boundMs: flooded.boundMs,
       achievedRps: flooded.achievedRps }, sendSafety },
     scenarios: results, notes };
-  const outputPath = resolve('SingleSparkContract/deployments/local/arc/singlespark/rpc-resilience-local-acceptance-20260920.json');
+  const outputPath = resolve('SingleSparkContract/chains/arc/deployments/local/singlespark/rpc-resilience-local-acceptance-20260920.json');
   writeFileSync(outputPath, JSON.stringify(report, null, 2) + '\n');
   console.log(`${report.status.toUpperCase()}: ${results.filter(r => r.status === 'passed').length}/${results.length} scenarios in ${outputPath}`);
   if (!passed) process.exitCode = 1;

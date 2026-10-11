@@ -7,14 +7,14 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { persist, stringify } from '../../../shared/runtime.mjs';
 
 const dir = process.argv[2];
-assert(dir?.startsWith('SingleSparkContract/arc/data/'), 'Pass the saved test-wallet directory');
+assert(dir?.startsWith('SingleSparkContract/chains/arc/data/'), 'Pass the saved test-wallet directory');
 const amount = parseEther(process.argv[3] || '0.5');
 assert(amount > 0n && amount <= parseEther('0.5'), 'Maximum funding is 0.5 test USDC per wallet');
 const plan = JSON.parse(readFileSync(`${dir}/wallets.json`));
 assert(plan.synthetic && plan.chainId === 5042002 && plan.wallets.length === 100);
 assert.equal(new Set(plan.wallets.map(w => w.address.toLowerCase())).size, 100);
 for (const w of plan.wallets) assert.equal(privateKeyToAccount(w.privateKey).address, w.address);
-const source = JSON.parse(readFileSync('SingleSparkContract/arc/data/jet-test-wallets-20260916/wallets.json')).wallets[1];
+const source = JSON.parse(readFileSync('SingleSparkContract/chains/arc/data/jet-test-wallets-20260916/wallets.json')).wallets[1];
 const account = privateKeyToAccount(source.privateKey);
 assert.equal(account.address, plan.fundingAddress);
 assert(plan.wallets.every(w => w.address !== account.address));

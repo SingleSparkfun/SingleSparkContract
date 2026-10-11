@@ -30,7 +30,7 @@ export function environment(env = process.env) {
     fromBlock: integer('ARC_FROM_BLOCK', 0, 0, Number.MAX_SAFE_INTEGER), rpcUrl,
     publicRpcUrl: env.ARC_PUBLIC_RPC_URL || rpcUrl, explorer: required('ARC_EXPLORER_URL').replace(/\/$/, ''),
     origin, port: integer('ARC_PORT', 8088, 1, 65535), host: env.ARC_HOST || '127.0.0.1',
-    dataDir: resolve(env.ARC_DATA_DIR || 'SingleSparkContract/arc/data'),
+    dataDir: resolve(env.ARC_DATA_DIR || 'SingleSparkContract/chains/arc/data'),
     keeperKey: env.ARC_KEEPER_PRIVATE_KEY || null, signingKey: required('ARC_CONFIG_SIGNING_KEY'),
     keyId: env.ARC_CONFIG_KEY_ID || 'arc-v1',
     slippageBps: integer('ARC_SLIPPAGE_BPS', 300, 1, 500),

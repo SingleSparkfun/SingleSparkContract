@@ -28,7 +28,7 @@ import { deployArc, artifact } from '../shared/deploy.mjs';
 import { testDatabase, testRows, testSql, sqlString, localApiLimits } from './test-database.mjs';
 import { arcAbi } from '../../../../SingleSparkFront/front/chains/evm/arcAbi.ts';
 import { arcPrice } from '../../../../SingleSparkFront/front/utils/arcAnalytics.ts';
-mkdirSync('SingleSparkContract/deployments/local/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/local/singlespark', { recursive: true });
 
 const SHANGHAI_IP = '4000:1::1';
 const PARIS_IP = '4000:2::1';
@@ -506,7 +506,7 @@ try {
     execFileSync(process.execPath, [resolve('SingleSparkFront/scripts/checks/check-globe-ui.mjs'), site], { stdio: 'inherit',
       env: { ...process.env, GLOBE_UI_FIXTURE: JSON.stringify(globeFixture) } });
     notes.push('--ui run: the page check drove this same backend through a temporary Vite dev server; '
-      + 'its screenshots are in SingleSparkContract/arc/data/globe-ui-check.');
+      + 'its screenshots are in SingleSparkContract/chains/arc/data/globe-ui-check.');
   }
 
   notes.push(
@@ -530,7 +530,7 @@ try {
       + 'address, token or transaction recorded here exists anywhere else, and no running service '
       + 'was touched. Every meme is synthetic and every city comes from a fixed local test table.',
     chainId: 5042002, deployment, scenarios: results, notes };
-  const outputPath = resolve(process.env.ARC_GLOBE_REPORT || 'SingleSparkContract/deployments/local/arc/singlespark/globe-local-acceptance-20260919.json');
+  const outputPath = resolve(process.env.ARC_GLOBE_REPORT || 'SingleSparkContract/chains/arc/deployments/local/singlespark/globe-local-acceptance-20260919.json');
   writeFileSync(outputPath, JSON.stringify(report, null, 2) + '\n');
   console.log(`${report.status.toUpperCase()}: ${results.filter(r => r.status === 'passed').length}/${results.length} scenarios in ${outputPath}`);
   if (!passed) process.exitCode = 1;

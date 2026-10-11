@@ -9,7 +9,7 @@ import { createPublicClient, defineChain, http, custom, erc20Abi, parseEther, fo
 import { privateKeyToAccount } from 'viem/accounts';
 import { artifact } from '../../../shared/deploy.mjs';
 import { persist, stringify } from '../../../shared/runtime.mjs';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
 const direction = draw => draw % 2 === 1;
 const group = index => index <= 10 ? 0 : 1 + Math.floor((index - 11) / 30);
@@ -26,10 +26,10 @@ if (process.argv.includes('--self-check')) {
   assert.equal(noTradePossible(true,true,10n),true);assert.equal(noTradePossible(true,false,0n),true);
   console.log('PASS: odd buys/even sells, wallet groups, integer allocations, both sides checked before stopping'); process.exit(0);
 }
-process.loadEnvFile('SingleSparkContract/arc/.env.testnet.local');
-process.loadEnvFile('SingleSparkContract/arc/.env.postgres.local');
-const deployment = JSON.parse(readFileSync('SingleSparkContract/deployments/testnet/arc/singlespark/arc-current-testnet.json')).deployment;
-const batchDir = 'SingleSparkContract/arc/data/spark-test-wallets-20260917-gpEgqt';
+process.loadEnvFile('SingleSparkContract/chains/arc/.env.testnet.local');
+process.loadEnvFile('SingleSparkContract/chains/arc/.env.postgres.local');
+const deployment = JSON.parse(readFileSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-current-testnet.json')).deployment;
+const batchDir = 'SingleSparkContract/chains/arc/data/spark-test-wallets-20260917-gpEgqt';
 const dir = `${batchDir}/stress-${deployment.launch.slice(2,10)}`;
 mkdirSync(dir, { recursive: true, mode: 0o700 });
 if(process.argv.includes('--pause')) {

@@ -9,16 +9,16 @@ import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { deployArc, artifact } from '../../../shared/deploy.mjs';
 import { persist, stringify } from '../../../shared/runtime.mjs';
 import { positionManagerAbi, quoterAbi } from '../../../../../../SingleSparkFront/front/chains/evm/arcAbi.ts';
-mkdirSync('SingleSparkContract/deployments/testnet/arc/singlespark', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/testnet/singlespark', { recursive: true });
 
 const gasCheck = process.argv.includes('--gas');
 assert(!(gasCheck && process.argv.includes('--rewards')), 'Gas proof uses its own bounded worker run');
-const dir = gasCheck ? 'SingleSparkContract/arc/data/keeper-gas-testnet' : 'SingleSparkContract/arc/data/economics-v2-testnet';
-const reportPath = gasCheck ? 'SingleSparkContract/deployments/testnet/arc/singlespark/arc-keeper-gas-testnet.json' : 'SingleSparkContract/deployments/testnet/arc/singlespark/arc-economics-v2-testnet.json';
+const dir = gasCheck ? 'SingleSparkContract/chains/arc/data/keeper-gas-testnet' : 'SingleSparkContract/chains/arc/data/economics-v2-testnet';
+const reportPath = gasCheck ? 'SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-keeper-gas-testnet.json' : 'SingleSparkContract/chains/arc/deployments/testnet/singlespark/arc-economics-v2-testnet.json';
 mkdirSync(dir, { recursive: true, mode: 0o700 });
-process.loadEnvFile('SingleSparkContract/arc/.env.testnet.local');
+process.loadEnvFile('SingleSparkContract/chains/arc/.env.testnet.local');
 assert.equal(Number(process.env.ARC_CHAIN_ID), 5042002);
-const key = JSON.parse(readFileSync('SingleSparkContract/arc/data/jet-test-wallets-20260916/wallets.json')).wallets[1].privateKey;
+const key = JSON.parse(readFileSync('SingleSparkContract/chains/arc/data/jet-test-wallets-20260916/wallets.json')).wallets[1].privateKey;
 const account = privateKeyToAccount(key);
 assert.equal(account.address.toLowerCase(), '0x0ca76906cef08981717f81dfa1519b5a3cecca57');
 const walletsPath = `${dir}/wallets.json`;
@@ -70,7 +70,7 @@ try {
     let previous = '', failures = 0;
     for (let attempt = 0; attempt < 320; attempt++) {
       let output = '', errors = '';
-      const child = spawn('SingleSparkBackend/api/target/debug/jet-arc-backend', ['SingleSparkContract/arc/.env.economics-v2.local', '--once'], { env, timeout: 300000 });
+      const child = spawn('SingleSparkBackend/api/target/debug/jet-arc-backend', ['SingleSparkContract/chains/arc/.env.economics-v2.local', '--once'], { env, timeout: 300000 });
       child.stdout.on('data', bytes => output += bytes); child.stderr.on('data', bytes => errors += bytes);
       const { code, signal } = await new Promise((ok, fail) => { child.once('error', fail); child.once('exit', (code, signal) => ok({ code, signal })); });
       if (errors) appendFileSync(`${dir}/worker.log`, errors, { mode: 0o600 });
@@ -163,7 +163,7 @@ try {
     ARC_CONFIG_SIGNING_KEY: process.env.ARC_CONFIG_SIGNING_KEY, ARC_CONFIG_KEY_ID: process.env.ARC_CONFIG_KEY_ID,
     ARC_KEEPER_PRIVATE_KEY: wallets.keeper.privateKey, ARC_GAS_RESERVE_USDC: '1', ARC_SLIPPAGE_BPS: '300',
     ARC_MAX_GAS_PER_TX: '1500000', ARC_KEEPER_BATCH_SIZE: '20', ARC_REWARDS_ADDRESS: '', ARC_REWARDS_FROM_BLOCK: '' };
-  const envPath = gasCheck ? 'SingleSparkContract/arc/.env.keeper-gas.local' : 'SingleSparkContract/arc/.env.economics-v2.local';
+  const envPath = gasCheck ? 'SingleSparkContract/chains/arc/.env.keeper-gas.local' : 'SingleSparkContract/chains/arc/.env.economics-v2.local';
   const encryptionPath = `${dir}/treasury-encryption.key`;
   if (!existsSync(encryptionPath)) writeFileSync(encryptionPath, generatePrivateKey().slice(2), { mode: 0o600 });
   env.ARC_TREASURY_ENCRYPTION_KEY = readFileSync(encryptionPath, 'utf8').trim();

@@ -31,7 +31,7 @@ const abi=artifact('ArcLaunchV2').abi;
 let api, apiBase, env, hangUntil=0, hangCalls=0, rewardAddress='', faultCalls=0, calls=0, inFlight=0, peakInFlight=0;
 const methods={}, metrics=[], expected=new Map();
 const diagnostic=process.env.ARC_CAPACITY_SKIP_SWEEP==='1';
-const reportPath=process.env.ARC_CAPACITY_REPORT || `SingleSparkContract/arc/deployments/capacity-${diagnostic?'diagnostic':'1000'}-20260917.json`;
+const reportPath=process.env.ARC_CAPACITY_REPORT || `SingleSparkContract/chains/arc/deployments/local/singlespark/capacity-${diagnostic?'diagnostic':'1000'}-20260917.json`;
 const report={startedAt:new Date().toISOString(),environment:'isolated local Anvil + singlespark_test PostgreSQL',
   runtime:{node:process.version,undici:process.versions.undici},
   actualDeployedPools:count,rpcDelayMs:delayMs,keeperBatchSize:100,hardware:{cpu:cpus()[0]?.model,cores:cpus().length,memoryGiB:totalmem()/2**30},

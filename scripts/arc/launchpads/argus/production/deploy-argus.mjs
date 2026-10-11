@@ -14,8 +14,8 @@ import { persist, stringify } from '../../../shared/runtime.mjs';
 const option = name => process.argv[process.argv.indexOf(name) + 1];
 const PORTAL = '0xB021Be536808f551b31789422Fd28a6c9c6e97Da';
 const QUOTE = '0x3600000000000000000000000000000000000000';
-const portalAbi = JSON.parse(readFileSync(new URL('../../../../../arc/abi/argus-portal-v7.json', import.meta.url)));
-const splitterAbi = JSON.parse(readFileSync(new URL('../../../../../arc/abi/argus-splitter-v7.json', import.meta.url)));
+const portalAbi = JSON.parse(readFileSync(new URL('../../../../../chains/arc/launchpads/argus/abi/argus-portal-v7.json', import.meta.url)));
+const splitterAbi = JSON.parse(readFileSync(new URL('../../../../../chains/arc/launchpads/argus/abi/argus-splitter-v7.json', import.meta.url)));
 
 async function main() {
   assert(process.argv.includes('--env'), 'Pass --env <private configuration file>');

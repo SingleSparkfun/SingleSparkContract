@@ -1,6 +1,6 @@
 [profile.default]
-src = "../chains/evm/gameplay"
-test = "../chains/evm/gameplay/test"
+src = "./gameplay"
+test = "./gameplay/test"
 out = "out"
 cache_path = "cache"
 libs = ["../arc/lib"]

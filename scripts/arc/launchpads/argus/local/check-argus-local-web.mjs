@@ -4,11 +4,11 @@ import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {createPublicClient,http,parseAbi,keccak256,toHex,zeroAddress} from 'viem';
 import {privateKeyToAccount} from 'viem/accounts';
-mkdirSync('SingleSparkContract/deployments/local/arc/argus', { recursive: true });
+mkdirSync('SingleSparkContract/chains/arc/deployments/local/argus', { recursive: true });
 const checkPlugins=process.argv.includes('--plugins');
 const base='http://127.0.0.1:8092',client=createPublicClient({transport:http('http://127.0.0.1:8547')});
 assert.equal(await client.getChainId(),31338);
-const deployment=JSON.parse(readFileSync('SingleSparkContract/arc/data/argus-local-fork/deployment.json','utf8'));
+const deployment=JSON.parse(readFileSync('SingleSparkContract/chains/arc/data/argus-local-fork/deployment.json','utf8'));
 const request=async(path,init={})=>{const r=await fetch(base+path,{...init,headers:{'Content-Type':'application/json',...init.headers},signal:AbortSignal.timeout(30000)});return {status:r.status,body:await r.json()};};
 const account=privateKeyToAccount(keccak256(toHex('singlespark/argus-fork/trader')));
 const draft={requestId:checkPlugins?'local-web-plugins-20261005':'local-web-image-20261005',name:'Argus Web Test',symbol:'AWTEST',imageUri:'',description:'Local fork test only',channels:{},startFdv:'10000',bondFdv:'20000',buyTaxBps:100,sellTaxBps:200,...(checkPlugins?{plugins:{buyback:false,distribution:true,revision:0}}:{})};
@@ -49,5 +49,5 @@ try{
   assert.deepEqual((await request(`/api/arc/plugins?token=${job.token}`)).body.settings,plugins.body.settings);
   assert.deepEqual(token.plugins,plugins.body.settings);
   const proof={status:'passed_local_fork_web_api',generatedAt:new Date().toISOString(),chainId:31338,publicTransactions:false,scope:'Local Argus mainnet fork; explicit mock ERC20 USDC and separate native test gas',token:job.token,transactionHash:job.transactionHash,initiator:account.address,treasury,anonymousPost:401,postLaunchChanges:409,indexed:true,imageUrl:draft.imageUri,plugins:plugins.body.settings};
-  writeFileSync(checkPlugins?'SingleSparkContract/deployments/local/arc/argus/argus-plugin-creation-local-20261005.json':'SingleSparkContract/deployments/local/arc/argus/argus-local-web-test-20261005.json',JSON.stringify(proof,null,2)+'\n');console.log(JSON.stringify(proof,null,2));
+  writeFileSync(checkPlugins?'SingleSparkContract/chains/arc/deployments/local/argus/argus-plugin-creation-local-20261005.json':'SingleSparkContract/chains/arc/deployments/local/argus/argus-local-web-test-20261005.json',JSON.stringify(proof,null,2)+'\n');console.log(JSON.stringify(proof,null,2));
 }finally{await request('/api/auth/logout',{method:'POST',headers});}
