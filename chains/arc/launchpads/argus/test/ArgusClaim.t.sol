@@ -5,6 +5,12 @@ import {ArgusRevenueVault} from "../ArgusRevenueVault.sol";
 
 contract ArgusClaimTest is ArgusRevenueVaultTest {
     address constant CALLER = address(0xc001);
+    function testDigestMatchesBackendAndWalletEip712Vector() public {
+        vm.chainId(5042002);
+        vm.etch(address(0x1009), address(vault).code);
+        ArgusRevenueVault.Claim memory c = ArgusRevenueVault.Claim(address(1),5,address(2),0,0,1000,7,3,address(3),9,keccak256(""));
+        assertEq(ArgusRevenueVault(payable(address(0x1009))).claimDigest(c), 0xacf43ec01366e98811f266fbf8e892f4b335665de05e0c3707e24897f71a3fea);
+    }
     function request(uint8 bucket, uint256 amount, address[] memory recipients) internal view returns (ArgusRevenueVault.Claim memory c) {
         c = ArgusRevenueVault.Claim(CALLER, bucket, bucket == 1 ? platform : token, amount,
             bucket == 5 ? 0 : 1, block.timestamp + 30, vault.nonce(), factory.revision(), factory.implementation(),

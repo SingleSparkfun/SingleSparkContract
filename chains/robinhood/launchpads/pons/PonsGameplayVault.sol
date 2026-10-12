@@ -9,6 +9,9 @@ import {IPonsVaultFactory, IPonsEscrow, IPonsCurve} from "./IPonsLaunch.sol";
 contract PonsGameplayVault is GameplayVault {
     constructor(IGameplayFactory factory_) GameplayVault(factory_) {}
 
+    // Pons permits repeated recipients within and across batches; Claim nonces still prevent authorization replay.
+    function permanentPayoutDeduplication() public pure override returns (bool) { return false; }
+
     function collectRevenue() external nonReentrant {
         IPonsVaultFactory source = IPonsVaultFactory(address(factory));
         source.checkPons();

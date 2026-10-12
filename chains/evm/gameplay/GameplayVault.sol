@@ -65,6 +65,7 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
     }
 
     function pluginIds() external view returns (bytes32[] memory) { return ids; }
+    function permanentPayoutDeduplication() public pure virtual returns (bool) { return true; }
     function policy(bytes32 id) external view returns (GameplayPolicy memory) { return policies[id]; }
     function activePolicy() external view returns (GameplayPolicy memory) {
         if (active.implementation == address(0)) revert Invalid();
@@ -249,13 +250,18 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
         inventory[active.id] -= amount;
         address target = policies[active.id].targetAsset;
         if (target == asset) accounted -= amount;
+        bool permanent = permanentPayoutDeduplication();
         address previous;
         for (uint256 i; i < recipients.length; ++i) {
             address to = recipients[i];
-            if (to <= previous || to == address(this) || to == address(factory) || to == target
-                || to == address(0xdead) || factory.isVault(to) || paid[to]) revert Invalid();
+            if (to == address(0) || to < previous || (permanent && to == previous)
+                || to == address(this) || to == address(factory) || to == target
+                || to == address(0xdead) || factory.isVault(to)) revert Invalid();
             previous = to;
-            paid[to] = true;
+            if (permanent) {
+                if (paid[to]) revert Invalid();
+                paid[to] = true;
+            }
             GameplayAsset.send(target, to, amountPerRecipient);
             emit Paid(active.id, target, to, amountPerRecipient);
         }

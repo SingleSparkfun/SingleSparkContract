@@ -2,20 +2,25 @@ import assert from 'node:assert/strict';
 import { openSync, closeSync, unlinkSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { encodeDeployData, encodeFunctionData, decodeFunctionData, encodeAbiParameters, parseEventLogs, parseAbi,
-  zeroAddress, toHex, keccak256, erc20Abi, getAddress } from 'viem';
+  zeroAddress, toHex, keccak256, erc20Abi, getAddress, hashTypedData } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { root, data, readJson, json } from './build.mjs';
+import { root, readJson, json } from './build.mjs';
 import { context } from './transactions.mjs';
 import { deploy, maskImmutables } from './deploy.mjs';
 import { poolMinimum } from './quote.mjs';
+import { gameplayPaths } from './build-gameplay.mjs';
+import { claimTypedData } from './claim-authorization.mjs';
 
 const index = process.argv.indexOf('--wallet'); assert(index >= 0, 'Pass an owner-only testnet --wallet');
 const walletPath = resolve(process.argv[index + 1]);
+const deploymentIndex = process.argv.indexOf('--deployment-id');
+assert(deploymentIndex < 0 || process.argv[deploymentIndex + 1], 'Missing --deployment-id');
+const deploymentId = deploymentIndex < 0 ? '' : process.argv[deploymentIndex + 1];
 const foundation = await context({ walletPath }); await deploy(foundation);
-const build = readJson(resolve(data, 'gameplay-build.json'));
+const build = readJson(gameplayPaths(deploymentId).output);
 assert.equal(build.chainId, 46630); assert.equal(build.policyDelaySeconds, 600);
 const roles = readJson(resolve(root, 'chains/robinhood/deployments/testnet/pons/vault-config.json'));
-const c = await context({ walletPath, broadcast: process.argv.includes('--broadcast'), deploymentName: 'gameplay', artifacts: { ...build, roles } });
+const c = await context({ walletPath, broadcast: process.argv.includes('--broadcast'), deploymentName: 'gameplay', deploymentId, artifacts: { ...build, roles } });
 if (!c.broadcast) { console.log(json({ status: 'prepared', chainId:46630, policyDelaySeconds:600, name:'SingleSpark',symbol:'SPARK',
   maximumCostWei:c.config.maximumTotalCostWei, isolatedTestnet:true, mainnet:false })); process.exit(0); }
 mkdirSync(c.storageDir, {recursive:true,mode:0o700});
@@ -37,10 +42,16 @@ try {
   c.report.addresses.vaultImplementation = vaultImpl; c.report.codeHashes.vaultImplementation = keccak256(implCode); c.save();
   for (const [field,expected] of Object.entries({admin:roles.admin,authorizer:roles.authorizer,treasury:roles.treasury,pons:source,escrow:foundation.report.addresses.escrow})) same(await c.read(factory,a.factory.abi,field),expected);
   assert.equal(await c.read(factory,a.factory.abi,'DELAY'),600n);
+  if (build.payoutPolicy === 'repeat') assert.equal(await c.read(vaultImpl,a.vault.abi,'permanentPayoutDeduplication'),false);
   const buyback = await create('buyback',[]), distribution = await create('distribution',[]), adapter = await create('adapter',[factory,source]);
   const ids = ['buyback-burn@1','platform-buyback@1','distribution@1'].map(name=>keccak256(toHex(name)));
   const wallets = readJson(walletPath);
   const authorizer = privateKeyToAccount(wallets.executor.privateKey); same(authorizer.address,roles.authorizer);
+  async function sign(request) {
+    const payload = claimTypedData(project.vault, request);
+    assert.equal(await c.read(project.vault,a.vault.abi,'claimDigest',[request]),hashTypedData(payload),'RPC Claim digest mismatch');
+    return authorizer.signTypedData(payload);
+  }
   same(wallets.admin.address,roles.admin);
   if (!c.journal.steps['fund-admin'] && await c.client.getBalance({address:roles.admin}) < 100_000_000_000_000n)
     await c.send('fund-admin',{to:roles.admin,value:200_000_000_000_000n});
@@ -130,12 +141,12 @@ try {
           const request={caller:c.account.address,pluginId:id,amount,minimumOutput,reward,deadline:block.timestamp+300n,
             nonce:await c.read(project.vault,a.vault.abi,'nonce'),policyRevision:await c.read(project.vault,a.vault.abi,'revision'),
             registryRevision:await c.read(factory,a.factory.abi,'revision'),dataHash:keccak256(data)};
-          const signature=await authorizer.sign({hash:await c.read(project.vault,a.vault.abi,'claimDigest',[request])});args=[request,data,signature];
+          const signature=await sign(request);args=[request,data,signature];
           await assert.rejects(c.client.simulateContract({address:project.vault,abi:a.vault.abi,functionName:'claim',args,account:roles.admin}));
           await assert.rejects(c.client.simulateContract({address:platform.vault,abi:a.vault.abi,functionName:'claim',args,account:c.account.address}));
           if(amount>0n) {
             const adverse={...request,minimumOutput:10n**40n};
-            const signed=await authorizer.sign({hash:await c.read(project.vault,a.vault.abi,'claimDigest',[adverse])});
+            const signed=await sign(adverse);
             await assert.rejects(c.client.simulateContract({address:project.vault,abi:a.vault.abi,functionName:'claim',args:[adverse,data,signed],account:c.account.address}));
           }
           await c.client.simulateContract({address:project.vault,abi:a.vault.abi,functionName:'claim',args,account:c.account.address});
@@ -152,18 +163,28 @@ try {
       const recipients=Array.from({length:100},(_,i)=>getAddress(toHex(0x100000+i,{size:20})));
       const payoutData=encodeAbiParameters([{type:'address[]'}],[recipients]);
       const inv=await c.read(project.vault,a.vault.abi,'inventory',[ids[2]]),heldReward=await c.read(project.vault,a.vault.abi,'inventoryReward',[ids[2]]);
-      const payoutReward=heldReward*(100n*10n**19n)/inv;
+      const payoutReward=c.journal.steps['distribution-payout']?0n:heldReward*(100n*10n**19n)/inv;
       if(!c.journal.steps['distribution-payout'])assert(inv>=100n*10n**19n);
       await claim('distribution-payout',ids[2],0n,payoutData,payoutReward);
-      for(let start=0;start<recipients.length;start+=10)await Promise.all(recipients.slice(start,start+10).map(async recipient=>{
-        assert(await c.read(project.vault,a.vault.abi,'paid',[recipient]));
-        assert.equal(await c.read(project.token,erc20Abi,'balanceOf',[recipient]),10n**19n);
+      for(let start=0;start<recipients.length;start+=10)await Promise.all(recipients.slice(start,start+10).map(async (recipient,offset)=>{
+        assert.equal(await c.read(project.vault,a.vault.abi,'paid',[recipient]),build.payoutPolicy!=='repeat');
+        assert.equal(await c.read(project.token,erc20Abi,'balanceOf',[recipient]),(c.journal.steps['distribution-payout-repeat']&&start+offset<50?3n:1n)*10n**19n);
       }));
+      if(build.payoutPolicy==='repeat') {
+        const inventory=await c.read(project.vault,a.vault.abi,'inventory',[ids[2]]);
+        const held=await c.read(project.vault,a.vault.abi,'inventoryReward',[ids[2]]);
+        if(!c.journal.steps['distribution-payout-repeat']) assert(inventory>=100n*10n**19n,'Fund a full repeated payout before acceptance');
+        const repeatedData=encodeAbiParameters([{type:'address[]'}],[recipients.slice(0,50).flatMap(recipient=>[recipient,recipient])]);
+        await claim('distribution-payout-repeat',ids[2],0n,repeatedData,c.journal.steps['distribution-payout-repeat']?0n:held*(100n*10n**19n)/inventory);
+        for(const [i,recipient] of recipients.entries()) assert.equal(await c.read(project.token,erc20Abi,'balanceOf',[recipient]),(i<50?3n:1n)*10n**19n);
+      }
       const paidRequest={caller:c.account.address,pluginId:ids[2],amount:0n,minimumOutput:0n,reward:0n,deadline:(await c.client.getBlock()).timestamp+300n,
         nonce:await c.read(project.vault,a.vault.abi,'nonce'),policyRevision:await c.read(project.vault,a.vault.abi,'revision'),
         registryRevision:await c.read(factory,a.factory.abi,'revision'),dataHash:keccak256(payoutData)};
-      const paidSignature=await authorizer.sign({hash:await c.read(project.vault,a.vault.abi,'claimDigest',[paidRequest])});
-      await assert.rejects(c.client.simulateContract({address:project.vault,abi:a.vault.abi,functionName:'claim',args:[paidRequest,payoutData,paidSignature],account:c.account.address}));
+      if(build.payoutPolicy!=='repeat') {
+        const paidSignature=await sign(paidRequest);
+        await assert.rejects(c.client.simulateContract({address:project.vault,abi:a.vault.abi,functionName:'claim',args:[paidRequest,payoutData,paidSignature],account:c.account.address}));
+      }
       assert(await c.read(project.token,erc20Abi,'balanceOf',['0x000000000000000000000000000000000000dEaD'])>0n);
       assert(await c.read(platform.token,erc20Abi,'balanceOf',['0x000000000000000000000000000000000000dEaD'])>0n);
       assert.equal(await c.client.getBalance({address:adapter}),0n);
@@ -185,7 +206,7 @@ try {
       const finalized=await c.client.getBlock({blockTag:'finalized'});
       c.report.finalizedThroughBlock=String(finalized.number);
       c.report.finalityComplete=Object.values(c.report.transactions).every(tx=>BigInt(tx.blockNumber)<=finalized.number);
-      c.report.status='gameplay_verified';c.report.verification={checks:['native ETH funding','10% / 0.5% / 89.5% weighted budgets','separate project and platform revenue / budgets','own-token buyback and burn','Robinhood SingleSpark platform-token buyback and burn','distribution inventory and 100 test-fixture payouts','Claim ETH rewards','fresh-nonce permanent payout deduplication','Claim nonce / caller / cross-Vault / slippage rejection','Pons graduation and native V4 buyback','10-minute on-chain registry and policy waits'],platformToken:platform.token,production:false};
+      c.report.status='gameplay_verified';c.report.verification={checks:['native ETH funding','10% / 0.5% / 89.5% weighted budgets','separate project and platform revenue / budgets','own-token buyback and burn','Robinhood SingleSpark platform-token buyback and burn','distribution inventory and 100 test-fixture payouts','Claim ETH rewards',build.payoutPolicy==='repeat'?'repeated recipients within and across batches':'fresh-nonce permanent payout deduplication','Claim nonce / caller / cross-Vault / slippage rejection','Pons graduation and native V4 buyback','10-minute on-chain registry and policy waits'],platformToken:platform.token,production:false};
       c.report.sourcePons={addresses:foundation.report.addresses,codeHashes:foundation.report.codeHashes};c.save();console.log(json({status:c.report.status,addresses:c.report.addresses,platformToken:platform.token,verification:c.report.verification}));
     }
   }

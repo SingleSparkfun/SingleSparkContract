@@ -1,10 +1,18 @@
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { posix, resolve, relative } from 'node:path';
+import { dirname, posix, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { root, data, compile, hash, json, readJson } from './build.mjs';
 
-export function buildGameplay() {
+export function gameplayPaths(deploymentId = '') {
+  assert(!deploymentId || /^[a-z0-9][a-z0-9-]{0,63}$/.test(deploymentId), 'Invalid testnet deployment ID');
+  const journalDirectory = resolve(data, 'testnet/gameplay', ...(deploymentId ? ['redeployments', deploymentId] : []));
+  const outputDirectory = deploymentId ? journalDirectory : data;
+  return { journal: resolve(journalDirectory, 'transactions.json'), output: resolve(outputDirectory, 'gameplay-build.json'),
+    compilerInput: resolve(outputDirectory, 'gameplay-compiler-input.json') };
+}
+export function buildGameplay(deploymentId = '') {
+  const paths = gameplayPaths(deploymentId);
   const sources = {};
   const remappings = { '@openzeppelin/': 'arc/lib/openzeppelin-contracts/', '@uniswap/v4-core/': 'arc/lib/v4-core/', 'solmate/': 'arc/lib/solmate/' };
   function visit(path) {
@@ -28,9 +36,8 @@ export function buildGameplay() {
   };
   for (const [path] of Object.values(owned)) visit(path);
   const productionSourcesSha256 = hash(sources);
-  const output = resolve(data, 'gameplay-build.json');
-  if (existsSync(resolve(data, 'testnet/gameplay/transactions.json')))
-    assert.equal(readJson(output).productionSourcesSha256, productionSourcesSha256, 'Public gameplay build is frozen; preserve its journal');
+  if (existsSync(paths.journal))
+    assert.equal(readJson(paths.output).productionSourcesSha256, productionSourcesSha256, 'Public gameplay build is frozen; preserve its journal and use a separate --deployment-id');
   const factory = sources['chains/evm/gameplay/GameplayVaultFactory.sol'];
   assert.equal(factory.content.split('DELAY = 48 hours').length, 2);
   factory.content = factory.content.replace('DELAY = 48 hours', 'DELAY = 10 minutes');
@@ -43,10 +50,10 @@ export function buildGameplay() {
     const a = compiled[file][contract]; assert(a.evm.deployedBytecode.object.length / 2 <= 24576);
     return [name, { abi: a.abi, bytecode: `0x${a.evm.bytecode.object}`, runtime: a.evm.deployedBytecode }];
   }));
-  const build = { chainId: 46630, policyDelaySeconds: 600, productionSourcesSha256, artifacts,
+  const build = { chainId: 46630, policyDelaySeconds: 600, payoutPolicy: 'repeat', productionSourcesSha256, artifacts,
     testnetChanges: ['Isolated Robinhood Testnet controller: 10 minutes. Production source remains 48 hours.'] };
-  mkdirSync(data, { recursive: true });
-  writeFileSync(resolve(data, 'gameplay-compiler-input.json'), json(input)); writeFileSync(output, json(build));
+  mkdirSync(dirname(paths.output), { recursive: true });
+  writeFileSync(paths.compilerInput, json(input)); writeFileSync(paths.output, json(build));
   return build;
 }
 export function sourcePath(path) {
@@ -55,4 +62,8 @@ export function sourcePath(path) {
   assert(relative(root, target).startsWith('chains/'), 'Source must belong to chains/');
   return target;
 }
-if (process.argv[1] === fileURLToPath(import.meta.url)) console.log(json({ ...buildGameplay(), artifacts: 'saved locally' }));
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const index = process.argv.indexOf('--deployment-id');
+  assert(index < 0 || process.argv[index + 1], 'Missing --deployment-id');
+  console.log(json({ ...buildGameplay(index < 0 ? '' : process.argv[index + 1]), artifacts: 'saved locally' }));
+}

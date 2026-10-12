@@ -94,4 +94,20 @@ The script requires separate deployer/admin/executor test identities. Raw signat
 
 The web app reuses shared transaction review and EVM recovery journals. Optional backend `PONS_TESTNET_CLAIM_SIGNING_KEY` signs bounded tasks only. Caller, Vault, chain, policy revision, nonce, budget, minimum output and deadline are bound; the backend does not pay ordinary-project Gas. Historical ARC tokens lose current platform designation without changing their funds, immutable recipients or recovery records.
 
-Production still requires issuance authorization and binding, the production 48-hour deployment/wait, an independent audit, distribution eligibility/indexing, a persisted 180-second platform-source Keeper interval and browser-wallet end-to-end acceptance. Test distribution uses 100 explicit fixture addresses, not a production eligibility scheme. No automatic Pons Keeper or mainnet transaction is added.
+Production still requires issuance authorization and binding, the production 48-hour deployment/wait, an independent audit, distribution eligibility/indexing, a persisted 180-second platform-source Keeper interval and browser-wallet end-to-end acceptance. Application distribution now uses a persisted finalized-transaction sender index (up to 2,000 candidates seen within 4,096 blocks, at most 40 blocks scanned per pass). It excludes contracts and infrastructure accounts, rotates the selection by Claim nonce, and verifies current code before signing. New repeat-policy Vaults cycle the available wallets into 100 payout slots, including a single wallet if necessary; zero verified wallets means no payout. Existing permanent-policy Vaults still require 100 distinct unpaid wallets. It never fills a batch with fixture addresses. Activity does not establish unique-human eligibility or Sybil resistance. The separately invoked contract acceptance script still uses explicit fixture addresses to test contract behavior. No automatic Pons Keeper or mainnet transaction is added.
+
+## Repeat recipients and signing hardening (2026-10-12)
+
+The user explicitly selected repeat payouts for Pons: new `PonsGameplayVault` implementations return `permanentPayoutDeduplication() == false`. A wallet may receive multiple shares within a batch and receive later authorized rounds again. Batches remain sorted, while Claim nonces, data hashes, policy revisions, budgets and signatures remain enforced. Shared EVM and ARC/Argus policies are unchanged.
+
+Current application pins still describe the already deployed immutable Vaults with `payoutPolicy: permanent`; their addresses, funds and journals do not change. Preparation filters their paid recipients. Only a separately reviewed deployment may use `payoutPolicy: repeat`, with matching frontend/backend code pins and an on-chain false getter checked before signing. Replacing source code does not update existing Vaults or migrate funds.
+
+Both backend Claim adapters, the Pons wallet validator and the ARC/Pons acceptance signers calculate EIP-712 locally and reject an RPC digest mismatch. Solidity, Rust and wallet tooling share golden digest vectors.
+
+Build a separate review artifact without replacing a frozen build or broadcasting:
+
+```sh
+node scripts/robinhood/launchpads/pons/testnet/build-gameplay.mjs --deployment-id repeat-payouts-20261012
+```
+
+Any later explicitly authorized acceptance uses the same `--deployment-id` on `verify-gameplay.mjs`; it keeps separate build artifacts, signed journals and public reports. Mainnet remains disabled. Independent audit, actual wallet acceptance, production controls, platform issuance and operations drills remain rollout requirements.

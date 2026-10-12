@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import { openSync, closeSync, unlinkSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { encodeAbiParameters, erc20Abi, getAddress, keccak256, parseEther, parseEventLogs, toHex } from 'viem';
+import { encodeAbiParameters, erc20Abi, getAddress, hashTypedData, keccak256, parseEther, parseEventLogs, toHex } from 'viem';
 import { context, launchArgs, QUOTE } from './deploy.mjs';
 import { json } from './build.mjs';
+import { claimTypedData } from './claim-authorization.mjs';
 
 export async function verifyClaim(c) {
 assert(process.argv.includes('--broadcast'), 'Select --broadcast for public-testnet acceptance');
@@ -80,8 +81,9 @@ try {
           deadline:(await client.getBlock()).timestamp+30n,nonce:await read(vault,va,'nonce'),
           revision:await read(factory,fa,'revision'),implementation:c.report.addresses.implementation,reward,
           recipientsHash:recipients.length?keccak256(encodeAbiParameters([{type:'address[]'}],[recipients])):emptyHash};
-        const digest=await read(vault,va,'claimDigest',[request]);
-        const signature=await accounts.executor.sign({hash:digest});
+        const payload=claimTypedData(vault,request);
+        assert.equal(await read(vault,va,'claimDigest',[request]),hashTypedData(payload),'RPC Claim digest mismatch');
+        const signature=await accounts.executor.signTypedData(payload);
         return [request,recipients,signature];
       });
     }
