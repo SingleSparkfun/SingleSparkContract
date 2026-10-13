@@ -1,0 +1,90 @@
+{
+  "identity": "b64bce4683e28ec30d3859f45b713e438d7f2a946e66c56a64c15f488b93bef6",
+  "chainId": 46630,
+  "environment": "testnet",
+  "owner": "0xAB370A85F810a1a598660Db1946b04C4c1bb541e",
+  "addresses": {
+    "factory": "0x3a2ceb40bc2026961a1ae0f98e657e525df8ae88",
+    "nft": "0x1c0880AE12c61ef76Bf31c23C524919Ffb7799c6",
+    "vault": "0x92788DDdA07dF7D74825072010b68d3019e53Bb6"
+  },
+  "codeHashes": {
+    "factory": "0x84b855b89ed5fb517973ca60a592d5bdb03471c480942f21b80644d8f0bf9334",
+    "nft": "0x6506629140f5712381f7e41240bb5130268ec92c15dca49ae1a7d687cf1bc251",
+    "vault": "0x4729955c8eac13179ea838fae25686b2bf3b5e320964bb47fd508f70d14a20db"
+  },
+  "transactions": {
+    "deploy-platform-factory": {
+      "hash": "0xe5034eb3eed87eb280c1d9afe9b15bbf29d202eb011c8598c3ec58ab6c76c7f0",
+      "blockNumber": "134303669",
+      "blockHash": "0xa5cfb58fd541d443c731ad44c4bea4fc5c064b601f1f80e75e82d44b061f221c",
+      "gasCostWei": "39735370000000"
+    },
+    "verify-treasury-forwarding": {
+      "hash": "0x19eeaa008f3af6ae68c5bc9562e53baab68ea476f7fa591da10d71ef8faf8bec",
+      "blockNumber": "134303769",
+      "blockHash": "0x0d0880e71e51609c05499c31a06a15723fdee888340a6d512f64ed3bd4da77a4",
+      "gasCostWei": "1462400000000"
+    },
+    "verify-owner-half-withdrawal": {
+      "hash": "0x2ce5c0b7002480a26e2421b4eaa3d4683dc35bd4b0ced735119f8c6c1c80c4d2",
+      "blockNumber": "134303852",
+      "blockHash": "0xdfb502620315b6b60e4fe6ab15c14c70fb4b01b5724fdf80f7dd3a6003208350",
+      "gasCostWei": "598220000000"
+    }
+  },
+  "issuance": {
+    "randomClaimsEnabled": false,
+    "xClaimsEnabled": false,
+    "referralClaimsEnabled": false
+  },
+  "deploymentBlock": "134303669",
+  "genesis": "1791897512",
+  "finalizedThroughBlock": "134307848",
+  "finalityComplete": true,
+  "status": "verified",
+  "verification": {
+    "treasuryForwarding": true,
+    "ownerHalfWithdrawal": true,
+    "nftReservePreserved": true,
+    "runtimeCodeMatched": true,
+    "weeklySettlementSeconds": 604800,
+    "policyDelaySeconds": 172800,
+    "weeklyClaimLiveVerified": false
+  },
+  "totalGasCostWei": "41795990000000",
+  "latestAccounting": {
+    "blockNumber": "134316802",
+    "totalReceivedWei": "1000000000000",
+    "ownerCreditWei": "0",
+    "nftReserveWei": "500000000000",
+    "ownerPaidWei": "500000000000",
+    "nftPaidWei": "0"
+  },
+  "sourceVerification": {
+    "factory": {
+      "jobId": "df0fddf1-9e0d-4580-b6bb-bfd62f810211",
+      "isJobCompleted": true,
+      "creationMatch": "match",
+      "runtimeMatch": "match",
+      "matchId": "56051728",
+      "address": "0x3a2ceb40bc2026961a1ae0f98e657e525df8ae88"
+    },
+    "nft": {
+      "jobId": "d7d5d53c-a01b-4629-aafc-f1e613b4ec9e",
+      "isJobCompleted": true,
+      "creationMatch": null,
+      "runtimeMatch": "match",
+      "matchId": "56051811",
+      "address": "0x1c0880AE12c61ef76Bf31c23C524919Ffb7799c6"
+    },
+    "vault": {
+      "jobId": "63f0cba7-283a-4d25-b8aa-611a00979781",
+      "isJobCompleted": true,
+      "creationMatch": null,
+      "runtimeMatch": "match",
+      "matchId": "56051812",
+      "address": "0x92788DDdA07dF7D74825072010b68d3019e53Bb6"
+    }
+  }
+}

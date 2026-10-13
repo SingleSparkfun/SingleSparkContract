@@ -62,3 +62,5 @@ The existing npm Pons commands keep their names. Direct Node tools now use the p
 - [Solana programs](chains/solana/README.md) and [business flow](docs/solana/business-flow.md)
 - [Deployment records](docs/deployments.md)
 - [Platform model](docs/platform.md)
+
+Platform-owned NFT income contracts live in `chains/robinhood/platform`, with their own Foundry profile and `build:platform:nft`, `test:platform:nft`, `deploy:platform:nft:testnet` commands. The native income Vault credits 50% to its immutable owner and 50% to NFT quality-seconds in seven-day epochs; it does not change Pons project Vault allocations. [Contract rules, tests and testnet verification](docs/robinhood/platform-nft-vault.md).

@@ -17,3 +17,9 @@ remappings = ["@openzeppelin/=../arc/lib/openzeppelin-contracts/", "forge-std/=.
 
 [lint]
 lint_on_build = false
+
+[profile.platform]
+src = "./platform"
+test = "./platform/test"
+out = "out/platform"
+cache_path = "cache/platform"
