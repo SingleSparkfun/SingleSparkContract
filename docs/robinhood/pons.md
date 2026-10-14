@@ -102,7 +102,7 @@ Production still requires issuance authorization and binding, the production 48-
 
 The user explicitly selected repeat payouts for Pons: new `PonsGameplayVault` implementations return `permanentPayoutDeduplication() == false`. A wallet may receive multiple shares within a batch and receive later authorized rounds again. Batches remain sorted, while Claim nonces, data hashes, policy revisions, budgets and signatures remain enforced. Shared EVM and ARC/Argus policies are unchanged.
 
-Current application pins still describe the already deployed immutable Vaults with `payoutPolicy: permanent`; their addresses, funds and journals do not change. Preparation filters their paid recipients. Only a separately reviewed deployment may use `payoutPolicy: repeat`, with matching frontend/backend code pins and an on-chain false getter checked before signing. Replacing source code does not update existing Vaults or migrate funds.
+Local frontend/backend pins now select the finalized revenue-repair factory with `payoutPolicy: repeat`, matching code hashes and an on-chain false getter checked before signing. Historical immutable Vaults retain their original permanent policy, addresses, funds and recovery bindings; they are not relabeled Claim-ready. The last published application still uses its previous pins until a separate application release. Replacing source code does not update existing Vaults or migrate funds.
 
 Both backend Claim adapters, the Pons wallet validator and the ARC/Pons acceptance signers calculate EIP-712 locally and reject an RPC digest mismatch. Solidity, Rust and wallet tooling share golden digest vectors.
 
@@ -124,7 +124,7 @@ forge test --root chains/robinhood --match-contract PonsRevenueClaimForkTest --f
 
 At that block, the test passed: launch and graduation, an actual V4 sell producing native Hook fees, permissionless collection into isolated Vault budgets, a signed user Claim buying and burning the project token, exact execution-reward payment, and caller/replay rejection. Collection itself earns no reward; collection and rewarded Claim are separate calls. A V4 buy produces token-denominated fees requiring the upstream operator; ordinary collection refuses to invent income, then succeeds after operator conversion. Operator impersonation and all deployments/transactions occur only in the local fork. The ordinary offline suite skips this fork test.
 
-The online read at block `134966777` still matched implementation `0xb153cdb47c38c8fcf12a1f67cfd25ef94e77ba02` and its original code hash, and the existing project Vault did not expose `poolRevenue()`. This verifies the local source flow, not rollout of the fix. Existing immutable Vaults, application pins and signed journals remain unchanged. Browser-wallet submission, live operator operation and reward profitability after actual Gas were not verified by this test.
+The pre-rollout online read at block `134966777` matched implementation `0xb153cdb47c38c8fcf12a1f67cfd25ef94e77ba02` and its original code hash, and the existing project Vault did not expose `poolRevenue()`. The fork test verifies the source flow; the separate finalized deployment is recorded below. Existing immutable Vaults and signed journals remain unchanged. Browser-wallet submission, live operator operation and reward profitability after actual Gas were not verified by this test.
 
 The reviewed testnet rollout uses a separate frozen build/journal and preserves the existing platform-token target:
 
@@ -136,4 +136,16 @@ node scripts/robinhood/launchpads/pons/testnet/deploy-revenue-fix.mjs --wallet /
 
 Resume the same broadcast command after the recorded `readyAt` to activate the three reviewed plugins and the factory-bound adapter. The existing transaction runner persists signed bytes before broadcasting and retains the 0.009 ETH total and 0.0015 ETH per-transaction Gas caps. Application pins may switch only after registry verification and finality; `revenueFixPins` retains the previous factory, implementation and adapter code hashes and discovery bindings. Existing immutable project Vaults keep their original implementation and funds. The backend obtains the preserved platform token's curve from its verified upstream launch record, independently of the new Vault factory.
 
-Native-only sweep now pins Hook code and factory/escrow bindings; token fees, token tax or pending buyback remain operator-only. A deferred collection may still claim existing escrow or recognize ETH already in the Vault, without crediting upstream pending balances. The isolated `revenue-sweep-20261014` build uses production source SHA-256 `20d38d69bc08ae42af11073700ae48246c03c88d71817a38031c26320df9897e`, repeat payouts and the existing in-memory 10-minute test delay. Its public deployment is pending authorized wallet files; production sources retain 48 hours.
+Native-only sweep now pins Hook code and factory/escrow bindings; token fees, token tax or pending buyback remain operator-only. A deferred collection may still claim existing escrow or recognize ETH already in the Vault, without crediting upstream pending balances. The deployed `revenue-claim-fix-20261014` build uses production source SHA-256 `20d38d69bc08ae42af11073700ae48246c03c88d71817a38031c26320df9897e`, repeat payouts and the existing in-memory 10-minute test delay. Production sources retain 48 hours.
+
+## Revenue repair deployment (2026-10-14)
+
+| Contract | Robinhood Testnet address |
+| --- | --- |
+| Revenue Vault factory | `0x38fb2f4c748ab5d35c2f21afa5103fa68f25bdf1` |
+| Revenue Vault implementation | `0xeb25f0ef1a6a3d071a50a487e5dbf73035026abc` |
+| Factory-bound swap adapter | `0x1f8685a732236388d0ef7b4bc8f0a746f755b072` |
+
+The [deployment report](../../chains/robinhood/deployments/testnet/pons/gameplay-revenue-claim-fix-20261014.json) records all eleven successful funding, deployment, registration and activation transactions. Three reviewed plugins and the adapter activated after the immutable 600-second testnet delay; the last activation is block `134982270`. Finalized coverage and `finalityComplete: true` were verified before switching both local application pin files. Actual transaction Gas cost was `0.00008209951 ETH`, excluding the admin funding principal. The existing platform-token target, platform treasury recipient, old project Vaults and signed recovery journals retain their bindings. No token was issued by this rollout.
+
+The [new public roles](../../chains/robinhood/deployments/testnet/pons/revenue-claim-fix-20261014-roles.json) separate administration from Claim authorization. The generated Claim signing key is stored only in the owner-readable `backend-claim.env` beside the ignored wallet and deployment journal; the backend must load that key when publishing the new application pins. Contract deployment and local pin updates do not publish the frontend/backend application. The existing older gameplay deployment table above remains a historical record.

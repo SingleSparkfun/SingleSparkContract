@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { closeSync, mkdirSync, openSync, statSync, unlinkSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, statSync, unlinkSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { encodeDeployData, encodeFunctionData, keccak256, parseAbi, toHex } from 'viem';
@@ -32,13 +32,14 @@ async function main() {
   const walletPath = resolve(argument('--wallet'));
   const deploymentId = argument('--deployment-id');
   const build = readJson(gameplayPaths(deploymentId).output);
-  const roles = readJson(resolve(root, 'chains/robinhood/deployments/testnet/pons/vault-config.json'));
+  const roleDirectory = resolve(root, 'chains/robinhood/deployments/testnet/pons');
+  const deploymentRoles = resolve(roleDirectory, `${deploymentId}-roles.json`);
+  const roles = readJson(existsSync(deploymentRoles) ? deploymentRoles : resolve(roleDirectory, 'vault-config.json'));
+  assert.equal(roles.chainId, 46630);
   assert.equal(build.chainId, 46630); assert.equal(build.policyDelaySeconds, 600); assert.equal(build.payoutPolicy, 'repeat');
   assert.equal(statSync(walletPath).mode & 0o077, 0, 'Wallet file must be owner-only');
   const wallets = readJson(walletPath);
-  for (const [role, expected] of [['admin', roles.admin], ['executor', roles.authorizer]]) {
-    assert.equal(privateKeyToAccount(wallets[role].privateKey).address.toLowerCase(), expected.toLowerCase(), `${role} does not match the reviewed testnet role`);
-  }
+  assert.equal(privateKeyToAccount(wallets.admin.privateKey).address.toLowerCase(), roles.admin.toLowerCase(), 'Admin does not match the reviewed testnet role');
   const c = await context({ walletPath, broadcast: process.argv.includes('--broadcast'), deploymentName: 'gameplay', deploymentId, artifacts: { ...build, roles } });
   const previous = c.report.previousPins ?? readJson(resolve(root, '../SingleSparkBackend/api/src/chains/robinhood/launchpads/pons/deployment.json'));
   assert.equal(previous.chainId, 46630);
@@ -64,6 +65,8 @@ async function main() {
   const lock = openSync(lockPath, 'wx', 0o600);
   try {
     c.report.previousPins = previous; c.save();
+    if (c.journal.steps['fund-revenue-admin'] || await c.client.getBalance({ address: roles.admin }) < 5_000_000_000_000n)
+      await c.send('fund-revenue-admin', { to: roles.admin, value: 20_000_000_000_000n });
     const call = (label, address, abi, functionName, args = [], role = 'deployer') => c.send(label, { to: address, data: encodeFunctionData({ abi, functionName, args }) }, role);
     async function create(label, artifact, args) {
       const receipt = await c.send(label, { data: encodeDeployData({ abi: artifact.abi, bytecode: artifact.bytecode, args }) });
