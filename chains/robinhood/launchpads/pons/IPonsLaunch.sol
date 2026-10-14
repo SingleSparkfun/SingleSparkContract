@@ -36,7 +36,26 @@ interface IPonsCurve {
 }
 
 interface IPonsVaultFactory {
+    function pons() external view returns (IPonsLaunch);
+    function hook() external view returns (IPonsHook);
     function escrow() external view returns (IPonsEscrow);
     function curveOf(address token) external view returns (IPonsCurve);
     function checkPons() external view;
+}
+
+interface IPonsHook {
+    struct LaunchInfo {
+        bool registered; bool memecoinIsCurrency0; address memecoin; address quoteToken; address creator;
+        address buybackCreatorRecipient; address protocolFeeRecipient; uint16 creatorTaxBps;
+        uint16 protocolFeeShareBps; uint16 buybackBurnBps; uint16 hookFeeBps;
+        uint16 maxInternalPriceImpactBps; bool buybackEnabled;
+    }
+    function factory() external view returns (address);
+    function feeEscrow() external view returns (address);
+    function launches(bytes32 poolId) external view returns (LaunchInfo memory);
+    function pendingFees(bytes32 poolId, address currency) external view returns (uint256);
+    function pendingCreatorTax(bytes32 poolId, address currency) external view returns (uint256);
+    function pendingBuyback(bytes32 poolId, address currency) external view returns (uint256);
+    function feeSweepOperator() external view returns (address);
+    function sweepPoolFees(bytes32 poolId, uint256 minimumConversion, uint256 minimumBuyback) external;
 }

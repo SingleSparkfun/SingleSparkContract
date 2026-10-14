@@ -5,14 +5,16 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {GameplayVaultFactory} from "../../../evm/gameplay/GameplayVaultFactory.sol";
 import {GameplayPolicy, IGameplayFactory} from "../../../evm/gameplay/IGameplayProtocol.sol";
 import {PonsGameplayVault} from "./PonsGameplayVault.sol";
-import {IPonsLaunch, IPonsEscrow, IPonsCurve} from "./IPonsLaunch.sol";
+import {IPonsLaunch, IPonsEscrow, IPonsCurve, IPonsHook} from "./IPonsLaunch.sol";
 
 /// Atomic native-ETH Pons launch and isolated project custody on Robinhood Testnet.
 contract PonsVaultFactory is GameplayVaultFactory {
     IPonsLaunch public immutable pons;
     IPonsEscrow public immutable escrow;
+    IPonsHook public immutable hook;
     bytes32 public immutable ponsCodeHash;
     bytes32 public immutable escrowCodeHash;
+    bytes32 public immutable hookCodeHash;
     mapping(address => IPonsCurve) public curveOf;
     event ProjectLaunched(address indexed owner, address indexed token, address indexed vault, address curve, bytes32 salt);
 
@@ -22,16 +24,21 @@ contract PonsVaultFactory is GameplayVaultFactory {
         if (block.chainid != 46630 || address(pons_).code.length == 0) revert Invalid();
         pons = pons_;
         escrow = IPonsEscrow(pons_.feeEscrow());
-        if (address(escrow).code.length == 0) revert Invalid();
+        hook = IPonsHook(pons_.memeHook());
+        if (address(escrow).code.length == 0 || address(hook).code.length == 0
+            || hook.factory() != address(pons_) || hook.feeEscrow() != address(escrow)) revert Invalid();
         ponsCodeHash = address(pons_).codehash;
         escrowCodeHash = address(escrow).codehash;
+        hookCodeHash = address(hook).codehash;
     }
     function _deployImplementation() internal override returns (address) {
         return address(new PonsGameplayVault(IGameplayFactory(address(this))));
     }
     function checkPons() public view {
         if (address(pons).codehash != ponsCodeHash || address(escrow).codehash != escrowCodeHash
-            || pons.feeEscrow() != address(escrow)) revert Invalid();
+            || address(hook).codehash != hookCodeHash || pons.feeEscrow() != address(escrow)
+            || pons.memeHook() != address(hook) || hook.factory() != address(pons)
+            || hook.feeEscrow() != address(escrow)) revert Invalid();
     }
     function launchSalt(address owner, bytes32 salt) public pure returns (bytes32) {
         return keccak256(abi.encode("pons", owner, salt));

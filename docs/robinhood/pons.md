@@ -113,3 +113,27 @@ node scripts/robinhood/launchpads/pons/testnet/build-gameplay.mjs --deployment-i
 ```
 
 Any later explicitly authorized acceptance uses the same `--deployment-id` on `verify-gameplay.mjs`; it keeps separate build artifacts, signed journals and public reports. Mainnet remains disabled. Independent audit, actual wallet acceptance, production controls, platform issuance and operations drills remain rollout requirements.
+
+## Graduated revenue and manual Claim verification (2026-10-14)
+
+`PonsRevenueClaimFork.t.sol` verifies the current local Vault/factory against the real pinned upstream contracts on a Robinhood Testnet fork. From this repository, run:
+
+```sh
+forge test --root chains/robinhood --match-contract PonsRevenueClaimForkTest --fork-url https://rpc.testnet.chain.robinhood.com --fork-block-number 134964835 --no-storage-caching -vvv
+```
+
+At that block, the test passed: launch and graduation, an actual V4 sell producing native Hook fees, permissionless collection into isolated Vault budgets, a signed user Claim buying and burning the project token, exact execution-reward payment, and caller/replay rejection. Collection itself earns no reward; collection and rewarded Claim are separate calls. A V4 buy produces token-denominated fees requiring the upstream operator; ordinary collection refuses to invent income, then succeeds after operator conversion. Operator impersonation and all deployments/transactions occur only in the local fork. The ordinary offline suite skips this fork test.
+
+The online read at block `134966777` still matched implementation `0xb153cdb47c38c8fcf12a1f67cfd25ef94e77ba02` and its original code hash, and the existing project Vault did not expose `poolRevenue()`. This verifies the local source flow, not rollout of the fix. Existing immutable Vaults, application pins and signed journals remain unchanged. Browser-wallet submission, live operator operation and reward profitability after actual Gas were not verified by this test.
+
+The reviewed testnet rollout uses a separate frozen build/journal and preserves the existing platform-token target:
+
+```sh
+node scripts/robinhood/launchpads/pons/testnet/build-gameplay.mjs --deployment-id revenue-claim-fix-20261014
+node scripts/robinhood/launchpads/pons/testnet/deploy-revenue-fix.mjs --wallet /absolute/testnet-wallet.json --deployment-id revenue-claim-fix-20261014
+node scripts/robinhood/launchpads/pons/testnet/deploy-revenue-fix.mjs --wallet /absolute/testnet-wallet.json --deployment-id revenue-claim-fix-20261014 --broadcast
+```
+
+Resume the same broadcast command after the recorded `readyAt` to activate the three reviewed plugins and the factory-bound adapter. The existing transaction runner persists signed bytes before broadcasting and retains the 0.009 ETH total and 0.0015 ETH per-transaction Gas caps. Application pins may switch only after registry verification and finality; `revenueFixPins` retains the previous factory, implementation and adapter code hashes and discovery bindings. Existing immutable project Vaults keep their original implementation and funds. The backend obtains the preserved platform token's curve from its verified upstream launch record, independently of the new Vault factory.
+
+Native-only sweep now pins Hook code and factory/escrow bindings; token fees, token tax or pending buyback remain operator-only. A deferred collection may still claim existing escrow or recognize ETH already in the Vault, without crediting upstream pending balances. The isolated `revenue-sweep-20261014` build uses production source SHA-256 `20d38d69bc08ae42af11073700ae48246c03c88d71817a38031c26320df9897e`, repeat payouts and the existing in-memory 10-minute test delay. Its public deployment is pending authorized wallet files; production sources retain 48 hours.
