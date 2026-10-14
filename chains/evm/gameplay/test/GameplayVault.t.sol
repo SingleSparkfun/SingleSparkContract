@@ -160,8 +160,51 @@ contract GameplayVaultTest is GameplayFixture {
         vm.assume(amount != 0);
         GameplayVault vault = create(address(quote), policies(address(quote))); fund(vault, amount);
         assertEq(vault.budget(BURN) + vault.budget(PLATFORM) + vault.budget(DISTRIBUTE)
-            + vault.platformBudget() + vault.claimBudget() + vault.unallocated(), amount);
+            + vault.platformBudget() + vault.claimBudget() + vault.unallocated() + vault.roundingReserve(), amount);
         vault.sync(); assertEq(vault.received(), amount);
+    }
+    function testOneUnitDepositsCannotAvoidPlatformAndClaimFees() public {
+        GameplayVault vault = create(address(quote), policies(address(quote)));
+        for (uint256 i; i < 200; ++i) {
+            fund(vault, 1);
+            assertEq(vault.platformBudget() + vault.claimBudget() + vault.budget(BURN)
+                + vault.budget(PLATFORM) + vault.budget(DISTRIBUTE) + vault.roundingReserve(), i + 1);
+        }
+        assertEq(vault.platformBudget(), 20); assertEq(vault.claimBudget(), 1);
+        assertEq(vault.budget(BURN) + vault.budget(PLATFORM) + vault.budget(DISTRIBUTE), 179);
+        assertEq(vault.roundingReserve(), 0);
+    }
+    function testFullWidthIncomeDoesNotOverflowAllocationProducts() public {
+        GameplayVault vault = create(address(quote), policies(address(quote)));
+        fund(vault, type(uint256).max);
+        assertEq(vault.platformBudget(), type(uint256).max / 10);
+        assertEq(vault.claimBudget(), type(uint256).max / 200);
+        assertEq(vault.budget(BURN) + vault.budget(PLATFORM) + vault.budget(DISTRIBUTE)
+            + vault.platformBudget() + vault.claimBudget() + vault.roundingReserve(), type(uint256).max);
+        vault.sync(); assertEq(vault.received(), type(uint256).max);
+    }
+    function testRoundingBackingCannotBeSpentBeforeTheNextIncome() public {
+        GameplayPolicy[] memory p = policies(address(quote)); p[1].weight = 0; p[2].weight = 0;
+        GameplayVault vault = create(address(quote), p); fund(vault, 199);
+        assertEq(vault.roundingReserve(), 2);
+        execute(vault, request(vault, BURN, vault.budget(BURN), ""), "");
+        vault.settlePlatform(); assertEq(quote.balanceOf(address(vault)), 2);
+        fund(vault, 1);
+        assertEq(vault.platformBudget(), 1); assertEq(vault.claimBudget(), 1);
+        assertEq(vault.budget(BURN), 1); assertEq(vault.roundingReserve(), 0);
+        assertEq(vault.accounted(), 3);
+    }
+    function testFuzzSplitIncomeKeepsCumulativeFeesAfterSettlement(uint96 first, uint96 second) public {
+        GameplayVault vault = create(address(quote), policies(address(quote)));
+        if (first != 0) fund(vault, first);
+        uint256 settled = vault.platformBudget(); vault.settlePlatform();
+        if (second != 0) fund(vault, second);
+        uint256 total = uint256(first) + second;
+        assertEq(vault.platformBudget() + settled, total * 1000 / 10000);
+        assertEq(vault.claimBudget(), total * 50 / 10000);
+        assertEq(vault.platformBudget() + settled + vault.claimBudget() + vault.budget(BURN)
+            + vault.budget(PLATFORM) + vault.budget(DISTRIBUTE) + vault.roundingReserve(), total);
+        assertEq(vault.accounted(), quote.balanceOf(address(vault)));
     }
     function testNonReturningErc20DoesNotRequireMetadataOrBoolReturns() public {
         GameplayNoReturnToken asset = new GameplayNoReturnToken();

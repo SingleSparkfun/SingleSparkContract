@@ -116,8 +116,55 @@ contract WeightedPluginsTest is ArgusClaimTest {
     }
     function testFuzzWeightedAccountingConservesEveryUnit(uint96 amount, uint8 mask) public {
         weighted(mask % 8); fund(amount);
-        uint256 sum = vault.claimBudget() + vault.unallocatedPluginBudget();
+        uint256 sum = vault.claimBudget() + vault.unallocatedPluginBudget() + vault.roundingReserve();
         for (uint256 i; i < 5; ++i) sum += vault.budgets(i);
         assertEq(sum, amount);
+    }
+    function testPermissionlessSettlementCannotInvalidateOrReplayAClaim() public {
+        weighted(7); fund(100e6);
+        address[] memory empty = new address[](0);
+        ArgusRevenueVault.Claim memory c = request(0, 1e6, empty); bytes memory sig = signature(c);
+        vm.startPrank(address(0xbad));
+        vault.settle(true, 1); vault.settle(true, 1);
+        vm.stopPrank();
+        assertEq(vault.nonce(), c.nonce);
+        vm.prank(CALLER); vault.claim(c, empty, sig);
+        assertEq(vault.nonce(), c.nonce + 1);
+        vm.expectRevert(); vm.prank(CALLER); vault.claim(c, empty, sig);
+        assertEq(quote.balanceOf(router.operations()), 2);
+        assertEq(vault.accounted(), quote.balanceOf(address(vault)));
+    }
+    function testOneUnitIncomeCannotAvoidFeesOrSpendRoundingBacking() public {
+        weighted(1);
+        for (uint256 i; i < 199; ++i) fund(1);
+        assertEq(vault.budgets(4), 19); assertEq(vault.claimBudget(), 0);
+        assertEq(vault.budgets(0), 178); assertEq(vault.roundingReserve(), 2);
+        vault.settle(true, 19); buy(0, 178);
+        assertEq(quote.balanceOf(address(vault)), 2);
+        fund(1);
+        assertEq(vault.budgets(4), 1); assertEq(vault.claimBudget(), 1);
+        assertEq(vault.budgets(0), 1); assertEq(vault.roundingReserve(), 0);
+        assertEq(vault.accounted(), 3);
+    }
+    function testFullWidthIncomeDoesNotOverflowWeightedAllocation() public {
+        weighted(7); fund(type(uint256).max);
+        assertEq(vault.budgets(4), type(uint256).max / 10);
+        assertEq(vault.claimBudget(), type(uint256).max / 200);
+        uint256 sum = vault.claimBudget() + vault.roundingReserve();
+        for (uint256 i; i < 5; ++i) sum += vault.budgets(i);
+        assertEq(sum, type(uint256).max);
+        vault.sync(); assertEq(vault.received(), type(uint256).max);
+    }
+    function testFuzzSplitIncomePreservesFeesAndAllBuckets(uint96 first, uint96 second, uint8 mask) public {
+        weighted(mask % 8); fund(first);
+        uint256 settled = vault.budgets(4);
+        if (settled != 0) vault.settle(true, settled);
+        fund(second);
+        uint256 total = uint256(first) + second;
+        assertEq(vault.budgets(4) + settled, total * 1000 / 10000);
+        assertEq(vault.claimBudget(), total * 50 / 10000);
+        uint256 sum = settled + vault.claimBudget() + vault.unallocatedPluginBudget() + vault.roundingReserve();
+        for (uint256 i; i < 5; ++i) sum += vault.budgets(i);
+        assertEq(sum, total); assertEq(vault.accounted(), quote.balanceOf(address(vault)));
     }
 }

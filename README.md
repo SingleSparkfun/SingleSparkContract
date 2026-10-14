@@ -51,6 +51,8 @@ cargo test --manifest-path chains/solana/Cargo.toml --workspace --locked
 node --test chains/solana/tests/client.test.mjs
 ```
 
+From the workspace root, `npm run test:contracts` aggregates all of those Solidity/Rust/client suites, including the separate platform NFT and legacy profiles. ARC source roots exclude vendored test directories while still building dependency artifacts needed by local V4 fixtures. Public-chain acceptance and local-validator integration are separate, explicitly invoked checks.
+
 The existing npm Pons commands keep their names. Direct Node tools now use the paths under `scripts/`; deployment and acceptance commands can spend funds and are not part of structural checks.
 
 ## Guides

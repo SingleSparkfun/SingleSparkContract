@@ -38,6 +38,7 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
         uint256 minimumOutput; uint256 deadline; uint256 output; uint256 reward;
     }
     Active private active;
+    uint16 private allocationRemainder;
     bytes32 public constant CLAIM_TYPEHASH = keccak256("GameplayClaim(address caller,bytes32 pluginId,uint256 amount,uint256 minimumOutput,uint256 reward,uint256 deadline,uint256 nonce,uint256 policyRevision,uint256 registryRevision,bytes32 dataHash)");
     event Income(uint256 amount);
     event Deposited(address indexed sender, uint256 amount);
@@ -131,14 +132,22 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
         if (balance < accounted) revert Invalid();
         uint256 income = balance - accounted;
         if (income == 0) return;
-        uint256 fee = Math.mulDiv(income, 1000, 10000);
-        uint256 reward = Math.mulDiv(income, 50, 10000);
+        uint256 base = income + allocationRemainder;
+        uint256 fee = Math.mulDiv(base, 1000, 10000) - uint256(allocationRemainder) * 1000 / 10000;
+        uint256 reward = Math.mulDiv(base, 50, 10000) - uint256(allocationRemainder) * 50 / 10000;
+        uint256 work = Math.mulDiv(base, 8950, 10000) - uint256(allocationRemainder) * 8950 / 10000;
+        allocationRemainder = uint16(base % 10000);
         platformBudget += fee;
         claimBudget += reward;
-        _allocate(income - fee - reward);
+        _allocate(work);
         accounted = balance;
         received += income;
         emit Income(income);
+    }
+    /// Fractional allocations stay backed by unspendable funding units until later income completes them.
+    function roundingReserve() external view returns (uint256) {
+        uint256 base = allocationRemainder;
+        return base - base * 1000 / 10000 - base * 50 / 10000 - base * 8950 / 10000;
     }
     function _allocate(uint256 amount) private {
         amount += unallocated;

@@ -68,6 +68,8 @@ contract ArgusRevenueVault is ReentrancyGuard {
         bytes32 recipientsHash;
     }
     PluginTask private activeTask;
+    // Append only: historical income and existing proxy budgets keep their original allocation.
+    uint16 private allocationRemainder;
     struct Claim {
         address caller; uint8 bucket; address target; uint256 amount; uint256 minimum;
         uint256 deadline; uint256 nonce; uint256 revision; address implementation;
@@ -175,11 +177,15 @@ contract ArgusRevenueVault is ReentrancyGuard {
         uint256 income = balance - accounted;
         if (income == 0) return;
         if (weightedAllocation) {
-            uint256 platformFee = Math.mulDiv(income, weights[4], 10000);
-            uint256 reward = Math.mulDiv(income, claimWeight, 10000);
+            uint256 base = income + allocationRemainder;
+            uint256 platformFee = Math.mulDiv(base, weights[4], 10000) - uint256(allocationRemainder) * weights[4] / 10000;
+            uint256 reward = Math.mulDiv(base, claimWeight, 10000) - uint256(allocationRemainder) * claimWeight / 10000;
+            uint256 workWeight = 10000 - uint256(weights[4]) - claimWeight;
+            uint256 work = Math.mulDiv(base, workWeight, 10000) - uint256(allocationRemainder) * workWeight / 10000;
+            allocationRemainder = uint16(base % 10000);
             budgets[4] += platformFee;
             claimBudget += reward;
-            _allocatePlugins(income - platformFee - reward);
+            _allocatePlugins(work);
             accounted = balance;
             received += income;
             emit Income(income);
@@ -197,6 +203,12 @@ contract ArgusRevenueVault is ReentrancyGuard {
         accounted = balance;
         received += income;
         emit Income(income);
+    }
+    /// Fractional allocations stay backed by unspendable quote units until later income completes them.
+    function roundingReserve() external view returns (uint256) {
+        uint256 base = allocationRemainder;
+        return base - base * weights[4] / 10000 - base * claimWeight / 10000
+            - base * (10000 - uint256(weights[4]) - claimWeight) / 10000;
     }
     function _bit(uint8 bucket) private pure returns (uint8) { return bucket == 2 ? 2 : bucket == 1 ? 4 : 1; }
     function _allocatePlugins(uint256 amount) private {
@@ -408,7 +420,8 @@ contract ArgusRevenueVault is ReentrancyGuard {
         quote.forceApprove(address(router), amount);
         router.fundTreasury(token, platform, amount);
         quote.forceApprove(address(router), 0);
-        emit Executed(nonce++, bucket, amount, 0);
+        // Permissionless treasury transfers must not invalidate an unrelated signed Claim.
+        emit Executed(nonce, bucket, amount, 0);
     }
     receive() external payable {}
 }

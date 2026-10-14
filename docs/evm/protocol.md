@@ -93,6 +93,8 @@ Users call Vault `claim(request, data, signature)` and pay native Gas on that ch
 
 Eligible buyback rewards are capped at `spent * 50 / 8950` and the unreserved Claim budget. Acquiring distribution inventory only reserves its reward; successful distribution releases it proportionally to delivered inventory. Failed execution pays no reward, and failures or excessive rewards revert atomically. Rewards use the Vault funding asset; they need not cover Gas or be native currency.
 
+The 2026-10-14 source carries fractional platform/Claim/work allocations across income events, so splitting deposits cannot avoid those fees. `roundingReserve()` reports at most two funding base units excluded from spendable budgets until later income completes the fractions. Conservation includes this reserve alongside plugin, platform, Claim and unallocated balances. Existing immutable Vaults retain their deployed accounting; this source change does not migrate funds or modify pinned deployments.
+
 Factory `admin` and online `authorizer` must differ. The online role may authorize bounded Claims and immediately pause, but cannot register plugins, change policy, resume or select arbitrary withdrawals. The signing service must verify business eligibility and quotes. Contracts enforce signature bindings, on-chain policy, spending caps, actual delivery and permanent deduplication.
 
 | Operation | Permission and activation |

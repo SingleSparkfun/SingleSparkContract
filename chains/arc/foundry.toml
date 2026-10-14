@@ -1,7 +1,7 @@
 [profile.default]
-src = "."
-test = "."
-skip = ["lib/**", "out/**", "cache/**", "data/**"]
+src = "launchpads"
+test = "test"
+skip = ["out/**", "cache/**", "data/**"]
 script = "script"
 out = "out"
 libs = ["lib"]

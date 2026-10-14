@@ -4,6 +4,14 @@ The platform-token issuance plan selected Robinhood/Pons on 2026-10-11. Referenc
 
 Scope: new ARC/Argus projects. Solana PDAs and EVM contracts keep their own chain implementations under the same product custody and permission standard.
 
+## Source hardening (2026-10-14; deployment pending)
+
+Permissionless `settle` pays the same fixed treasury destinations without advancing the Claim/execution nonce. It still emits the existing `Executed` event; settlement records are identified by transaction/log identity and bucket, not by assuming every event consumes a Claim nonce. A pending signed Claim survives unrelated treasury settlement, while successful plugin execution still consumes its nonce once.
+
+Weighted income carries allocation fractions across deposits. Platform and Claim allocations therefore equal the cumulative 10% and 0.5% floors even if income is split into one-unit transfers. `roundingReserve()` exposes at most two USDC base units held outside all spendable budgets until later income completes their fractions. The fractional accumulator is appended after the existing storage; it starts with future income and does not reinterpret historical proxy balances. Fixed-allocation legacy accounting remains unchanged.
+
+These are source/test fixes, not a public deployment or proxy upgrade. Existing code hashes, immutable deployments, funds and signed journals retain their bindings. A later ARC upgrade still requires storage/code review, the controller delay and coordinated deployment pins.
+
 ## Latest allocation design (2026-10-10, deployed on ARC Testnet)
 
 The required flow is: Argus creator rewards → project Vault → isolated plugin budgets allocated by weight; the user pays Gas to call Vault Claim → the Vault checks authorization, pause state and budget → a registered plugin contract executes its gameplay → successful execution settles the reward. Allocation is internal accounting within each project Vault, not a transfer into an unisolated shared plugin fund. Plugin weights and executable contract registration are separate: changing a weight cannot authorize arbitrary external execution or withdrawals.
