@@ -1,0 +1,50 @@
+name: singlespark-nft-randomness
+services:
+  postgres:
+    image: postgres:17-alpine@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: openvrf
+      POSTGRES_USER: openvrf
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -h 127.0.0.1 -U openvrf -d openvrf]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes: [postgres_data:/var/lib/postgresql/data]
+  relayer:
+    build:
+      context: ../data/openvrf/9fb960cfc4d41e38f9d3057bf547e0d9cdcd4cc2
+      dockerfile: ../../../randomness/Dockerfile
+    user: "${RELAYER_UID:?Set RELAYER_UID}:${RELAYER_GID:?Set RELAYER_GID}"
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 2m
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      OPENVRF_DIR: /app
+      NFT_RANDOM_DEPLOYMENT_FILE: /run/config/nft-random-vault.json
+      RELAYER_KEY_FILE: /run/secrets/relayer-key
+      RPC_URL: ${RPC_URL:?Set RPC_URL}
+      WS_URL: ${WS_URL:-}
+      DATABASE_URL: postgresql://openvrf:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/openvrf
+      RECEIPT_CONFIRMATIONS: '2'
+      MAX_REQUEST_SPEND_ETH: ${MAX_REQUEST_SPEND_ETH:?Set MAX_REQUEST_SPEND_ETH}
+      MAX_TOTAL_SPEND_ETH: ${MAX_TOTAL_SPEND_ETH:?Set MAX_TOTAL_SPEND_ETH}
+      MAX_GAS_PRICE_GWEI: ${MAX_GAS_PRICE_GWEI:?Set MAX_GAS_PRICE_GWEI}
+    volumes:
+      - ${NFT_RANDOM_DEPLOYMENT_FILE:?Set NFT_RANDOM_DEPLOYMENT_FILE}:/run/config/nft-random-vault.json:ro
+      - ${RELAYER_KEY_FILE:?Set RELAYER_KEY_FILE}:/run/secrets/relayer-key:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: 5m
+        max-file: '7'
+volumes:
+  postgres_data:

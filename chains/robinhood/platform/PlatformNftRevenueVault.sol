@@ -70,7 +70,7 @@ contract PlatformNftRevenueVault is IERC721Receiver, ReentrancyGuard {
     }
     function currentEpoch() public view returns (uint256) { return (block.timestamp - genesis) / EPOCH_DURATION; }
     function epochStart(uint256 epoch) public view returns (uint256) { return genesis + epoch * EPOCH_DURATION; }
-    function qualityWeight(uint8 quality) public pure returns (uint16) {
+    function qualityWeight(uint8 quality) public view virtual returns (uint16) {
         if (quality == 1) return 100;
         if (quality == 2) return 150;
         if (quality == 3) return 200;

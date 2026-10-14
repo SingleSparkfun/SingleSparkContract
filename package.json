@@ -14,6 +14,9 @@
     "test:tools": "node --test --test-concurrency=1 scripts/arc/shared/*.test.mjs scripts/arc/launchpads/argus/testnet/*.test.mjs scripts/robinhood/launchpads/pons/testnet/*.test.mjs",
     "build:platform:nft": "FOUNDRY_PROFILE=platform forge build --root chains/robinhood --sizes",
     "test:platform:nft": "FOUNDRY_PROFILE=platform forge test --root chains/robinhood",
+    "prepare:platform:nft:randomness": "node scripts/robinhood/platform/testnet/prepare-openvrf.mjs",
+    "test:platform:nft:tools": "node --test scripts/robinhood/platform/testnet/*.test.mjs",
+    "test:platform:nft:randomness:local": "node scripts/robinhood/platform/testnet/check-random-nft-local.mjs",
     "deploy:platform:nft:testnet": "node scripts/robinhood/platform/testnet/deploy-nft-vault.mjs",
     "verify:platform:nft:testnet": "node scripts/robinhood/platform/testnet/verify-nft-vault.mjs"
   },

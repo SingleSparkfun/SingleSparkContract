@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "project": {
+    "team_name": "default",
+    "region_name": "rainbond",
+    "app_name": "SingleSpark-NFT-Randomness"
+  },
+  "components": [
+    {
+      "name": "postgres",
+      "role": "database",
+      "image": "registry.cn-hangzhou.aliyuncs.com/xmhxiansheng/singlespark@sha256:7456ef82e5f5bc43d997f4781bbd7c0d6389bff397564649a356e206ba473aee",
+      "port": 5432,
+      "port_alias": "DATABASE",
+      "env": {
+        "POSTGRES_DB": "openvrf",
+        "POSTGRES_USER": "openvrf"
+      },
+      "storage": [
+        {
+          "volume_name": "postgres-data",
+          "volume_type": "share-file",
+          "volume_path": "/var/lib/postgresql/data"
+        }
+      ]
+    },
+    {
+      "name": "relayer",
+      "role": "worker",
+      "image": "registry.cn-hangzhou.aliyuncs.com/xmhxiansheng/singlespark@sha256:bca673759abc067d3c17e61e3d67b62037d9cc67e51c27da976211e6d3e9e0b2",
+      "depends_on": [
+        "postgres"
+      ],
+      "env": {
+        "RPC_URL": "https://rpc.testnet.chain.robinhood.com",
+        "OPENVRF_DIR": "/app",
+        "NFT_RANDOM_DEPLOYMENT_FILE": "/run/config/nft-random-vault.json",
+        "RELAYER_KEY_SOURCE_FILE": "/run/config/relayer-key",
+        "MAX_REQUEST_SPEND_ETH": "0.0001",
+        "MAX_TOTAL_SPEND_ETH": "0.001",
+        "MAX_GAS_PRICE_GWEI": "2",
+        "RECEIPT_CONFIRMATIONS": "2"
+      }
+    }
+  ]
+}

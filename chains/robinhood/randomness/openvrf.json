@@ -1,0 +1,19 @@
+{
+  "repository": "https://github.com/Robinhood-OSS/OpenVRF",
+  "revision": "9fb960cfc4d41e38f9d3057bf547e0d9cdcd4cc2",
+  "archiveSha256": "8783a5e926cd3ecf86295104515fcd1c12021090dc59ca8dd765042f2e556574",
+  "dependencies": [
+    {
+      "repository": "https://github.com/randa-mu/bls-solidity",
+      "revision": "11af179a8287d978659aae07adb66aa60f64b8a6",
+      "archiveSha256": "c9d413370a6b9b613b8afc887df37f33fce82a904178627fc4625a0aeaaffb7e",
+      "directory": "lib/bls-solidity"
+    },
+    {
+      "repository": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "revision": "cab19933c33c2ad1d4c7a84864a3601dddfd16f3",
+      "archiveSha256": "55d04b52de7ee78e036ec8fcf23f82fd65b05fc18c9f4a2bec825c224a85a178",
+      "directory": "lib/openzeppelin-contracts"
+    }
+  ]
+}

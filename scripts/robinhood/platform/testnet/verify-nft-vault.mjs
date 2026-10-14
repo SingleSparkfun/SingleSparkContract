@@ -3,14 +3,16 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createPublicClient, http, keccak256, parseAbi } from 'viem';
+import { nftDeploymentReportName } from './random-nft-config.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
-const reportPath = resolve(root, 'chains/robinhood/deployments/testnet/platform/nft-vault.json');
+const reportPath = resolve(root, 'chains/robinhood/deployments/testnet/platform', nftDeploymentReportName({
+ random: process.argv.includes('--random'), immediateClaims: process.argv.includes('--immediate-claims') }));
 const report = JSON.parse(readFileSync(reportPath));
 assert.equal(report.chainId, 46630); assert.equal(report.environment, 'testnet');
 const client = createPublicClient({ transport: http('https://rpc.testnet.chain.robinhood.com', { timeout: 30000, retryCount: 2 }) });
 assert.equal(await client.getChainId(), 46630);
-for (const name of ['factory', 'nft', 'vault']) {
+for (const name of ['factory', 'nft', 'vault', ...(report.openVrfRevision ? ['router'] : [])]) {
  const code = await client.getCode({ address: report.addresses[name] });
  assert(code && code !== '0x'); assert.equal(keccak256(code), report.codeHashes[name]);
 }
@@ -32,5 +34,40 @@ const [received, accounted, owner, nft, ownerPaid, nftPaid, balance] = await Pro
 ]);
 assert.equal(accounted, owner + nft); assert.equal(balance, accounted); assert.equal(received, accounted + ownerPaid + nftPaid);
 report.latestAccounting = { blockNumber: String(blockNumber), totalReceivedWei: String(received), ownerCreditWei: String(owner), nftReserveWei: String(nft), ownerPaidWei: String(ownerPaid), nftPaidWei: String(nftPaid) };
+if (report.openVrfRevision) {
+ const factoryAbi = parseAbi(['function owner() view returns(address)', 'function nft() view returns(address)', 'function vault() view returns(address)',
+  'function randomnessRouter() view returns(address)', 'function probabilities(uint256) view returns(uint16)', 'function paused() view returns(bool)',
+  'function DELAY() view returns(uint256)', 'function CLAIM_DELAY() view returns(uint256)']);
+ const nftAbi = parseAbi(['function MAX_SUPPLY() view returns(uint256)', 'function issuer() view returns(address)', 'function artworkUris(uint256) view returns(string)']);
+ const vaultAbi = parseAbi(['function nft() view returns(address)', 'function controller() view returns(address)', 'function owner() view returns(address)',
+  'function qualityWeight(uint8) view returns(uint16)']);
+ const routerAbi = parseAbi(['function owner() view returns(address)', 'function authorizedConsumers(address) view returns(bool)',
+  'function authorizedRelayers(address) view returns(bool)', 'function requestFee() view returns(uint256)']);
+ const read = (address, abi, functionName, args = []) => client.readContract({address,abi,functionName,args,blockNumber});
+ const same = (actual, expected) => assert.equal(actual.toLowerCase(), expected.toLowerCase());
+ const {factory,nft,vault,router} = report.addresses;
+ same(await read(factory,factoryAbi,'owner'),report.owner);
+ assert.equal(await read(factory,factoryAbi,'DELAY'),172800n);
+ if (report.claimEligibilityDelaySeconds !== undefined) {
+  assert.equal(report.claimEligibilityDelaySeconds,0);
+  assert.equal(await read(factory,factoryAbi,'CLAIM_DELAY'),0n);
+ }
+ same(await read(factory,factoryAbi,'nft'),nft); same(await read(factory,factoryAbi,'vault'),vault);
+ same(await read(factory,factoryAbi,'randomnessRouter'),router); same(await read(nft,nftAbi,'issuer'),factory);
+ same(await read(vault,vaultAbi,'nft'),nft); same(await read(vault,vaultAbi,'controller'),factory);
+ same(await read(vault,vaultAbi,'owner'),report.owner); same(await read(router,routerAbi,'owner'),report.owner);
+ assert.equal(await read(nft,nftAbi,'MAX_SUPPLY'),100_000n);
+ assert.equal(await read(router,routerAbi,'authorizedConsumers',[factory]),true);
+ assert.equal(await read(router,routerAbi,'authorizedRelayers',[report.relayerAddress]),true);
+ assert.equal(await read(router,routerAbi,'requestFee'),BigInt(report.randomPolicy.requestFeeWei));
+ for(let i=0;i<8;i++) {
+  assert.equal(Number(await read(factory,factoryAbi,'probabilities',[BigInt(i)])),report.randomPolicy.probabilitiesBps[i]);
+  assert.equal(Number(await read(vault,vaultAbi,'qualityWeight',[i+1])),report.randomPolicy.gradeWeights[i]);
+  assert.equal(await read(nft,nftAbi,'artworkUris',[BigInt(i)]),report.randomPolicy.artworkUris[i]);
+ }
+ report.issuance.randomClaimsEnabled = !(await read(factory,factoryAbi,'paused'));
+ report.verification = {...report.verification,maxSupply:100000,probabilitiesMatched:true,gradeWeightsMatched:true,
+  artworkUrisMatched:true,randomnessBindingsMatched:true,randomnessAuthorizationsMatched:true};
+}
 writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({ status: report.status, finalizedThroughBlock: report.finalizedThroughBlock, accounting: report.latestAccounting, totalGasCostWei: report.totalGasCostWei }));

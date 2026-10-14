@@ -1,0 +1,46 @@
+{
+  "chainId": 46630,
+  "maxSupply": 100000,
+  "probabilitiesBps": [
+    4000,
+    2500,
+    1500,
+    1000,
+    600,
+    300,
+    99,
+    1
+  ],
+  "gradeWeights": [
+    100,
+    200,
+    300,
+    400,
+    500,
+    600,
+    700,
+    800
+  ],
+  "artworkUris": [
+    "https://singlespark.fun/assets/nft/01-ember-seed.png",
+    "https://singlespark.fun/assets/nft/02-verdant-flame.png",
+    "https://singlespark.fun/assets/nft/03-azure-heart.png",
+    "https://singlespark.fun/assets/nft/04-amethyst-soul.png",
+    "https://singlespark.fun/assets/nft/05-solar-crown.png",
+    "https://singlespark.fun/assets/nft/06-crimson-phoenix.png",
+    "https://singlespark.fun/assets/nft/07-astral-flame-crowned.png",
+    "https://singlespark.fun/assets/nft/08-genesis-core.png"
+  ],
+  "artworkSha256": [
+    "daf0c63332a6f11973dd17de4931fcaf9e5c20f62ae940996463c3366787aaf7",
+    "9a74b345d358a0cac9a0d678f94eec25673b64e2511433493741135316ccc7d3",
+    "7b1b6d524327bc01bbd8348eb6fb07f3fa5d4f2d9da2b6791227989caab03dbf",
+    "03d46ce0de5e5a255876c1ab9a5dc4381b4ee82272adf20ee648251f2f68824f",
+    "f02ba30d29ea041b15e4108711eabdd334066647ea2f057b554b785e89dd5b54",
+    "0172ff9f01564f79d8c5b8220c24b2d891ead714c77a28be4be250b4a3bc695b",
+    "7bc8216263ed53ce06a5940aed7cc3e67f6a0466ac537402315ba956f2450b96",
+    "c734d3ceb52bf1340b0c4b49d244556934ba5dddf1e14f32a1ebc6ba1d50b1e5"
+  ],
+  "requestFeeWei": "0",
+  "relayerAddress": "0xF926A4A9A3630A311699E8904dccF3F756bE5A05"
+}

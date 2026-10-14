@@ -40,7 +40,7 @@
   },
   "deploymentBlock": "134303669",
   "genesis": "1791897512",
-  "finalizedThroughBlock": "134307848",
+  "finalizedThroughBlock": "135033222",
   "finalityComplete": true,
   "status": "verified",
   "verification": {
@@ -54,7 +54,7 @@
   },
   "totalGasCostWei": "41795990000000",
   "latestAccounting": {
-    "blockNumber": "134316802",
+    "blockNumber": "135043698",
     "totalReceivedWei": "1000000000000",
     "ownerCreditWei": "0",
     "nftReserveWei": "500000000000",

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-14T15:06:09.682Z",
+  "chainId": 46630,
+  "environment": "testnet",
+  "status": "configured-awaiting-finality-and-secure-transport",
+  "contractDeploymentFile": "chains/robinhood/deployments/testnet/platform/nft-random-immediate-vault.json",
+  "addresses": {
+    "factory": "0x8489d2a24d2ab8549315cd7b66e3e48b381e3652",
+    "nft": "0x3B219C419e04441Dd5DE994CE672c3c28DEBe463",
+    "vault": "0x0DF75327816DFCB50686D13c33F8067609B40347",
+    "router": "0xea843734df627b545cf7389f3948e74e10915e80"
+  },
+  "claimEligibilityDelaySeconds": 0,
+  "administrativeResumeDelaySeconds": 172800,
+  "finalityComplete": false,
+  "appName": "SingleSpark-NFT-Randomness",
+  "appId": 4,
+  "teamName": "default",
+  "regionName": "rainbond",
+  "runtimeVerified": false,
+  "publicConfigurationUpdated": true,
+  "secretsUploaded": false,
+  "relayerFunded": false,
+  "issuanceEnabled": false,
+  "previousDeploymentPreserved": true,
+  "tests": {
+    "contracts": 30,
+    "deploymentTools": 2,
+    "architecture": true,
+    "localOpenVrfPostgres": true
+  },
+  "pending": [
+    "Finalized testnet deployment authorization",
+    "Authenticated encrypted control-plane connection",
+    "Upload existing private database and dedicated Relayer signer configuration",
+    "Start PostgreSQL and Relayer; verify recovery and restart",
+    "Fund the dedicated testnet Gas signer using a durable signed journal"
+  ],
+  "publicConfigurationVerified": true,
+  "publicConfigurationSha256": "fefa37ca9ad1d842855205e49daabd2be367b7dea89c2c7eca43c53ba2a05402"
+}

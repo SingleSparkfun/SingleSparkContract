@@ -1,0 +1,122 @@
+{
+  "identity": "c39b68d2232c468bc7915bca2110e5fbbcf90f36a2dce312b2a3c5c63518e839",
+  "chainId": 46630,
+  "environment": "testnet",
+  "owner": "0xe3CB759628928e584256Da687Cf837Df2cf3C116",
+  "addresses": {
+    "factory": "0x8489d2a24d2ab8549315cd7b66e3e48b381e3652",
+    "nft": "0x3B219C419e04441Dd5DE994CE672c3c28DEBe463",
+    "vault": "0x0DF75327816DFCB50686D13c33F8067609B40347",
+    "router": "0xea843734df627b545cf7389f3948e74e10915e80"
+  },
+  "codeHashes": {
+    "factory": "0xb26bc81c12e8c9d6743655bd5a242d444c056b8437045b438e48460de31e8d5a",
+    "nft": "0xd1d36115ef3e5435baae97601e7ec5e6f651138612b1711dca6cffe7be0c43d8",
+    "vault": "0x9a363a1764bb2e8eb118c5d7790b5fcd788e43b706ddadee29a7b28007ca070d",
+    "router": "0x701b72dba2d9877afffdc660f1cb43615796b2bc900a6a61349cba556161d013"
+  },
+  "transactions": {
+    "deploy-randomness-router": {
+      "hash": "0x278357fd2be09c0de5c969726b89f58bd187b2543505f11dd4e2bff7c66811c0",
+      "blockNumber": "135126704",
+      "blockHash": "0x422fcee5f4cbe59bc63e2fe888aeb49ccbf8700fd16d2dcd2b2dfdcfe7285d5d",
+      "gasCostWei": "28869530000000"
+    },
+    "deploy-platform-factory": {
+      "hash": "0xf8d654070a33e78b8cc3b796fbdc0b370ef8f57954075cca34dd5acec2e6e309",
+      "blockNumber": "135126754",
+      "blockHash": "0x23ff757d7be4af4e21cc65ce8e5df1123185fb7aa4a6b044137d80fea99b70f5",
+      "gasCostWei": "49772700000000"
+    },
+    "authorize-nft-randomness": {
+      "hash": "0x04aa7dde5006cc5e2372195e35fce4d8a45475b7a6d6fb685c1bdb13f848a9a7",
+      "blockNumber": "135126866",
+      "blockHash": "0xa5cff912e3d9575c7aa6feef56385f5d718757470bb31489f2172d5fef9408c9",
+      "gasCostWei": "479210000000"
+    },
+    "verify-treasury-forwarding": {
+      "hash": "0xc6680d55b9b1b735c76f7a39928a82e3ba95fc6719cf741069b9f03004348c16",
+      "blockNumber": "135126921",
+      "blockHash": "0x13e6c3b1d74bec6c248d0b854bd186e140ae4ba29b111c5e85a94cda31572299",
+      "gasCostWei": "1462450000000"
+    },
+    "verify-owner-half-withdrawal": {
+      "hash": "0xa5b7c2d2073a8da3e5b08bd676f7358c5faa70c6edc018d59eff4248b4fb05d9",
+      "blockNumber": "135126974",
+      "blockHash": "0xdec28dae0b894b0b9f3f1a8e7389a01b8d7947af2d3ccb351f3b3dfdf910e55a",
+      "gasCostWei": "598220000000"
+    }
+  },
+  "issuance": {
+    "randomClaimsEnabled": false,
+    "xClaimsEnabled": false,
+    "referralClaimsEnabled": false
+  },
+  "openVrfRevision": "9fb960cfc4d41e38f9d3057bf547e0d9cdcd4cc2",
+  "relayerAddress": "0xF926A4A9A3630A311699E8904dccF3F756bE5A05",
+  "randomPolicy": {
+    "probabilitiesBps": [
+      4000,
+      2500,
+      1500,
+      1000,
+      600,
+      300,
+      99,
+      1
+    ],
+    "gradeWeights": [
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800
+    ],
+    "artworkUris": [
+      "https://singlespark.fun/assets/nft/01-ember-seed.png",
+      "https://singlespark.fun/assets/nft/02-verdant-flame.png",
+      "https://singlespark.fun/assets/nft/03-azure-heart.png",
+      "https://singlespark.fun/assets/nft/04-amethyst-soul.png",
+      "https://singlespark.fun/assets/nft/05-solar-crown.png",
+      "https://singlespark.fun/assets/nft/06-crimson-phoenix.png",
+      "https://singlespark.fun/assets/nft/07-astral-flame-crowned.png",
+      "https://singlespark.fun/assets/nft/08-genesis-core.png"
+    ],
+    "requestFeeWei": "0"
+  },
+  "routerDeploymentBlock": "135126704",
+  "deploymentBlock": "135126754",
+  "claimEligibilityDelaySeconds": 0,
+  "authorizationBlock": "135126866",
+  "genesis": "1791990149",
+  "finalizedThroughBlock": "135117281",
+  "finalityComplete": false,
+  "status": "verified_pending_finality",
+  "verification": {
+    "treasuryForwarding": true,
+    "ownerHalfWithdrawal": true,
+    "nftReservePreserved": true,
+    "runtimeCodeMatched": true,
+    "weeklySettlementSeconds": 604800,
+    "policyDelaySeconds": 172800,
+    "weeklyClaimLiveVerified": false,
+    "maxSupply": 100000,
+    "probabilitiesMatched": true,
+    "gradeWeightsMatched": true,
+    "artworkUrisMatched": true,
+    "randomnessBindingsMatched": true,
+    "randomnessAuthorizationsMatched": true
+  },
+  "totalGasCostWei": "81182110000000",
+  "latestAccounting": {
+    "blockNumber": "135127161",
+    "totalReceivedWei": "1000000000000",
+    "ownerCreditWei": "0",
+    "nftReserveWei": "500000000000",
+    "ownerPaidWei": "500000000000",
+    "nftPaidWei": "0"
+  }
+}

@@ -1,0 +1,8 @@
+FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
+COPY --chown=node:node relayer ./relayer
+COPY --chown=node:node singlespark ./singlespark
+ENV OPENVRF_DIR=/app
+ENTRYPOINT ["sh", "/app/singlespark/start-relayer.sh"]

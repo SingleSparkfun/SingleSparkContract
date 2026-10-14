@@ -5,11 +5,15 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { createPublicClient, createWalletClient, defineChain, http, encodeDeployData, encodeFunctionData, keccak256, parseTransaction, recoverTransactionAddress } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import { randomNftConfig, nftDeploymentReportName } from './random-nft-config.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const json = value => JSON.stringify(value, (_, item) => typeof item === 'bigint' ? String(item) : item, 2);
 const read = path => JSON.parse(readFileSync(path));
 const arg = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
+const policyPath = arg('--random-config');
+const policy = policyPath ? randomNftConfig(read(policyPath)) : null;
+const openVrfPin = policy ? read(resolve(root, 'chains/robinhood/randomness/openvrf.json')) : null;
 const walletPath = arg('--wallet'); assert(walletPath, 'Pass an owner-only workspace testnet --wallet file');
 assert.equal(statSync(walletPath).mode & 0o077, 0, 'Wallet file must be owner-only');
 const saved = read(walletPath);
@@ -23,18 +27,24 @@ const chain = defineChain({ id: 46630, name: 'Robinhood Chain Testnet', testnet:
 const transport = http(rpc, { timeout: 30000, retryCount: 2 });
 const client = createPublicClient({ chain, transport, pollingInterval: 1500, cacheTime: 0 });
 assert.equal(await client.getChainId(), 46630, 'RPC chain mismatch');
-const names = ['PlatformNftVaultFactory', 'PlatformNft', 'PlatformNftRevenueVault'];
+const names = policy ? ['PlatformRandomNftFactory', 'PlatformRandomNft', 'PlatformRandomNftRevenueVault']
+  : ['PlatformNftVaultFactory', 'PlatformNft', 'PlatformNftRevenueVault'];
 const artifacts = Object.fromEntries(names.map(name => [name, read(resolve(root, `chains/robinhood/out/platform/${name}.sol/${name}.json`))]));
+if (policy) artifacts.OpenVRF = read(resolve(root, `chains/robinhood/data/openvrf/${openVrfPin.revision}/out/OpenVRF.sol/OpenVRF.json`));
 const owner = accounts.admin.address;
+if (policy) for (const account of Object.values(accounts)) assert.notEqual(policy.relayer.toLowerCase(), account.address.toLowerCase(), 'Use a dedicated Relayer Gas wallet');
 const identity = createHash('sha256').update(json({ chainId: 46630, owner, deployer: accounts.deployer.address,
-  artifacts: Object.fromEntries(names.map(name => [name, artifacts[name].bytecode.object])) })).digest('hex');
-const privateDir = resolve(root, 'chains/robinhood/data/platform-nft-vault', identity);
+  artifacts: Object.fromEntries(Object.keys(artifacts).map(name => [name, artifacts[name].bytecode.object])), randomPolicy: policy ?? undefined })).digest('hex');
+const privateDir = resolve(root, policy ? 'chains/robinhood/data/platform-random-nft-vault' : 'chains/robinhood/data/platform-nft-vault', identity);
 const journalPath = resolve(privateDir, 'transactions.json');
-const reportPath = resolve(root, 'chains/robinhood/deployments/testnet/platform/nft-vault.json');
+const immediateClaims = process.argv.includes('--immediate-claims');
+const reportPath = resolve(root, 'chains/robinhood/deployments/testnet/platform', nftDeploymentReportName({ random: !!policy, immediateClaims }));
 const journal = existsSync(journalPath) ? read(journalPath) : { identity, steps: {} };
 assert.equal(journal.identity, identity);
 const report = existsSync(reportPath) ? read(reportPath) : { identity, chainId: 46630, environment: 'testnet', owner,
   addresses: {}, codeHashes: {}, transactions: {}, issuance: { randomClaimsEnabled: false, xClaimsEnabled: false, referralClaimsEnabled: false } };
+if (policy) Object.assign(report, { openVrfRevision: openVrfPin.revision, relayerAddress: policy.relayer,
+  randomPolicy: { probabilitiesBps: policy.probabilities, gradeWeights: policy.weights, artworkUris: policy.artwork, requestFeeWei: String(policy.requestFeeWei) } });
 assert.equal(report.identity, identity, 'Preserve the original deployment report; use a new reviewed report path for another build');
 const persist = (path, value) => {
   mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
@@ -86,13 +96,21 @@ try {
   persist(reportPath, report); console.log(label, receipt.transactionHash); return receipt;
  }
  const call = (address, artifact, functionName, args = [], blockNumber) => client.readContract({ address, abi: artifact.abi, functionName, args, blockNumber });
- const factoryArtifact = artifacts.PlatformNftVaultFactory, vaultArtifact = artifacts.PlatformNftRevenueVault;
- const deployment = await send('deploy-platform-factory', { data: encodeDeployData({ abi: factoryArtifact.abi, bytecode: factoryArtifact.bytecode.object, args: [owner] }) });
+ const factoryArtifact = artifacts[names[0]], vaultArtifact = artifacts[names[2]];
+ let router;
+ if (policy) {
+  const routerDeployment = await send('deploy-randomness-router', { data: encodeDeployData({ abi: artifacts.OpenVRF.abi,
+   bytecode: artifacts.OpenVRF.bytecode.object, args: [owner, policy.relayer, policy.requestFeeWei] }) });
+  router = routerDeployment.contractAddress; assert(router);
+  report.routerDeploymentBlock = String(routerDeployment.blockNumber);
+ }
+ const deployment = await send('deploy-platform-factory', { data: encodeDeployData({ abi: factoryArtifact.abi, bytecode: factoryArtifact.bytecode.object,
+  args: policy ? [owner, router, policy.probabilities, policy.weights, policy.artwork] : [owner] }) });
  const factory = deployment.contractAddress; assert(factory);
  const nft = await call(factory, factoryArtifact, 'nft'); const vault = await call(factory, factoryArtifact, 'vault');
- report.addresses = { factory, nft, vault }; report.deploymentBlock = String(deployment.blockNumber);
+ report.addresses = { factory, nft, vault, ...(router ? { router } : {}) }; report.deploymentBlock = String(deployment.blockNumber);
  const mask = (code, references) => { let value = code.slice(2); for (const entries of Object.values(references ?? {})) for (const { start, length } of entries) value = value.slice(0, start * 2) + '0'.repeat(length * 2) + value.slice((start + length) * 2); return value.toLowerCase(); };
- for (const [name, address, artifact] of [['factory', factory, factoryArtifact], ['nft', nft, artifacts.PlatformNft], ['vault', vault, vaultArtifact]]) {
+ for (const [name, address, artifact] of [['factory', factory, factoryArtifact], ['nft', nft, artifacts[names[1]]], ['vault', vault, vaultArtifact], ...(router ? [['router', router, artifacts.OpenVRF]] : [])]) {
   const code = await client.getCode({ address }); assert(code && code !== '0x');
   assert.equal(mask(code, artifact.deployedBytecode.immutableReferences), mask(artifact.deployedBytecode.object, artifact.deployedBytecode.immutableReferences), `${name} runtime mismatch`);
   report.codeHashes[name] = keccak256(code);
@@ -101,6 +119,23 @@ try {
  assert.equal((await call(vault, vaultArtifact, 'nft')).toLowerCase(), nft.toLowerCase());
  assert.equal((await call(vault, vaultArtifact, 'controller')).toLowerCase(), factory.toLowerCase());
  assert.equal(await call(vault, vaultArtifact, 'EPOCH_DURATION'), 604800n); assert.equal(await call(factory, factoryArtifact, 'DELAY'), 172800n);
+ if (policy) {
+  if (immediateClaims) {
+   assert.equal(await call(factory, factoryArtifact, 'CLAIM_DELAY'), 0n);
+   report.claimEligibilityDelaySeconds = 0;
+  }
+  assert.equal((await call(factory, factoryArtifact, 'randomnessRouter')).toLowerCase(), router.toLowerCase());
+  assert.equal(await call(factory, factoryArtifact, 'paused'), true);
+  for (let i = 0; i < 8; i++) {
+   assert.equal(Number(await call(factory, factoryArtifact, 'probabilities', [BigInt(i)])), policy.probabilities[i]);
+   assert.equal(Number(await call(vault, vaultArtifact, 'qualityWeight', [i + 1])), policy.weights[i]);
+  }
+  const authorization = await send('authorize-nft-randomness', { to: router, data: encodeFunctionData({ abi: artifacts.OpenVRF.abi,
+   functionName: 'setConsumerAuthorization', args: [factory, true] }) }, 'admin');
+  report.authorizationBlock = String(authorization.blockNumber);
+  assert.equal(await call(router, artifacts.OpenVRF, 'authorizedConsumers', [factory]), true);
+  assert.equal(await call(router, artifacts.OpenVRF, 'authorizedRelayers', [policy.relayer]), true);
+ }
  report.genesis = String(await call(vault, vaultArtifact, 'genesis')); persist(reportPath, report);
  const income = 1_000_000_000_000n;
  const deposit = await send('verify-treasury-forwarding', { to: factory, value: income });
