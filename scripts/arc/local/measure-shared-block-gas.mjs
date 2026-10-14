@@ -2,7 +2,6 @@
 // party's transaction is mined first in the same block. Public development keys, synthetic accounts;
 // never sends anything to a public network. Run after `forge build --root backend`:
 //   node SingleSparkContract/scripts/arc/local/measure-shared-block-gas.mjs [output.json]
-// Readiness checklist item 4 (`docs/production-readiness-20260920.md`).
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';

@@ -10,3 +10,11 @@ cache/
 chains/*/data/
 chains/solana/target/
 .data/
+
+# Workspace-only guidance, audit working papers and operating notes.
+/AGENTS.md
+/docs/
+# Publish only the repository overview as Markdown.
+*.[mM][dD]
+!/README.md
+chains/robinhood/randomness/.rainbond/

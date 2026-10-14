@@ -27,7 +27,7 @@ export async function deployArc(client, wallet, { positionManager, keeper, opera
   if ((satisfaction || executor) && version !== 3) throw new Error('Satisfaction vault and keeper executor require the USDC fee model');
   // `satisfaction` carries no default here on purpose: the caller must state the durations, and the
   // schedule the owner chose for future deployments is roundDuration 604800 s with votingDuration
-  // 601200 s (6 d 23 h). The vault is immutable, so read what that implies in SingleSparkContract/docs/arc/vaults.md first:
+  // 601200 s (6 d 23 h). The vault is immutable:
   // the pot is fixed about an hour into the round, and a quorum-sized stake must be in by mid-window
   // or the round is Void. A local or fast testnet run passes its own short durations instead.
   if (satisfaction) {

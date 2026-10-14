@@ -204,7 +204,7 @@ const parseExposition = (text) => {
   };
 };
 
-/** Every metric the operations package and SingleSparkContract/docs/arc/vaults.md document. All of them must exist on a
+/** Every metric the operations package exposes. All of them must exist on a
  *  healthy backend on this platform; the two Linux-only ones are listed separately below. */
 const DOCUMENTED = ['arc_build_info', 'arc_process_start_time_seconds', 'arc_uptime_seconds',
   'arc_index_head_block', 'arc_index_indexed_block', 'arc_index_lag_blocks', 'arc_index_age_seconds',

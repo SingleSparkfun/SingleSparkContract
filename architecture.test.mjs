@@ -76,9 +76,9 @@ test('build roots contain no misplaced browser checks or asset generators', () =
   for (const environment of ['mainnet', 'testnet', 'local']) assert(existsSync(resolve(root, 'chains/arc/deployments', environment)));
 });
 
-test('contract documentation links resolve after moving guides', () => {
+test('public contract documentation links resolve', () => {
   const failures = [];
-  const guides = [resolve(root, 'README.md'), ...files(resolve(root, 'docs')), resolve(root, 'chains/solana/README.md')];
+  const guides = [resolve(root, 'README.md')];
   for (const file of guides.filter(path => path.endsWith('.md'))) {
     for (const [, link] of readFileSync(file, 'utf8').matchAll(/\]\(([^)]+)\)/g)) {
       if (link.startsWith('#') || /^[a-z]+:/i.test(link)) continue;

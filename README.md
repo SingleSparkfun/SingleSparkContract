@@ -1,68 +1,32 @@
 # SingleSpark contracts
 
-On-chain project vaults, revenue plugins, governance and launchpad integrations. Each project keeps its own funds and budgets.
+On-chain contracts for project vaults, revenue plugins, token launches and NFTs. Project funds and plugin budgets are accounted for separately.
 
-## Repository layout
+## Repository structure
 
-| Path | Responsibility |
+| Directory | Contents |
 | --- | --- |
-| `chains/<chain>/launchpads/<platform>/` | Platform contracts and their tests |
-| `chains/evm/` | Shared EVM contracts; not a public network |
-| `chains/solana/` | Solana programs and shared accounts |
-| `scripts/<chain>/launchpads/<platform>/production/` | Production deployment tools |
-| `scripts/<chain>/launchpads/<platform>/testnet/` | Public testnet build, deployment and acceptance tools |
-| `scripts/<chain>/launchpads/<platform>/local/` | Local forks and integration checks |
-| `scripts/arc/shared/`, `scripts/arc/local/` | Existing ARC runtime, deployment preflight and integration checks |
-| `chains/<chain>/deployments/<environment>/<launchpad>/` | Environment-specific public configuration and evidence |
-| `docs/` | Protocol, custody and operating guides |
-| `chains/<chain>/foundry.toml`, `chains/solana/Cargo.toml` | Chain-owned build profiles and dependencies |
+| [`chains/arc/`](chains/arc/) | ARC contracts and launchpad integrations |
+| [`chains/evm/`](chains/evm/) | Shared EVM gameplay, revenue and governance contracts |
+| [`chains/robinhood/`](chains/robinhood/) | Pons integration and platform NFT contracts |
+| [`chains/solana/`](chains/solana/) | Rust programs, shared accounts and JavaScript client |
+| [`chains/bsc/`](chains/bsc/) | Launchpad interface definitions |
+| [`scripts/`](scripts/) | Build, deployment and verification tools |
 
-Frontend asset generators and browser checks belong to `SingleSparkFront/scripts/`. Geographic data generators belong to `SingleSparkBackend/scripts/geo/`. Contract integration tools that start the API or read frontend ABI bindings explicitly require the complete SingleSpark workspace; Solidity and Rust builds do not.
+Tests, build profiles and deployment records live alongside their owning chain.
 
-## Environments
+## Contracts
 
-Business contracts have one source under `chains/`. Production policy delays remain **48 hours**. The isolated ARC Claim and Pons gameplay testnet builds substitute **10 minutes in compiler inputs**, without changing production Solidity. Existing deployments keep their recorded delay.
-
-| Environment | Network | Configuration and evidence |
+| Module | Main contracts / programs | Responsibility |
 | --- | --- | --- |
-| Mainnet | ARC `5042` / Argus | `chains/arc/deployments/mainnet/`; production launches still require reviewed pins |
-| Testnet | ARC `5042002` / Argus and SingleSpark | `chains/arc/deployments/testnet/` |
-| Testnet | Robinhood `46630` / Pons | `chains/robinhood/deployments/testnet/pons/` |
-| Reference only | Robinhood mainnet `4663` | `chains/robinhood/deployments/mainnet/pons/reference.json`; execution disabled |
-| Local | Loopback Anvil forks | `chains/<chain>/deployments/local/`; never evidence of public-chain execution |
+| [ARC / Argus](chains/arc/launchpads/argus/) | `ArgusCustodyRouter`, `ArgusVaultFactory`, `ArgusRevenueVault`, `BuybackBurnPlugin`, `PlatformBuybackPlugin`, `TokenDistributionPlugin`, `ArgusGovernance` | Launch integration, project vaults, revenue allocation and governance binding |
+| [ARC / SingleSpark](chains/arc/launchpads/singlespark/) | `ArcLaunch`, `ArcLaunchV2`, `ArcLaunchStrategy`, `ArcRewards` | Token launch, launch strategy and rewards |
+| [EVM gameplay](chains/evm/gameplay/) | `GameplayVaultFactory`, `GameplayVault`, `GameplayBuybackPlugin`, `GameplayDistributionPlugin`, `GameplayV4Adapter` | Isolated vaults and bounded plugin execution |
+| [EVM revenue](chains/evm/revenue/) | `NativeRevenueDistributor` | Revenue distribution |
+| [EVM governance](chains/evm/governance/) | `ArcProjectTreasury`, `ArcProjectTreasuryDeployer`, `ArcSatisfaction`, `ArcDrandVerifier` | Treasury, voting and randomness verification |
+| [EVM execution](chains/evm/execution/) | `ArcKeeperExecutor` | Authorized execution of bounded operations |
+| [Robinhood / Pons](chains/robinhood/launchpads/pons/) | `PonsVaultFactory`, `PonsGameplayVault`, `PonsSwapAdapter` | Project creation, revenue custody and gameplay execution |
+| [Robinhood NFTs](chains/robinhood/platform/) | `PlatformNft*`, `PlatformRandomNft*` | NFT issuance, staking and income accounting |
+| [Solana](chains/solana/) | Revenue, DAO and timelock programs | PDA vaults, revenue operations, governance and delayed administration |
 
-Directory names do not enable a network. RPC identity, configuration, source pins, wallet roles, budgets and explicit broadcast gates remain enforced. ARC profiles are selected by chain ID and checked against their environment. Pons deployment tools reject mainnet.
-
-Private environment files, wallets, frozen builds and signed journals are ignored under `chains/arc/data/`, `chains/arc/.env.*`, `chains/robinhood/data/pons/` and the operator's configured data directory. The directory move preserves their bytes and deployment identities; all maintained tools use the chain-owned paths. They are not public deployment records. Do not move or delete them to retry transactions.
-
-Sanitized environment templates are in [ARC production](chains/arc/deployments/mainnet/argus/.env.example) and [ARC testnet](chains/arc/deployments/testnet/argus/.env.example). Production tools require an explicit owner-only `--env` file. Testnet RPC overrides can be loaded with Node's `--env-file`; the independent deployment still enforces chain `5042002` and dedicated wallet roles.
-
-## Verification
-
-From this repository:
-
-```sh
-npm run check:architecture
-npm run test:tools
-forge test --root chains/arc
-forge test --root chains/evm
-npm run test:pons:vault
-cargo test --manifest-path chains/solana/Cargo.toml --workspace --locked
-node --test chains/solana/tests/client.test.mjs
-```
-
-From the workspace root, `npm run test:contracts` aggregates all of those Solidity/Rust/client suites, including the separate platform NFT and legacy profiles. ARC source roots exclude vendored test directories while still building dependency artifacts needed by local V4 fixtures. Public-chain acceptance and local-validator integration are separate, explicitly invoked checks.
-
-The existing npm Pons commands keep their names. Direct Node tools now use the paths under `scripts/`; deployment and acceptance commands can spend funds and are not part of structural checks.
-
-## Guides
-
-- [ARC vault custody, allocation and rollout](docs/arc/vaults.md)
-- [ARC isolated Claim testnet build](docs/arc/argus-testnet.md)
-- [Robinhood / Pons testnet deployment](docs/robinhood/pons.md)
-- [Shared EVM gameplay protocol](docs/evm/protocol.md)
-- [Solana programs](chains/solana/README.md) and [business flow](docs/solana/business-flow.md)
-- [Deployment records](docs/deployments.md)
-- [Platform model](docs/platform.md)
-
-Platform-owned NFT income contracts live in `chains/robinhood/platform`, with their own Foundry profile and `build:platform:nft`, `test:platform:nft`, `deploy:platform:nft:testnet` commands. The native income Vault credits 50% to its immutable owner and 50% to NFT quality-seconds in seven-day epochs; it does not change Pons project Vault allocations. [Contract rules, tests and testnet verification](docs/robinhood/platform-nft-vault.md).
+Source code describes the implementation; network deployment records identify deployed versions. Updating this repository does not upgrade existing contracts or migrate funds.

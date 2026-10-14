@@ -32,8 +32,8 @@ const source = { keeper: { address: privateKeyToAccount(process.env.ARC_KEEPER_P
 const satisfactionMode = process.argv.includes('--satisfaction');
 // The defaults are the ones a real deployment should get: a 7-day round with voting open for 6 d 23 h.
 // A fast acceptance run overrides them (that is what the existing 30-minute testnet vault was deployed with):
-// ARC_SATISFACTION_ROUND_SECONDS=1800 ARC_SATISFACTION_VOTING_SECONDS=600. See SingleSparkContract/docs/arc/vaults.md for what the
-// long window implies: the pot is fixed about an hour in, and a quorum-sized stake must be in by mid-window.
+// ARC_SATISFACTION_ROUND_SECONDS=1800 ARC_SATISFACTION_VOTING_SECONDS=600.
+// With the long window, the pot is fixed about an hour in, and a quorum-sized stake must be in by mid-window.
 const satisfaction = satisfactionMode ? { team: getAddress(process.env.ARC_SATISFACTION_TEAM || source.platform.address),
   roundDuration: Number(process.env.ARC_SATISFACTION_ROUND_SECONDS || 604800),
   votingDuration: Number(process.env.ARC_SATISFACTION_VOTING_SECONDS || 601200),
