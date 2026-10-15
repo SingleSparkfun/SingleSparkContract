@@ -21,4 +21,15 @@ test('revenue rollout preserves platform-token, old custody and recovery pins un
   assert.throws(() => revenueFixPins(previous, { ...report, finalityComplete: false }));
   assert.throws(() => revenueFixPins(previous, { ...report, status: 'revenue_registry_timelock_pending' }));
   assert.throws(() => revenueFixPins({ ...previous, chainId: 4663 }, report));
+  const beforeHooks = { ...previous, buybackPlugin:'0x99', distributionPlugin:'0xaa', contracts:{...previous.contracts,
+    buybackPlugin:{address:'0x99',codeHash:'old-buyback'},distributionPlugin:{address:'0xaa',codeHash:'old-distribution'}} };
+  const allHooks = { ...report, addresses:{...report.addresses,buybackPlugin:'0xbb',distributionPlugin:'0xcc'},
+    codeHashes:{...report.codeHashes,buybackPlugin:'new-buyback',distributionPlugin:'new-distribution'} };
+  const updated = revenueFixPins(beforeHooks, allHooks);
+  assert.equal(updated.buybackPlugin,'0xbb');assert.equal(updated.distributionPlugin,'0xcc');
+  assert.deepEqual(updated.contracts.historical_99,beforeHooks.contracts.buybackPlugin);
+  assert.deepEqual(updated.contracts.historical_aa,beforeHooks.contracts.distributionPlugin);
+  assert.equal(beforeHooks.buybackPlugin,'0x99');
+  assert.throws(()=>revenueFixPins(beforeHooks,{...allHooks,addresses:{...report.addresses,buybackPlugin:'0xbb'}}));
+  assert.throws(()=>revenueFixPins(beforeHooks,{...allHooks,codeHashes:{...report.codeHashes,buybackPlugin:'new-buyback'}}));
 });

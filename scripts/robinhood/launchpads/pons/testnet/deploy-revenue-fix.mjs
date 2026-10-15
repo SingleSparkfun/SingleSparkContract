@@ -14,7 +14,14 @@ export function revenueFixPins(previous, report) {
   assert.equal(report.status, 'revenue_registry_verified');
   assert.equal(report.finalityComplete, true);
   const contracts = { ...previous.contracts };
-  for (const name of ['vaultFactory', 'vaultImplementation', 'swapAdapter']) {
+  const freshHooks = report.addresses.buybackPlugin !== undefined || report.addresses.distributionPlugin !== undefined;
+  const names = ['vaultFactory', 'vaultImplementation', 'swapAdapter'];
+  if (freshHooks) {
+    for (const name of ['buybackPlugin', 'distributionPlugin'])
+      assert(report.addresses[name] && report.codeHashes[name] && previous.contracts[name], 'Both new Hook implementations must be verified');
+    names.push('buybackPlugin', 'distributionPlugin');
+  }
+  for (const name of names) {
     const old = previous.contracts[name];
     contracts[`historical_${old.address.slice(2).toLowerCase()}`] = old;
     contracts[name] = { address: report.addresses[name].toLowerCase(), codeHash: report.codeHashes[name] };
@@ -24,6 +31,7 @@ export function revenueFixPins(previous, report) {
   return { ...previous, payoutPolicy: 'repeat', contracts, legacyFactories,
     vaultFactory: contracts.vaultFactory.address, vaultImplementation: contracts.vaultImplementation.address,
     swapAdapter: contracts.swapAdapter.address,
+    ...(freshHooks ? { buybackPlugin: contracts.buybackPlugin.address, distributionPlugin: contracts.distributionPlugin.address } : {}),
     deploymentBlock: Number(report.transactions['deploy-revenue-factory'].blockNumber), policyDelaySeconds: 600 };
 }
 
@@ -31,6 +39,7 @@ async function main() {
   const argument = name => { const index = process.argv.indexOf(name); assert(index >= 0 && process.argv[index + 1], `Pass ${name}`); return process.argv[index + 1]; };
   const walletPath = resolve(argument('--wallet'));
   const deploymentId = argument('--deployment-id');
+  const freshHooks = process.argv.includes('--deploy-hooks');
   const build = readJson(gameplayPaths(deploymentId).output);
   const roleDirectory = resolve(root, 'chains/robinhood/deployments/testnet/pons');
   const deploymentRoles = resolve(roleDirectory, `${deploymentId}-roles.json`);
@@ -40,7 +49,7 @@ async function main() {
   assert.equal(statSync(walletPath).mode & 0o077, 0, 'Wallet file must be owner-only');
   const wallets = readJson(walletPath);
   assert.equal(privateKeyToAccount(wallets.admin.privateKey).address.toLowerCase(), roles.admin.toLowerCase(), 'Admin does not match the reviewed testnet role');
-  const c = await context({ walletPath, broadcast: process.argv.includes('--broadcast'), deploymentName: 'gameplay', deploymentId, artifacts: { ...build, roles } });
+  const c = await context({ walletPath, broadcast: process.argv.includes('--broadcast'), deploymentName: 'gameplay', deploymentId, artifacts: { ...build, roles, ...(freshHooks ? { freshHooks: true } : {}) } });
   const previous = c.report.previousPins ?? readJson(resolve(root, '../SingleSparkBackend/api/src/chains/robinhood/launchpads/pons/deployment.json'));
   assert.equal(previous.chainId, 46630);
   await preflight(c);
@@ -57,7 +66,7 @@ async function main() {
   if (!c.broadcast) {
     console.log(json({ status: 'prepared', chainId: 46630, deploymentId, deployer: c.account.address, roles,
       platformToken: previous.platformToken, journal: c.journalPath, policyDelaySeconds: 600,
-      maximumTotalCostWei: c.config.maximumTotalCostWei, contracts: ['PonsVaultFactory', 'PonsHookVault', 'PonsSwapAdapter'] }));
+      maximumTotalCostWei: c.config.maximumTotalCostWei, contracts: ['PonsVaultFactory', 'PonsHookVault', 'PonsSwapAdapter', ...(freshHooks ? ['BuybackHook', 'DistributionHook'] : [])] }));
     return;
   }
   mkdirSync(c.storageDir, { recursive: true, mode: 0o700 });
@@ -90,8 +99,16 @@ async function main() {
       assert.equal((await c.read(adapter.address, a.adapter.abi, field)).toLowerCase(), expected.toLowerCase());
     Object.assign(c.report.addresses, { vaultFactory: f.address, vaultImplementation: implementation.toLowerCase(), swapAdapter: adapter.address });
     Object.assign(c.report.codeHashes, { vaultFactory: f.codeHash, vaultImplementation: keccak256(implementationCode), swapAdapter: adapter.codeHash });
+    const hooks = { buybackPlugin: previous.buybackPlugin, distributionPlugin: previous.distributionPlugin };
+    if (freshHooks) {
+      for (const [name, artifact] of [['buybackPlugin', a.buyback], ['distributionPlugin', a.distribution]]) {
+        const deployed = await create(`deploy-revenue-${name === 'buybackPlugin' ? 'buyback' : 'distribution'}`, artifact, []);
+        hooks[name] = deployed.address;
+        c.report.addresses[name] = deployed.address; c.report.codeHashes[name] = deployed.codeHash;
+      }
+    }
     c.report.platformToken = previous.platformToken; c.save();
-    const plugins = ['buyback-burn@1', 'platform-buyback@1', 'distribution@1'].map((name, index) => [keccak256(toHex(name)), index === 2 ? previous.distributionPlugin : previous.buybackPlugin]);
+    const plugins = ['buyback-burn@1', 'platform-buyback@1', 'distribution@1'].map((name, index) => [keccak256(toHex(name)), index === 2 ? hooks.distributionPlugin : hooks.buybackPlugin]);
     for (const [index, [id, address]] of plugins.entries()) await call(`schedule-revenue-plugin-${index}`, f.address, a.factory.abi, 'schedulePlugin', [id, address], 'admin');
     await call('schedule-revenue-adapter', f.address, a.factory.abi, 'scheduleAdapter', [adapter.address], 'admin');
     const scheduled = Object.entries(c.report.transactions).filter(([label]) => label.startsWith('schedule-revenue-'));
@@ -117,5 +134,6 @@ async function main() {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch(error => {
   console.error(error instanceof assert.AssertionError ? error.message : (error.shortMessage ?? 'Pons revenue deployment stopped; preserve its journal.'));
+  if (!(error instanceof assert.AssertionError)) console.error(json({ error: error.name, code: error.code, cause: error.cause?.name, causeCode: error.cause?.code }));
   process.exitCode = 1;
 });

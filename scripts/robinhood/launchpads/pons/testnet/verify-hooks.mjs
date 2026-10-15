@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createPublicClient, defineChain, http, keccak256, toHex } from 'viem';
 import { root, readJson, json } from './build.mjs';
@@ -21,13 +22,17 @@ export async function verifyHooks(deploymentId) {
   const block = await client.getBlock();
   const finalized = await client.getBlock({blockTag:'finalized'});
   assert(BigInt(pins.deploymentBlock) <= finalized.number, 'Factory deployment is not finalized');
-  const activation = readJson(resolve(root, 'chains/robinhood/deployments/testnet/pons/gameplay-revenue-claim-fix-20261014.json'));
+  const ownActivation = resolve(root, `chains/robinhood/deployments/testnet/pons/gameplay-${deploymentId}.json`);
+  const isNewDeployment = existsSync(ownActivation);
+  const activation = readJson(isNewDeployment ? ownActivation : resolve(root, 'chains/robinhood/deployments/testnet/pons/gameplay-revenue-claim-fix-20261014.json'));
   assert.equal(activation.status, 'revenue_registry_verified');
   assert.equal(activation.addresses.vaultFactory.toLowerCase(), pins.vaultFactory);
   for (const transaction of Object.values(activation.transactions)) {
     const number = BigInt(transaction.blockNumber);
     assert(number <= finalized.number, 'Registry activation is not finalized');
     assert.equal((await client.getBlock({blockNumber:number})).hash, transaction.blockHash, 'Deployment or registry activation was reorganized');
+    const receipt = await client.getTransactionReceipt({hash:transaction.hash});
+    assert.equal(receipt.status, 'success');assert.equal(receipt.blockHash, transaction.blockHash);
   }
   const codeAt = address => client.getCode({address,blockNumber:block.number});
   for (const pin of Object.values(pins.contracts))
@@ -50,9 +55,9 @@ export async function verifyHooks(deploymentId) {
     assert.equal((await read(pins.vaultFactory,build.artifacts.factory.abi,'plugin',[keccak256(toHex(id))])).toLowerCase(),address);
   await read(pins.vaultFactory,build.artifacts.factory.abi,'checkAdapter',[pins.swapAdapter]);
   await read(pins.vaultFactory,build.artifacts.factory.abi,'checkPons');
-  const report={status:'hooks_verified_existing_testnet_deployment',chainId:46630,contracts,productionSourcesSha256:build.productionSourcesSha256,
+  const report={status:isNewDeployment?'hooks_verified_new_testnet_deployment':'hooks_verified_existing_testnet_deployment',chainId:46630,contracts,productionSourcesSha256:build.productionSourcesSha256,
     stateBlock:String(block.number),finalizedThroughBlock:String(finalized.number),factoryDeploymentFinalized:true,finalityComplete:true,policyDelaySeconds:600,
-    platformToken:pins.platformToken,legacyFactories:pins.legacyFactories,reusedDeployment:true,transactionsBroadcast:0,verifiedAt:new Date().toISOString()};
+    platformToken:pins.platformToken,legacyFactories:pins.legacyFactories,reusedDeployment:!isNewDeployment,transactionsBroadcast:isNewDeployment?Object.keys(activation.transactions).length:0,verifiedAt:new Date().toISOString()};
   persist(resolve(root,`chains/robinhood/deployments/testnet/pons/${deploymentId}.json`),report);
   return report;
 }
