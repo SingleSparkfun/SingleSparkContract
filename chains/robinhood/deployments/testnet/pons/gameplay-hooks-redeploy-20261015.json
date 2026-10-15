@@ -1,0 +1,229 @@
+{
+  "identity": "9a1e27ed76b4e90e4094b87c3b797359c5cf1ece63fb33a95c87eea766558a5f",
+  "status": "revenue_registry_verified",
+  "chainId": 46630,
+  "local": false,
+  "independentDeployment": true,
+  "officialPonsDeployment": false,
+  "deployer": "0x696b8b3fd9528Bea1cBBD1f3746CB3E5E44ED3C9",
+  "addresses": {
+    "vaultFactory": "0x82ab44690efff93c2d85272b8fbb21cddeb264d6",
+    "vaultImplementation": "0x92a6c3d68a0fea5b9967d33cc6afeb46745cb441",
+    "swapAdapter": "0x54dc0fb52b8d121e7b4e063f33305e0d09f70f59",
+    "buybackPlugin": "0xfd70cc451031f9ad940581c89cc1d9e028a99691",
+    "distributionPlugin": "0x6b38bcf5bad0c1ca4a6b145989250022d5385e1c"
+  },
+  "codeHashes": {
+    "vaultFactory": "0xd31fbb34a412d1163f4ccd3c110e32bde1cd87c45cbe13bfd86dca5ea6496fc3",
+    "vaultImplementation": "0x95777c014c9fef585a483561ed7dc5861e90044f715fde477f5556a06bbc5014",
+    "swapAdapter": "0x17b395542982fd4f1f33f0bcde42a305371fa7846c93a77a5453d5e41b4f051a",
+    "buybackPlugin": "0xf4f540efef3c7c6276b04662e5b032a7c28bb382c59e602e29c36a30a507ab12",
+    "distributionPlugin": "0x9dc88044877d1999de39ea00396304c2e9845927de0b82453716d62f44a4d74d"
+  },
+  "transactions": {
+    "deploy-revenue-factory": {
+      "hash": "0x45254a542f5f14312a356f0667da300ffd0dc1d95fc0e62c13cc9d61d4700e24",
+      "blockNumber": "135613815",
+      "blockHash": "0x34a5eadc166177b2d3fe881551adec76d400e733056988893508473b50e59b49",
+      "gasCostWei": "62448050000000"
+    },
+    "deploy-revenue-adapter": {
+      "hash": "0x7ea4b2ed15e859065b53956df608e63a3ebbdc33de5ff2e9a8a22f9dd60f0652",
+      "blockNumber": "135613901",
+      "blockHash": "0x13bbdaf4c2cb957a7f7547527d1539a0aa922a2ca0d27727f53b0e9b40a43ba1",
+      "gasCostWei": "14234150000000"
+    },
+    "deploy-revenue-buyback": {
+      "hash": "0xf4ddcbe7fbade3589a616624863cc6eb2a407080ee8e1091fd107f44f0626a45",
+      "blockNumber": "135613955",
+      "blockHash": "0x51ae4e6c3b30bf2a33bb0350ed1bedd7d5f881ee0316ec97ad5713ef4b422d5b",
+      "gasCostWei": "2039520000000"
+    },
+    "deploy-revenue-distribution": {
+      "hash": "0x8de65f8cc5a227d4ab15433744f3f447c58659b7efc5b06a9269686c1a7e1033",
+      "blockNumber": "135613999",
+      "blockHash": "0x59b3168eb756af77da34688d7a0b8e856f657993ea6ba76d71d3b36ec30cda56",
+      "gasCostWei": "3886480000000"
+    },
+    "schedule-revenue-plugin-0": {
+      "hash": "0x86f657eaf5c6420fc0693364ba94656c1eebe385babb1d52333b79f369f763b6",
+      "blockNumber": "135614047",
+      "blockHash": "0x5e91082e9478a5a7a258152134428e0fc6d55f5f54740937405c43eecdc82bdc",
+      "gasCostWei": "542470000000"
+    },
+    "schedule-revenue-plugin-1": {
+      "hash": "0x9895dd0f58ba4d2b63fe68f77c91692d23699dd40aba2d0d850b24630093e9c5",
+      "blockNumber": "135614093",
+      "blockHash": "0xa0ae14934acd1b6eaddca8d07145ab9a98f438f28e5fb4a7c39fd14b95e21541",
+      "gasCostWei": "542470000000"
+    },
+    "schedule-revenue-plugin-2": {
+      "hash": "0x2c3035f604f2282ce4472ea47e80afe8ad98503cb859dd88a2283f83633334cb",
+      "blockNumber": "135614139",
+      "blockHash": "0xed1f5d1e4ab8808ff3281342cdd73e7253d1b14b56138d2c86912d0efd8055d5",
+      "gasCostWei": "542350000000"
+    },
+    "schedule-revenue-adapter": {
+      "hash": "0x7c9a9be35a30e913803f5b90187aab5026537ebc4a3ef0fd3ea7072a75cc2b9a",
+      "blockNumber": "135614943",
+      "blockHash": "0xae2697194b6538820d56926dc8ecab6558134a8405f91e3e31e5b28052f73951",
+      "gasCostWei": "518340000000"
+    },
+    "activate-revenue-plugin-0": {
+      "hash": "0x57c0b4f701c3e341fbdfa452573b4748b68702cf8443d5a64da059e0a04d55b9",
+      "blockNumber": "135621217",
+      "blockHash": "0x0683532cbf2fe0724927e7466053452bb8ba1eb1d06f9e298157bda0b8d7b79a",
+      "gasCostWei": "952700000000"
+    },
+    "activate-revenue-plugin-1": {
+      "hash": "0x8f3531a22c329fc336a499ffed29a34b66f0c185bdba6a1861dcf8ae5c2d71de",
+      "blockNumber": "135621256",
+      "blockHash": "0x51fe9ca61b3b463159bc95ed356bb0c2cfcd1e9cb9d0b2b0ae844499fecdf83a",
+      "gasCostWei": "781700000000"
+    },
+    "activate-revenue-plugin-2": {
+      "hash": "0x82b7e3541faa07f2649ce99e1ac13b4e4187f173affee1285153a42b87e69817",
+      "blockNumber": "135621298",
+      "blockHash": "0x30dc011f1875e8e82814839623e85ba005d357d0039be2f20c391333ad98c32b",
+      "gasCostWei": "781580000000"
+    },
+    "activate-revenue-adapter": {
+      "hash": "0x372f9cfb28b6f1f854c4469e624a30494235bd5bfd7eff32b016263222b33ee3",
+      "blockNumber": "135621339",
+      "blockHash": "0x13d4f9931f41e8bf6778a1f6c0edfe3b1159faa73e36a9e7e6583f05c272b773",
+      "gasCostWei": "545460000000"
+    }
+  },
+  "testnetDifferences": [
+    "Reuse an existing third-party testnet deployment, not an officially published Pons testnet.",
+    "Native phantom reserve 0.000008 ETH, graduation threshold 0.00002 ETH, launch fee zero.",
+    "External administrator can change launch availability and policies; every run rechecks the recorded state."
+  ],
+  "previousPins": {
+    "chainId": 46630,
+    "payoutPolicy": "repeat",
+    "ponsFactory": "0xec987ceb5f08d6bde2871e78ab67af145746bc8c",
+    "escrow": "0x7e637b4760549fe8d815d640bffbaaeb93b722e4",
+    "vaultFactory": "0x38fb2f4c748ab5d35c2f21afa5103fa68f25bdf1",
+    "vaultImplementation": "0xeb25f0ef1a6a3d071a50a487e5dbf73035026abc",
+    "contracts": {
+      "factory": {
+        "address": "0xEc987cEb5F08D6bdE2871E78AB67Af145746BC8c",
+        "codeHash": "0x8610636d8e26ebda6a9fccdd4913d12eb19e0db8463422d137794ac9a7bfd394",
+        "match": true,
+        "executableMatch": true
+      },
+      "escrow": {
+        "address": "0x7e637b4760549fE8d815D640bFfBaAEB93b722E4",
+        "codeHash": "0xf25f75cfbc1637ba068dc34f69098fa4e8a80f8ee8fe7bf7820594e0b3fed2f1",
+        "match": false,
+        "executableMatch": true
+      },
+      "hook": {
+        "address": "0x975a2B6c9B769cB065431445Ff554845D28E2044",
+        "codeHash": "0xafc4875f7c3528e18c90ef69f5d90d7021f8e82769f945867414f48c5fc5cab4",
+        "match": false,
+        "executableMatch": true
+      },
+      "buyback": {
+        "address": "0x5AFcAfb36e774c05D3F8a7484dccD9E3Deca44A1",
+        "codeHash": "0xa5a6bfd9af88147889a525d72af5ba58dc48a013bd0da349a4b965f70c4706db",
+        "match": false,
+        "executableMatch": true
+      },
+      "locker": {
+        "address": "0xd2B8C094b1c8f154d88b4305539A80909e752ab0",
+        "codeHash": "0x58455f80b3773871d601a025e56ec27c71ab3bbb8e2ca6b17828954450742025",
+        "match": false,
+        "executableMatch": true
+      },
+      "deployer": {
+        "address": "0xD428999b375fA665f5Ed86403B041253441e8a4e",
+        "codeHash": "0xff18cf1dfb239ca17170e006dcd2e411dddf2195b7a53af307e7f2629cd193a1",
+        "match": true,
+        "executableMatch": true
+      },
+      "graduation": {
+        "address": "0x49AB005469AA6B293fdF3C3c2e6779fbaf5e12BD",
+        "codeHash": "0x680ca9a52dd3272f69120bd88eae0889dfb7c89ecb96c866cebf77adf6fe3ca1",
+        "match": false,
+        "executableMatch": true
+      },
+      "vaultFactory": {
+        "address": "0x38fb2f4c748ab5d35c2f21afa5103fa68f25bdf1",
+        "codeHash": "0x83e6a38da4d82be1999a0ca6087a76a267b2561f3ab40bb6e8134209d9dc7d41"
+      },
+      "vaultImplementation": {
+        "address": "0xeb25f0ef1a6a3d071a50a487e5dbf73035026abc",
+        "codeHash": "0x63be217c9db65e32f9d4e1b8ea9d82aaa3c9ee7c7acea3b6f263196a71429aa8"
+      },
+      "legacyFactory": {
+        "address": "0xc27f99ca0fb8e4ee79dff8ba36f77effbe52e42b",
+        "codeHash": "0x53de2fc01744ced7225e4d7782fa6a76ec1a2d4a5afe9bd317e4091826205dbe"
+      },
+      "legacyImplementation": {
+        "address": "0x2e399e259d7f2cdfa0d49a198837cd2e3272da5a",
+        "codeHash": "0xe3a91690f6ab7f0a2d8c63721491eef2e42718cc94adb3bc6f89e2a746b102a8"
+      },
+      "swapAdapter": {
+        "address": "0x1f8685a732236388d0ef7b4bc8f0a746f755b072",
+        "codeHash": "0x4bc98bd85cfba039936a6745f5c8870fa0cd7c6372f5ad640c7299d39b2d1851"
+      },
+      "buybackPlugin": {
+        "address": "0xee5b8a7dbb4b10d1de5d84690d8abd45031dc2a9",
+        "codeHash": "0xf4f540efef3c7c6276b04662e5b032a7c28bb382c59e602e29c36a30a507ab12"
+      },
+      "distributionPlugin": {
+        "address": "0x9cab78eccad6954f0209675709ebf381137acbde",
+        "codeHash": "0x9dc88044877d1999de39ea00396304c2e9845927de0b82453716d62f44a4d74d"
+      },
+      "historical_ee540b1ab519a2f8076591e4db2380a965f0bf88": {
+        "address": "0xee540b1ab519a2f8076591e4db2380a965f0bf88",
+        "codeHash": "0x8d5161a2ffbaca5a529afb192ea0c0217cd1e07c1a7277a54ca51251b04bfc62"
+      },
+      "historical_b153cdb47c38c8fcf12a1f67cfd25ef94e77ba02": {
+        "address": "0xb153cdb47c38c8fcf12a1f67cfd25ef94e77ba02",
+        "codeHash": "0x8b2bee1529d923e27808e60f85444f74392a1ba454a900814fee7a94b50fb644"
+      },
+      "historical_c26b4cae05cae344038ea599fe4ba376bdf4b56e": {
+        "address": "0xc26b4cae05cae344038ea599fe4ba376bdf4b56e",
+        "codeHash": "0xe2d7f120b41b6a618db01aaf6ef98641952b78aeaeb81eb2c367fb3ef699b14b"
+      }
+    },
+    "poolManager": "0x8366a39CC670B4001A1121B8F6A443A643e40951",
+    "legacyFactories": [
+      {
+        "factory": "0xee540b1ab519a2f8076591e4db2380a965f0bf88",
+        "implementation": "0xb153cdb47c38c8fcf12a1f67cfd25ef94e77ba02",
+        "block": 132864729
+      },
+      {
+        "factory": "0xc27f99ca0fb8e4ee79dff8ba36f77effbe52e42b",
+        "implementation": "0x2e399e259d7f2cdfa0d49a198837cd2e3272da5a",
+        "block": 132747827
+      }
+    ],
+    "deploymentBlock": 134975860,
+    "platformToken": "0x79133018bf9cfd9049a428b5b16469c10c038a58",
+    "policyDelaySeconds": 600,
+    "swapAdapter": "0x1f8685a732236388d0ef7b4bc8f0a746f755b072",
+    "buybackPlugin": "0xee5b8a7dbb4b10d1de5d84690d8abd45031dc2a9",
+    "distributionPlugin": "0x9cab78eccad6954f0209675709ebf381137acbde"
+  },
+  "platformToken": "0x79133018bf9cfd9049a428b5b16469c10c038a58",
+  "readyAt": "1792045185",
+  "finalizedThroughBlock": "135623800",
+  "finalityComplete": true,
+  "verification": {
+    "checks": [
+      "reviewed executable bytecode",
+      "pinned Pons Hook and escrow bindings",
+      "separate admin and authorizer",
+      "10-minute testnet registry delay",
+      "three registered plugins",
+      "factory-bound swap adapter",
+      "existing platform token preserved"
+    ],
+    "production": false
+  }
+}

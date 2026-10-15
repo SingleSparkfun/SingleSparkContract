@@ -1,0 +1,93 @@
+{
+  "status": "hooks_verified_new_testnet_deployment",
+  "chainId": 46630,
+  "contracts": {
+    "PonsVaultFactory": {
+      "address": "0x82ab44690efff93c2d85272b8fbb21cddeb264d6",
+      "codeHash": "0xd31fbb34a412d1163f4ccd3c110e32bde1cd87c45cbe13bfd86dca5ea6496fc3",
+      "runtimeVerified": true
+    },
+    "PonsHookVault": {
+      "address": "0x92a6c3d68a0fea5b9967d33cc6afeb46745cb441",
+      "codeHash": "0x95777c014c9fef585a483561ed7dc5861e90044f715fde477f5556a06bbc5014",
+      "runtimeVerified": true
+    },
+    "PonsSwapAdapter": {
+      "address": "0x54dc0fb52b8d121e7b4e063f33305e0d09f70f59",
+      "codeHash": "0x17b395542982fd4f1f33f0bcde42a305371fa7846c93a77a5453d5e41b4f051a",
+      "runtimeVerified": true
+    },
+    "BuybackHook": {
+      "address": "0xfd70cc451031f9ad940581c89cc1d9e028a99691",
+      "codeHash": "0xf4f540efef3c7c6276b04662e5b032a7c28bb382c59e602e29c36a30a507ab12",
+      "runtimeVerified": true
+    },
+    "DistributionHook": {
+      "address": "0x6b38bcf5bad0c1ca4a6b145989250022d5385e1c",
+      "codeHash": "0x9dc88044877d1999de39ea00396304c2e9845927de0b82453716d62f44a4d74d",
+      "runtimeVerified": true
+    }
+  },
+  "productionSourcesSha256": "490948e6e9a5a7e2c946b4b8f9539d4a26bd8203b2524ad1eb5daf8f077c12af",
+  "stateBlock": "135632102",
+  "finalizedThroughBlock": "135623800",
+  "factoryDeploymentFinalized": true,
+  "finalityComplete": true,
+  "policyDelaySeconds": 600,
+  "platformToken": "0x79133018bf9cfd9049a428b5b16469c10c038a58",
+  "legacyFactories": [
+    {
+      "factory": "0x38fb2f4c748ab5d35c2f21afa5103fa68f25bdf1",
+      "implementation": "0xeb25f0ef1a6a3d071a50a487e5dbf73035026abc",
+      "block": 134975860
+    },
+    {
+      "factory": "0xee540b1ab519a2f8076591e4db2380a965f0bf88",
+      "implementation": "0xb153cdb47c38c8fcf12a1f67cfd25ef94e77ba02",
+      "block": 132864729
+    },
+    {
+      "factory": "0xc27f99ca0fb8e4ee79dff8ba36f77effbe52e42b",
+      "implementation": "0x2e399e259d7f2cdfa0d49a198837cd2e3272da5a",
+      "block": 132747827
+    }
+  ],
+  "reusedDeployment": false,
+  "transactionsBroadcast": 12,
+  "verifiedAt": "2026-10-15T06:40:06.175Z",
+  "launchSimulation": {
+    "status": "passed",
+    "chainId": 46630,
+    "vaultFactory": "0x82ab44690efff93c2d85272b8fbb21cddeb264d6",
+    "upstreamAllowsFactory": true,
+    "launchSimulationPassed": true,
+    "transactionsBroadcast": 0,
+    "verifiedAt": "2026-10-15T06:30:38.903Z"
+  },
+  "explorerVerification": {
+    "verifiedContracts": [
+      {
+        "name": "PonsVaultFactory",
+        "address": "0x82ab44690efff93c2d85272b8fbb21cddeb264d6"
+      },
+      {
+        "name": "PonsSwapAdapter",
+        "address": "0x54dc0fb52b8d121e7b4e063f33305e0d09f70f59"
+      },
+      {
+        "name": "BuybackHook",
+        "address": "0xfd70cc451031f9ad940581c89cc1d9e028a99691"
+      },
+      {
+        "name": "DistributionHook",
+        "address": "0x6b38bcf5bad0c1ca4a6b145989250022d5385e1c"
+      }
+    ],
+    "vaultImplementation": {
+      "address": "0x92a6c3d68a0fea5b9967d33cc6afeb46745cb441",
+      "status": "not_indexed_by_explorer",
+      "runtimeVerified": true
+    },
+    "checkedAt": "2026-10-15T06:28:33.035Z"
+  }
+}
