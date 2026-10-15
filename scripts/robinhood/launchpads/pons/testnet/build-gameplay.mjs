@@ -29,16 +29,16 @@ export function buildGameplay(deploymentId = '') {
   }
   const owned = {
     factory: ['chains/robinhood/launchpads/pons/PonsVaultFactory.sol', 'PonsVaultFactory'],
-    vault: ['chains/robinhood/launchpads/pons/PonsGameplayVault.sol', 'PonsGameplayVault'],
+    vault: ['chains/robinhood/launchpads/pons/PonsHookVault.sol', 'PonsHookVault'],
     adapter: ['chains/robinhood/launchpads/pons/PonsSwapAdapter.sol', 'PonsSwapAdapter'],
-    buyback: ['chains/evm/gameplay/GameplayPlugins.sol', 'GameplayBuybackPlugin'],
-    distribution: ['chains/evm/gameplay/GameplayPlugins.sol', 'GameplayDistributionPlugin'],
+    buyback: ['chains/evm/hooks/RevenueHooks.sol', 'BuybackHook'],
+    distribution: ['chains/evm/hooks/RevenueHooks.sol', 'DistributionHook'],
   };
   for (const [path] of Object.values(owned)) visit(path);
   const productionSourcesSha256 = hash(sources);
   if (existsSync(paths.journal))
     assert.equal(readJson(paths.output).productionSourcesSha256, productionSourcesSha256, 'Public gameplay build is frozen; preserve its journal and use a separate --deployment-id');
-  const factory = sources['chains/evm/gameplay/GameplayVaultFactory.sol'];
+  const factory = sources['chains/evm/hooks/HookVaultFactory.sol'];
   assert.equal(factory.content.split('DELAY = 48 hours').length, 2);
   factory.content = factory.content.replace('DELAY = 48 hours', 'DELAY = 10 minutes');
   assert(sources[owned.factory[0]].content.includes('block.chainid != 46630'));

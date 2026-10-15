@@ -1,0 +1,7 @@
+{
+  "chainId": 46630,
+  "admin": "0xe3CB759628928e584256Da687Cf837Df2cf3C116",
+  "authorizer": "0xe36aa094c070b3aB3475c6C2Af0071E8438A71C1",
+  "treasury": "0xAB370A85F810a1a598660Db1946b04C4c1bb541e",
+  "description": "Hook-naming testnet rollout; existing reviewed admin, authorizer and treasury are preserved. No token issuance or custody migration."
+}

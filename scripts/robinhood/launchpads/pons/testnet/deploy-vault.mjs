@@ -11,7 +11,7 @@ assert(walletIndex >= 0, 'Pass --wallet with an owner-only testnet wallet');
 const walletPath = resolve(process.argv[walletIndex + 1]);
 const foundation = await context({ walletPath });
 await deploy(foundation);
-const names = ['PonsVaultFactory', 'PonsGameplayVault'];
+const names = ['PonsVaultFactory', 'PonsHookVault'];
 const artifacts = Object.fromEntries(names.map(name => {
   const a = readJson(resolve(root, `chains/robinhood/out/${name}.sol/${name}.json`));
   return [name, { abi: a.abi, bytecode: a.bytecode, deployedBytecode: a.deployedBytecode }];
@@ -31,7 +31,7 @@ if (!c.broadcast) {
 mkdirSync(c.storageDir, { recursive: true, mode: 0o700 });
 const lockPath = resolve(c.storageDir, 'run.lock'), lock = openSync(lockPath, 'wx', 0o600);
 try {
-  const f = artifacts.PonsVaultFactory, v = artifacts.PonsGameplayVault;
+  const f = artifacts.PonsVaultFactory, v = artifacts.PonsHookVault;
   const pons = readJson(resolve(data, 'build.json')).artifacts;
   const call = (label, address, abi, functionName, args = [], value = 0n) => c.send(label, { to: address, data: encodeFunctionData({ abi, functionName, args }), value });
   const deployment = await c.send('vault-factory', { data: encodeDeployData({ abi: f.abi, bytecode: f.bytecode.object, args: [roles.admin, roles.authorizer, roles.treasury, source] }) });

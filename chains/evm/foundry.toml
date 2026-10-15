@@ -1,6 +1,6 @@
 [profile.default]
-src = "./gameplay"
-test = "./gameplay/test"
+src = "./hooks"
+test = "./hooks/test"
 out = "out"
 cache_path = "cache"
 libs = ["../arc/lib"]

@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {GameplayFixture, GameplayTestToken, GameplayNoReturnToken, GameplayForwardingRecipient} from "./GameplayFixture.sol";
-import {GameplayVault} from "../GameplayVault.sol";
-import {GameplayClaim, GameplayPolicy} from "../IGameplayProtocol.sol";
+import {HookFixture, HookTestToken, HookNoReturnToken, HookForwardingRecipient} from "./HookFixture.sol";
+import {HookVault} from "../HookVault.sol";
+import {HookClaim, HookPolicy} from "../IHookProtocol.sol";
 
-contract GameplayVaultTest is GameplayFixture {
+contract HookVaultTest is HookFixture {
     function testFactoryRegistersExistingTokenAndKeepsProjectsSeparate() public {
         project.mint(OWNER, 123 ether);
         address predicted = factory.predictVault(OWNER, address(project));
-        GameplayVault vault = create(address(quote), policies(address(quote)));
+        HookVault vault = create(address(quote), policies(address(quote)));
         assertEq(address(vault), predicted);
         assertEq(factory.vaultOf(OWNER, address(project)), address(vault));
         assertEq(project.balanceOf(OWNER), 123 ether);
         vm.expectRevert(); vm.prank(OWNER);
         factory.createVault(address(project), address(0), policies(address(0)));
         vm.prank(CALLER);
-        GameplayVault other = GameplayVault(payable(factory.createVault(address(project), address(quote), policies(address(quote)))));
+        HookVault other = HookVault(payable(factory.createVault(address(project), address(quote), policies(address(quote)))));
         fund(vault, 100e6);
         assertEq(other.accounted(), 0);
         assertEq(other.budget(BURN), 0);
@@ -24,23 +24,23 @@ contract GameplayVaultTest is GameplayFixture {
         assertEq(other.owner(), CALLER);
     }
     function testInitializationCannotBeStolenOrRepeated() public {
-        GameplayVault vault = create(address(quote), policies(address(quote)));
+        HookVault vault = create(address(quote), policies(address(quote)));
         vm.expectRevert(); vault.initialize(CALLER, address(project), address(0), policies(address(0)));
         vm.expectRevert(); vm.prank(address(factory));
         vault.initialize(CALLER, address(project), address(0), policies(address(0)));
-        GameplayVault implementation = GameplayVault(payable(factory.implementation()));
+        HookVault implementation = HookVault(payable(factory.implementation()));
         vm.expectRevert(); vm.prank(address(factory));
         implementation.initialize(CALLER, address(project), address(0), policies(address(0)));
     }
     function testNativeDepositAndClaimNeedNoWrappedToken() public {
-        GameplayVault vault = create(address(0), policies(address(0)));
+        HookVault vault = create(address(0), policies(address(0)));
         fund(vault, 100 ether);
         assertEq(vault.platformBudget(), 10 ether);
         assertEq(vault.claimBudget(), 0.5 ether);
         assertEq(vault.budget(BURN), uint256(89.5 ether) / 3);
         uint256 beforeBurn = address(0xdead).balance;
         uint256 beforeCaller = CALLER.balance;
-        GameplayClaim memory c = request(vault, BURN, 1 ether, "");
+        HookClaim memory c = request(vault, BURN, 1 ether, "");
         c.reward = uint256(1 ether) * 50 / 8950;
         execute(vault, c, "");
         assertEq(address(0xdead).balance, beforeBurn + 1 ether);
@@ -51,7 +51,7 @@ contract GameplayVaultTest is GameplayFixture {
         assertEq(vault.accounted(), address(vault).balance);
     }
     function testSixDecimalAssetAndDirectTransfersAccountExactlyOnce() public {
-        GameplayVault vault = create(address(quote), policies(address(quote)));
+        HookVault vault = create(address(quote), policies(address(quote)));
         fund(vault, 100e6);
         assertEq(vault.budget(BURN), 29833333);
         assertEq(vault.budget(PLATFORM), 29833333);
@@ -64,7 +64,7 @@ contract GameplayVaultTest is GameplayFixture {
         assertEq(vault.accounted(), quote.balanceOf(address(vault)));
     }
     function testUnexpectedAssetNeverCreatesBudget() public {
-        GameplayVault vault = create(address(quote), policies(address(quote)));
+        HookVault vault = create(address(quote), policies(address(quote)));
         project.mint(address(vault), 100 ether);
         vault.sync(); assertEq(vault.accounted(), 0);
         vm.expectRevert(); vm.prank(CALLER); vault.deposit{value: 1}(1);
@@ -72,16 +72,16 @@ contract GameplayVaultTest is GameplayFixture {
         assertFalse(ok);
     }
     function testNativeAmountMustMatchAndDirectNativeIncomeSyncs() public {
-        GameplayVault vault = create(address(0), policies(address(0)));
+        HookVault vault = create(address(0), policies(address(0)));
         vm.expectRevert(); vm.prank(CALLER); vault.deposit{value: 1}(2);
         vm.prank(CALLER); (bool ok,) = address(vault).call{value: 100 ether}("");
         assertTrue(ok); assertEq(vault.received(), 0);
         vault.sync(); assertEq(vault.received(), 100 ether);
     }
     function testInventoryIsNotNewIncomeAndRewardRequiresActualPayout() public {
-        GameplayVault vault = create(address(quote), policies(address(quote)));
+        HookVault vault = create(address(quote), policies(address(quote)));
         fund(vault, 100e6);
-        GameplayClaim memory c = request(vault, DISTRIBUTE, 8950, "");
+        HookClaim memory c = request(vault, DISTRIBUTE, 8950, "");
         c.reward = 1;
         bytes memory sig = sign(vault, c);
         vm.expectRevert(); vm.prank(CALLER); vault.claim(c, "", sig);
@@ -100,12 +100,12 @@ contract GameplayVaultTest is GameplayFixture {
         vm.expectRevert(); vm.prank(CALLER); vault.claim(c, data, sig);
     }
     function testDistributionRewardReleasedOnlyOnceOnCompleteDelivery() public {
-        GameplayPolicy[] memory p = policies(address(quote));
+        HookPolicy[] memory p = policies(address(quote));
         p[2].rules = abi.encode(uint256(4475), uint256(2));
-        GameplayVault vault = create(address(quote), p); fund(vault, 100e6);
+        HookVault vault = create(address(quote), p); fund(vault, 100e6);
         execute(vault, request(vault, DISTRIBUTE, 8950, ""), "");
         bytes memory data = abi.encode(recipients());
-        GameplayClaim memory c = request(vault, DISTRIBUTE, 0, data); c.reward = 51;
+        HookClaim memory c = request(vault, DISTRIBUTE, 0, data); c.reward = 51;
         bytes memory sig = sign(vault, c);
         vm.expectRevert(); vm.prank(CALLER); vault.claim(c, data, sig);
         assertFalse(vault.paid(address(0x4000)));
@@ -115,24 +115,24 @@ contract GameplayVaultTest is GameplayFixture {
         assertEq(vault.inventory(DISTRIBUTE), 0);
     }
     function testNativeInventoryPaysRecipientsAndCaller() public {
-        GameplayPolicy[] memory p = policies(address(0));
+        HookPolicy[] memory p = policies(address(0));
         p[2].rules = abi.encode(uint256(4475), uint256(2));
-        GameplayVault vault = create(address(0), p); fund(vault, 100000);
+        HookVault vault = create(address(0), p); fund(vault, 100000);
         execute(vault, request(vault, DISTRIBUTE, 8950, ""), "");
         bytes memory data = abi.encode(recipients());
-        GameplayClaim memory c = request(vault, DISTRIBUTE, 0, data); c.reward = 50;
+        HookClaim memory c = request(vault, DISTRIBUTE, 0, data); c.reward = 50;
         execute(vault, c, data);
         assertEq(address(0x4000).balance, 4475);
         assertEq(vault.accounted(), address(vault).balance);
     }
     function testRestrictedStockTokenPayoutIsAtomic() public {
-        GameplayVault vault = create(address(quote), policies(address(quote)));
+        HookVault vault = create(address(quote), policies(address(quote)));
         quote.setRestricted(true); quote.allow(address(vault));
         fund(vault, 100e6);
         execute(vault, request(vault, DISTRIBUTE, 1000, ""), "");
         quote.allow(address(0x4000));
         bytes memory data = abi.encode(recipients());
-        GameplayClaim memory c = request(vault, DISTRIBUTE, 0, data);
+        HookClaim memory c = request(vault, DISTRIBUTE, 0, data);
         bytes memory sig = sign(vault, c);
         vm.expectRevert(); vm.prank(CALLER); vault.claim(c, data, sig);
         assertEq(vault.inventory(DISTRIBUTE), 1000);
@@ -142,7 +142,7 @@ contract GameplayVaultTest is GameplayFixture {
         assertEq(quote.balanceOf(address(0x4001)), 10);
     }
     function testTaxedDepositsRejectBeforeLockingFundsAndPayoutsStayExact() public {
-        GameplayVault vault = create(address(quote), policies(address(quote)));
+        HookVault vault = create(address(quote), policies(address(quote)));
         quote.setTaxed(true); quote.mint(CALLER, 100e6);
         vm.prank(CALLER); quote.approve(address(vault), 100e6);
         vm.expectRevert(); vm.prank(CALLER); vault.deposit(100e6);
@@ -150,7 +150,7 @@ contract GameplayVaultTest is GameplayFixture {
         quote.setTaxed(false);
         vm.prank(CALLER); vault.deposit(100e6);
         quote.setTaxed(true);
-        GameplayClaim memory c = request(vault, BURN, 1000, "");
+        HookClaim memory c = request(vault, BURN, 1000, "");
         bytes memory sig = sign(vault, c);
         vm.expectRevert(); vm.prank(CALLER); vault.claim(c, "", sig);
         assertEq(vault.accounted(), 100e6);
@@ -158,13 +158,13 @@ contract GameplayVaultTest is GameplayFixture {
     }
     function testFuzzDepositsPreserveEveryBaseUnit(uint96 amount) public {
         vm.assume(amount != 0);
-        GameplayVault vault = create(address(quote), policies(address(quote))); fund(vault, amount);
+        HookVault vault = create(address(quote), policies(address(quote))); fund(vault, amount);
         assertEq(vault.budget(BURN) + vault.budget(PLATFORM) + vault.budget(DISTRIBUTE)
             + vault.platformBudget() + vault.claimBudget() + vault.unallocated() + vault.roundingReserve(), amount);
         vault.sync(); assertEq(vault.received(), amount);
     }
     function testOneUnitDepositsCannotAvoidPlatformAndClaimFees() public {
-        GameplayVault vault = create(address(quote), policies(address(quote)));
+        HookVault vault = create(address(quote), policies(address(quote)));
         for (uint256 i; i < 200; ++i) {
             fund(vault, 1);
             assertEq(vault.platformBudget() + vault.claimBudget() + vault.budget(BURN)
@@ -175,7 +175,7 @@ contract GameplayVaultTest is GameplayFixture {
         assertEq(vault.roundingReserve(), 0);
     }
     function testFullWidthIncomeDoesNotOverflowAllocationProducts() public {
-        GameplayVault vault = create(address(quote), policies(address(quote)));
+        HookVault vault = create(address(quote), policies(address(quote)));
         fund(vault, type(uint256).max);
         assertEq(vault.platformBudget(), type(uint256).max / 10);
         assertEq(vault.claimBudget(), type(uint256).max / 200);
@@ -184,8 +184,8 @@ contract GameplayVaultTest is GameplayFixture {
         vault.sync(); assertEq(vault.received(), type(uint256).max);
     }
     function testRoundingBackingCannotBeSpentBeforeTheNextIncome() public {
-        GameplayPolicy[] memory p = policies(address(quote)); p[1].weight = 0; p[2].weight = 0;
-        GameplayVault vault = create(address(quote), p); fund(vault, 199);
+        HookPolicy[] memory p = policies(address(quote)); p[1].weight = 0; p[2].weight = 0;
+        HookVault vault = create(address(quote), p); fund(vault, 199);
         assertEq(vault.roundingReserve(), 2);
         execute(vault, request(vault, BURN, vault.budget(BURN), ""), "");
         vault.settlePlatform(); assertEq(quote.balanceOf(address(vault)), 2);
@@ -195,7 +195,7 @@ contract GameplayVaultTest is GameplayFixture {
         assertEq(vault.accounted(), 3);
     }
     function testFuzzSplitIncomeKeepsCumulativeFeesAfterSettlement(uint96 first, uint96 second) public {
-        GameplayVault vault = create(address(quote), policies(address(quote)));
+        HookVault vault = create(address(quote), policies(address(quote)));
         if (first != 0) fund(vault, first);
         uint256 settled = vault.platformBudget(); vault.settlePlatform();
         if (second != 0) fund(vault, second);
@@ -207,8 +207,8 @@ contract GameplayVaultTest is GameplayFixture {
         assertEq(vault.accounted(), quote.balanceOf(address(vault)));
     }
     function testNonReturningErc20DoesNotRequireMetadataOrBoolReturns() public {
-        GameplayNoReturnToken asset = new GameplayNoReturnToken();
-        GameplayVault vault = create(address(asset), policies(address(asset)));
+        HookNoReturnToken asset = new HookNoReturnToken();
+        HookVault vault = create(address(asset), policies(address(asset)));
         asset.mint(CALLER, 100e6);
         vm.startPrank(CALLER); asset.approve(address(vault), 100e6); vault.deposit(100e6); vm.stopPrank();
         execute(vault, request(vault, BURN, 1000, ""), "");
@@ -218,9 +218,9 @@ contract GameplayVaultTest is GameplayFixture {
         assertEq(vault.accounted(), asset.balanceOf(address(vault)));
     }
     function testNativeContractRecipientCanForwardButCannotReenter() public {
-        GameplayVault vault = create(address(0), policies(address(0))); fund(vault, 100000);
+        HookVault vault = create(address(0), policies(address(0))); fund(vault, 100000);
         execute(vault, request(vault, DISTRIBUTE, 1000, ""), "");
-        GameplayForwardingRecipient recipient = new GameplayForwardingRecipient(); recipient.bind(vault);
+        HookForwardingRecipient recipient = new HookForwardingRecipient(); recipient.bind(vault);
         address[] memory list = new address[](2);
         list[0] = address(0x4000); list[1] = address(recipient);
         bytes memory data = abi.encode(list);

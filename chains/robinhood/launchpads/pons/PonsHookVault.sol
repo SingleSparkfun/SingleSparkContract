@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {GameplayVault} from "../../../evm/gameplay/GameplayVault.sol";
-import {IGameplayFactory} from "../../../evm/gameplay/IGameplayProtocol.sol";
+import {HookVault} from "../../../evm/hooks/HookVault.sol";
+import {IHookFactory} from "../../../evm/hooks/IHookProtocol.sol";
 import {IPonsVaultFactory, IPonsEscrow, IPonsCurve, IPonsLaunch, IPonsHook} from "./IPonsLaunch.sol";
 
 /// Pons pays the project contract; callers can collect but cannot choose a recipient.
-contract PonsGameplayVault is GameplayVault {
+contract PonsHookVault is HookVault {
     event PoolRevenueDeferred(bytes32 indexed poolId, address indexed operator);
     error UpstreamFeeSweepRequired(bytes32 poolId, address operator);
-    constructor(IGameplayFactory factory_) GameplayVault(factory_) {}
+    constructor(IHookFactory factory_) HookVault(factory_) {}
 
     // Pons permits repeated recipients within and across batches; Claim nonces still prevent authorization replay.
     function permanentPayoutDeduplication() public pure override returns (bool) { return false; }

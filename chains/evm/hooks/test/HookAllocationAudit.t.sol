@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {GameplayFixture} from "./GameplayFixture.sol";
-import {GameplayVault} from "../GameplayVault.sol";
+import {HookFixture} from "./HookFixture.sol";
+import {HookVault} from "../HookVault.sol";
 
 /// Audit reproduction: equal plugin weights do not imply equal cumulative allocation.
-contract GameplayAllocationAuditTest is GameplayFixture {
+contract HookAllocationAuditTest is HookFixture {
     function testAuditSplitIncomeChangesPluginAllocationDespiteEqualWeights() public {
-        GameplayVault split = create(address(quote), policies(address(quote)));
+        HookVault split = create(address(quote), policies(address(quote)));
         vm.prank(CALLER);
-        GameplayVault bulk = GameplayVault(payable(factory.createVault(
+        HookVault bulk = HookVault(payable(factory.createVault(
             address(project), address(quote), policies(address(quote)))));
 
         for (uint256 i; i < 200; ++i) fund(split, 1);

@@ -6,13 +6,13 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {GameplayAsset} from "./GameplayAsset.sol";
-import {GameplayPolicy, GameplayClaim, IGameplayFactory, IGameplayPlugin, IGameplaySwapAdapter, IGameplayVault} from "./IGameplayProtocol.sol";
+import {HookAsset} from "./HookAsset.sol";
+import {HookPolicy, HookClaim, IHookFactory, IHookPlugin, IHookSwapAdapter, IHookVault} from "./IHookProtocol.sol";
 
 /// Single project, single funding asset. Plugins operate bounded callbacks, never hold project budgets.
-contract GameplayVault is ReentrancyGuard, IGameplayVault {
+contract HookVault is ReentrancyGuard, IHookVault {
     using SafeERC20 for IERC20;
-    IGameplayFactory public immutable factory;
+    IHookFactory public immutable factory;
     address public owner;
     address public projectToken;
     address public asset;
@@ -27,7 +27,7 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
     uint256 public unallocated;
     bytes32[] private ids;
     mapping(bytes32 => bool) private known;
-    mapping(bytes32 => GameplayPolicy) private policies;
+    mapping(bytes32 => HookPolicy) private policies;
     mapping(bytes32 => bool) public pluginPaused;
     mapping(bytes32 => uint256) public budget;
     mapping(bytes32 => uint256) public inventory;
@@ -39,6 +39,7 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
     }
     Active private active;
     uint16 private allocationRemainder;
+    // Preserve the deployed EIP-712 wire identity after the Hook source rename.
     bytes32 public constant CLAIM_TYPEHASH = keccak256("GameplayClaim(address caller,bytes32 pluginId,uint256 amount,uint256 minimumOutput,uint256 reward,uint256 deadline,uint256 nonce,uint256 policyRevision,uint256 registryRevision,bytes32 dataHash)");
     event Income(uint256 amount);
     event Deposited(address indexed sender, uint256 amount);
@@ -51,14 +52,14 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
     event PlatformSettled(uint256 amount);
     error Invalid();
 
-    constructor(IGameplayFactory factory_) { factory = factory_; owner = address(1); }
+    constructor(IHookFactory factory_) { factory = factory_; owner = address(1); }
     modifier onlyFactory() { if (msg.sender != address(factory)) revert Invalid(); _; }
     modifier onlyPlugin(uint8 phase) {
         if (msg.sender != active.implementation || active.phase != phase || active.implementation == address(0)) revert Invalid();
         _;
     }
 
-    function initialize(address owner_, address project_, address asset_, GameplayPolicy[] calldata selected) external onlyFactory {
+    function initialize(address owner_, address project_, address asset_, HookPolicy[] calldata selected) external onlyFactory {
         if (owner != address(0) || owner_ == address(0) || project_.code.length == 0
             || (asset_ != address(0) && asset_.code.length == 0)) revert Invalid();
         owner = owner_; projectToken = project_; asset = asset_;
@@ -67,31 +68,31 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
 
     function pluginIds() external view returns (bytes32[] memory) { return ids; }
     function permanentPayoutDeduplication() public pure virtual returns (bool) { return true; }
-    function policy(bytes32 id) external view returns (GameplayPolicy memory) { return policies[id]; }
-    function activePolicy() external view returns (GameplayPolicy memory) {
+    function policy(bytes32 id) external view returns (HookPolicy memory) { return policies[id]; }
+    function activePolicy() external view returns (HookPolicy memory) {
         if (active.implementation == address(0)) revert Invalid();
         return policies[active.id];
     }
-    function setPolicies(GameplayPolicy[] calldata selected) external onlyFactory nonReentrant {
+    function setPolicies(HookPolicy[] calldata selected) external onlyFactory nonReentrant {
         _sync();
         _setPolicies(selected);
         // Unallocated funds have no prior plugin owner. Existing plugin balances never move.
         _allocate(0);
     }
-    function _setPolicies(GameplayPolicy[] calldata selected) private {
+    function _setPolicies(HookPolicy[] calldata selected) private {
         if (selected.length > 16) revert Invalid();
         for (uint256 i; i < ids.length; ++i) policies[ids[i]].weight = 0;
         for (uint256 i; i < selected.length; ++i) {
-            GameplayPolicy calldata p = selected[i];
+            HookPolicy calldata p = selected[i];
             if (p.id == bytes32(0) || p.route.length > 4096 || p.rules.length > 4096
                 || (p.targetAsset != address(0) && p.targetAsset.code.length == 0)) revert Invalid();
             for (uint256 j; j < i; ++j) if (selected[j].id == p.id) revert Invalid();
             if (inventory[p.id] != 0 && policies[p.id].targetAsset != p.targetAsset) revert Invalid();
             address implementation = factory.plugin(p.id);
-            IGameplayPlugin(implementation).validate(projectToken, asset, p);
+            IHookPlugin(implementation).validate(projectToken, asset, p);
             if (p.targetAsset != asset) {
                 factory.checkAdapter(p.adapter);
-                IGameplaySwapAdapter(p.adapter).validate(asset, p.targetAsset, p.route);
+                IHookSwapAdapter(p.adapter).validate(asset, p.targetAsset, p.route);
             } else if (p.adapter != address(0) || p.route.length != 0) revert Invalid();
             if (!known[p.id]) { known[p.id] = true; ids.push(p.id); }
             if (ids.length > 16) revert Invalid();
@@ -117,9 +118,9 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
             credited = amount;
         } else {
             if (msg.value != 0) revert Invalid();
-            uint256 beforeBalance = GameplayAsset.balance(asset, address(this));
+            uint256 beforeBalance = HookAsset.balance(asset, address(this));
             IERC20(asset).safeTransferFrom(msg.sender, address(this), amount);
-            credited = GameplayAsset.balance(asset, address(this)) - beforeBalance;
+            credited = HookAsset.balance(asset, address(this)) - beforeBalance;
             if (credited != amount) revert Invalid();
         }
         _sync();
@@ -128,7 +129,7 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
     function sync() external nonReentrant { _sync(); }
     function _sync() internal {
         if (owner == address(0)) revert Invalid();
-        uint256 balance = GameplayAsset.balance(asset, address(this));
+        uint256 balance = HookAsset.balance(asset, address(this));
         if (balance < accounted) revert Invalid();
         uint256 income = balance - accounted;
         if (income == 0) return;
@@ -169,18 +170,18 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
         uint256 amount = platformBudget;
         if (amount == 0) return;
         platformBudget = 0; accounted -= amount;
-        GameplayAsset.send(asset, factory.treasury(), amount);
+        HookAsset.send(asset, factory.treasury(), amount);
         emit PlatformSettled(amount);
     }
 
-    function claimDigest(GameplayClaim calldata request) public view returns (bytes32) {
+    function claimDigest(HookClaim calldata request) public view returns (bytes32) {
         bytes32 domain = keccak256(abi.encode(
             keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
             keccak256("SingleSpark Gameplay"), keccak256("1"), block.chainid, address(this)));
         return keccak256(abi.encodePacked("\x19\x01", domain, keccak256(abi.encode(CLAIM_TYPEHASH, request))));
     }
-    function claim(GameplayClaim calldata request, bytes calldata data, bytes calldata signature) external nonReentrant {
-        GameplayPolicy storage p = policies[request.pluginId];
+    function claim(HookClaim calldata request, bytes calldata data, bytes calldata signature) external nonReentrant {
+        HookPolicy storage p = policies[request.pluginId];
         if (paused || factory.paused() || pluginPaused[request.pluginId] || p.weight == 0
             || request.caller != msg.sender || request.nonce != nonce || request.policyRevision != revision
             || request.registryRevision != factory.revision() || request.deadline < block.timestamp
@@ -190,21 +191,21 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
         ++nonce;
         active = Active(request.pluginId, factory.plugin(request.pluginId), 0, request.amount,
             request.minimumOutput, request.deadline, 0, 0);
-        IGameplayPlugin(active.implementation).validate(projectToken, asset, p);
-        IGameplayPlugin(active.implementation).execute(data);
+        IHookPlugin(active.implementation).validate(projectToken, asset, p);
+        IHookPlugin(active.implementation).execute(data);
         if (active.phase != 2 || request.reward > active.reward || request.reward > claimBudget - reservedClaim
             || request.policyRevision != revision || request.registryRevision != factory.revision()) revert Invalid();
         delete active;
         if (request.reward != 0) {
             claimBudget -= request.reward; accounted -= request.reward;
-            GameplayAsset.send(asset, msg.sender, request.reward);
+            HookAsset.send(asset, msg.sender, request.reward);
         }
         emit Executed(request.pluginId, msg.sender, request.nonce, request.amount, request.reward);
     }
 
     /// If the plugin spends its funding asset directly, no exchange or wrapping is needed.
     function pluginAcquire() external onlyPlugin(0) returns (uint256 output) {
-        GameplayPolicy storage p = policies[active.id];
+        HookPolicy storage p = policies[active.id];
         uint256 amount = active.amount;
         if (amount == 0 || amount > budget[active.id] || active.minimumOutput == 0) revert Invalid();
         active.phase = 1;
@@ -214,15 +215,15 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
             if (output < active.minimumOutput) revert Invalid();
         } else {
             factory.checkAdapter(p.adapter);
-            uint256 beforeInput = GameplayAsset.balance(asset, address(this));
-            uint256 beforeOutput = GameplayAsset.balance(p.targetAsset, address(this));
+            uint256 beforeInput = HookAsset.balance(asset, address(this));
+            uint256 beforeOutput = HookAsset.balance(p.targetAsset, address(this));
             accounted -= amount;
             if (asset != address(0)) IERC20(asset).forceApprove(p.adapter, amount);
-            output = IGameplaySwapAdapter(p.adapter).swap{value: asset == address(0) ? amount : 0}(
+            output = IHookSwapAdapter(p.adapter).swap{value: asset == address(0) ? amount : 0}(
                 asset, p.targetAsset, amount, active.minimumOutput, active.deadline, p.route);
             if (asset != address(0)) IERC20(asset).forceApprove(p.adapter, 0);
-            if (GameplayAsset.balance(asset, address(this)) + amount != beforeInput
-                || GameplayAsset.balance(p.targetAsset, address(this)) != beforeOutput + output
+            if (HookAsset.balance(asset, address(this)) + amount != beforeInput
+                || HookAsset.balance(p.targetAsset, address(this)) != beforeOutput + output
                 || output < active.minimumOutput) revert Invalid();
         }
         active.output = output;
@@ -236,7 +237,7 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
         address target = policies[active.id].targetAsset;
         if (target == asset) accounted -= active.output;
         active.reward = _reward(active.amount);
-        GameplayAsset.send(target, address(0xdead), active.output);
+        HookAsset.send(target, address(0xdead), active.output);
         emit Burned(active.id, target, active.output);
     }
     function pluginStore() external onlyPlugin(1) {
@@ -271,7 +272,7 @@ contract GameplayVault is ReentrancyGuard, IGameplayVault {
                 if (paid[to]) revert Invalid();
                 paid[to] = true;
             }
-            GameplayAsset.send(target, to, amountPerRecipient);
+            HookAsset.send(target, to, amountPerRecipient);
             emit Paid(active.id, target, to, amountPerRecipient);
         }
     }

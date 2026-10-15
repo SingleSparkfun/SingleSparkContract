@@ -11,18 +11,18 @@ import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
 import {SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
 import {StateLibrary} from "@uniswap/v4-core/src/libraries/StateLibrary.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
-import {IGameplayFactory, IGameplaySwapAdapter} from "../IGameplayProtocol.sol";
+import {IHookFactory, IHookSwapAdapter} from "../IHookProtocol.sol";
 
 /// Single-hop, exact-input V4 execution. Native currency settles directly, with no WETH dependency.
-contract GameplayV4Adapter is IGameplaySwapAdapter, ReentrancyGuard {
+contract V4SwapAdapter is IHookSwapAdapter, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using StateLibrary for IPoolManager;
-    IGameplayFactory public immutable factory;
+    IHookFactory public immutable factory;
     IPoolManager public immutable poolManager;
     bytes32 private callbackHash;
     error Invalid();
 
-    constructor(IGameplayFactory factory_, IPoolManager poolManager_) {
+    constructor(IHookFactory factory_, IPoolManager poolManager_) {
         if (address(factory_).code.length == 0 || address(poolManager_).code.length == 0) revert Invalid();
         factory = factory_; poolManager = poolManager_;
     }

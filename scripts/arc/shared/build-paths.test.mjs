@@ -20,11 +20,11 @@ test('chain build roots keep separate frozen deployment and recovery directories
 
 test('frozen compiler source keys resolve to relocated sources without escaping chains', () => {
   assert.equal(arcSource('../chains/arc/launchpads/argus/ArgusRevenueVault.sol'), resolve(repository, 'chains/arc/launchpads/argus/ArgusRevenueVault.sol'));
-  assert.equal(arcSource('../chains/evm/gameplay/GameplayPlugins.sol'), resolve(repository, 'chains/evm/gameplay/GameplayPlugins.sol'));
+  assert.equal(arcSource('../chains/evm/hooks/RevenueHooks.sol'), resolve(repository, 'chains/evm/hooks/RevenueHooks.sol'));
   assert.equal(arcSource('lib/v4-core/src/PoolManager.sol'), resolve(repository, 'chains/arc/lib/v4-core/src/PoolManager.sol'));
   assert.equal(ponsSource('arc/lib/v4-core/src/PoolManager.sol'), arcSource('lib/v4-core/src/PoolManager.sol'));
-  assert.equal(ponsSource('chains/robinhood/launchpads/pons/PonsGameplayVault.sol'), resolve(repository, 'chains/robinhood/launchpads/pons/PonsGameplayVault.sol'));
-  for (const path of [arcSource('../chains/arc/launchpads/argus/ArgusRevenueVault.sol'), arcSource('lib/v4-core/src/PoolManager.sol'), ponsSource('chains/robinhood/launchpads/pons/PonsGameplayVault.sol')]) assert(existsSync(path), path);
+  assert.equal(ponsSource('chains/robinhood/launchpads/pons/PonsHookVault.sol'), resolve(repository, 'chains/robinhood/launchpads/pons/PonsHookVault.sol'));
+  for (const path of [arcSource('../chains/arc/launchpads/argus/ArgusRevenueVault.sol'), arcSource('lib/v4-core/src/PoolManager.sol'), ponsSource('chains/robinhood/launchpads/pons/PonsHookVault.sol')]) assert(existsSync(path), path);
   for (const bad of ['/etc/passwd', '../../.env', 'lib/../../../.env', 'arc/lib/../../../.env']) {
     assert.throws(() => arcSource(bad));
     assert.throws(() => ponsSource(bad));

@@ -2,13 +2,13 @@
 pragma solidity 0.8.26;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {GameplayVaultFactory} from "../../../evm/gameplay/GameplayVaultFactory.sol";
-import {GameplayPolicy, IGameplayFactory} from "../../../evm/gameplay/IGameplayProtocol.sol";
-import {PonsGameplayVault} from "./PonsGameplayVault.sol";
+import {HookVaultFactory} from "../../../evm/hooks/HookVaultFactory.sol";
+import {HookPolicy, IHookFactory} from "../../../evm/hooks/IHookProtocol.sol";
+import {PonsHookVault} from "./PonsHookVault.sol";
 import {IPonsLaunch, IPonsEscrow, IPonsCurve, IPonsHook} from "./IPonsLaunch.sol";
 
 /// Atomic native-ETH Pons launch and isolated project custody on Robinhood Testnet.
-contract PonsVaultFactory is GameplayVaultFactory {
+contract PonsVaultFactory is HookVaultFactory {
     IPonsLaunch public immutable pons;
     IPonsEscrow public immutable escrow;
     IPonsHook public immutable hook;
@@ -19,7 +19,7 @@ contract PonsVaultFactory is GameplayVaultFactory {
     event ProjectLaunched(address indexed owner, address indexed token, address indexed vault, address curve, bytes32 salt);
 
     constructor(address admin_, address authorizer_, address treasury_, IPonsLaunch pons_)
-        GameplayVaultFactory(admin_, authorizer_, treasury_)
+        HookVaultFactory(admin_, authorizer_, treasury_)
     {
         if (block.chainid != 46630 || address(pons_).code.length == 0) revert Invalid();
         pons = pons_;
@@ -32,7 +32,7 @@ contract PonsVaultFactory is GameplayVaultFactory {
         hookCodeHash = address(hook).codehash;
     }
     function _deployImplementation() internal override returns (address) {
-        return address(new PonsGameplayVault(IGameplayFactory(address(this))));
+        return address(new PonsHookVault(IHookFactory(address(this))));
     }
     function checkPons() public view {
         if (address(pons).codehash != ponsCodeHash || address(escrow).codehash != escrowCodeHash
@@ -63,7 +63,7 @@ contract PonsVaultFactory is GameplayVaultFactory {
         if (curve.code.length == 0) revert Invalid();
         curveOf[token] = IPonsCurve(curve);
         // No plugin executes before registration and its unchanged 48-hour activation delay.
-        _registerVault(msg.sender, token, vault, address(0), new GameplayPolicy[](0));
+        _registerVault(msg.sender, token, vault, address(0), new HookPolicy[](0));
         emit ProjectLaunched(msg.sender, token, vault, curve, draft.salt);
     }
 }

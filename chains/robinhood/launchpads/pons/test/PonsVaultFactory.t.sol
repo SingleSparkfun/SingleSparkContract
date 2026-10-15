@@ -4,9 +4,9 @@ pragma solidity 0.8.26;
 import {Test} from "forge-std/Test.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {PonsVaultFactory} from "../PonsVaultFactory.sol";
-import {PonsGameplayVault} from "../PonsGameplayVault.sol";
+import {PonsHookVault} from "../PonsHookVault.sol";
 import {IPonsLaunch, IPonsHook} from "../IPonsLaunch.sol";
-import {GameplayPolicy} from "../../../../evm/gameplay/IGameplayProtocol.sol";
+import {HookPolicy} from "../../../../evm/hooks/IHookProtocol.sol";
 
 contract TestPonsEscrow {
     mapping(address => uint256) public balanceOf;
@@ -112,25 +112,25 @@ contract PonsVaultFactoryTest is Test {
         p.expectedEconomics = source.ECONOMICS(); p.salt = keccak256("project");
         p.creatorFeeRecipient = OTHER;
     }
-    function launch() internal returns (address token, address curve, PonsGameplayVault vault) {
+    function launch() internal returns (address token, address curve, PonsHookVault vault) {
         IPonsLaunch.TokenParams memory p = draft();
         vm.prank(OWNER);
         address v; (token, curve, v) = factory.launch(p);
-        vault = PonsGameplayVault(payable(v));
+        vault = PonsHookVault(payable(v));
     }
     function testAtomicLaunchBindsOwnerAndIgnoresExternalRecipient() public {
         address predicted = factory.predictLaunchVault(OWNER, draft().salt);
-        (address token, address curve, PonsGameplayVault vault) = launch();
+        (address token, address curve, PonsHookVault vault) = launch();
         assertEq(address(vault), predicted); assertEq(vault.owner(), OWNER);
         assertEq(vault.projectToken(), token); assertEq(vault.asset(), address(0));
         assertEq(address(factory.curveOf(token)), curve);
         assertEq(factory.vaultOf(OWNER, token), predicted); assertTrue(factory.isVault(predicted));
         assertEq(source.lastRecipient(), predicted); assertEq(source.lastExemption(), OWNER);
         assertEq(factory.DELAY(), 48 hours);
-        vm.expectRevert(); vault.initialize(OTHER, token, address(0), new GameplayPolicy[](0));
+        vm.expectRevert(); vault.initialize(OTHER, token, address(0), new HookPolicy[](0));
     }
     function testRevenueCollectionIsPermissionlessAndBudgetedExactlyOnce() public {
-        (,address curve, PonsGameplayVault vault) = launch();
+        (,address curve, PonsHookVault vault) = launch();
         vm.deal(curve, 100 ether);
         vm.prank(OTHER); vault.collectRevenue();
         assertEq(address(vault).balance, 100 ether); assertEq(vault.received(), 100 ether);
@@ -141,7 +141,7 @@ contract PonsVaultFactoryTest is Test {
         vault.settlePlatform(); assertEq(TREASURY.balance, 10 ether);
     }
     function testGraduatedRevenueAndDirectDepositsStillReachSameBudget() public {
-        (,address curve, PonsGameplayVault vault) = launch();
+        (,address curve, PonsHookVault vault) = launch();
         TestPonsCurve(payable(curve)).graduate();
         vm.deal(address(this), 2 ether);
         source.feeEscrow().credit{value: 1 ether}(address(vault));
@@ -150,7 +150,7 @@ contract PonsVaultFactoryTest is Test {
         assertEq(vault.received(), 2 ether); assertEq(vault.unallocated(), 1.79 ether);
     }
     function testGraduatedNativeHookFeesAndTaxReachVaultExactlyOnce() public {
-        (address token,, PonsGameplayVault vault) = launch();
+        (address token,, PonsHookVault vault) = launch();
         bytes32 poolId = source.graduate(token);
         vm.deal(address(this), 10 ether);
         source.memeHook().accrue{value: 10 ether}(poolId, 3 ether);
@@ -163,14 +163,14 @@ contract PonsVaultFactoryTest is Test {
         assertEq(source.memeHook().pendingCreatorTax(poolId, address(0)), 0);
     }
     function testTokenFeeConversionRequiresUpstreamOperatorWithoutInventingVaultIncome() public {
-        (address token,, PonsGameplayVault vault) = launch();
+        (address token,, PonsHookVault vault) = launch();
         bytes32 poolId = source.graduate(token);
         vm.deal(address(this), 3 ether);
         source.memeHook().accrue{value: 2 ether}(poolId, 0);
         source.memeHook().setTokenFees(poolId, token, 100);
         (,uint256 nativePending,uint256 tokenPending,bool needsOperator) = vault.poolRevenue();
         assertEq(nativePending, 2 ether); assertEq(tokenPending, 100); assertTrue(needsOperator);
-        vm.expectRevert(abi.encodeWithSelector(PonsGameplayVault.UpstreamFeeSweepRequired.selector, poolId, address(0x7777)));
+        vm.expectRevert(abi.encodeWithSelector(PonsHookVault.UpstreamFeeSweepRequired.selector, poolId, address(0x7777)));
         vault.collectRevenue();
         assertEq(vault.received(), 0); assertEq(vault.accounted(), 0);
         // Previously collected escrow remains claimable while the upstream operator is needed.
@@ -184,17 +184,17 @@ contract PonsVaultFactoryTest is Test {
         vault.collectRevenue(); assertEq(vault.received(), 3 ether);
     }
     function testTokenTaxAndBuybackEachRequireOperator() public {
-        (address token,, PonsGameplayVault vault) = launch();
+        (address token,, PonsHookVault vault) = launch();
         bytes32 poolId = source.graduate(token);
         source.memeHook().setTokenTax(poolId, token, 1);
         (,,,bool needsOperator) = vault.poolRevenue(); assertTrue(needsOperator);
         source.memeHook().setTokenTax(poolId, token, 0);
         source.memeHook().setBuyback(poolId, 1);
         (,,,needsOperator) = vault.poolRevenue(); assertTrue(needsOperator);
-        vm.expectRevert(abi.encodeWithSelector(PonsGameplayVault.UpstreamFeeSweepRequired.selector, poolId, address(0x7777))); vault.collectRevenue();
+        vm.expectRevert(abi.encodeWithSelector(PonsHookVault.UpstreamFeeSweepRequired.selector, poolId, address(0x7777))); vault.collectRevenue();
     }
     function testChangedHookCodeBlocksCollectionBeforeFundsMove() public {
-        (address token,, PonsGameplayVault vault) = launch(); source.graduate(token);
+        (address token,, PonsHookVault vault) = launch(); source.graduate(token);
         vm.etch(address(source.memeHook()), hex"00");
         vm.expectRevert(); vault.collectRevenue();
         vm.expectRevert(); vault.poolRevenue();
@@ -205,7 +205,7 @@ contract PonsVaultFactoryTest is Test {
         address expected = factory.predictLaunchVault(OWNER, p.salt);
         vm.prank(OTHER); (,,address otherVault) = factory.launch(p);
         assertTrue(otherVault != expected);
-        (,,PonsGameplayVault vault) = launch(); assertEq(address(vault), expected);
+        (,,PonsHookVault vault) = launch(); assertEq(address(vault), expected);
         vm.expectRevert(); vm.prank(OWNER); factory.launch(p);
     }
     function testRevertedLaunchRollsBackVaultAndCanBeRetried() public {
@@ -213,7 +213,7 @@ contract PonsVaultFactoryTest is Test {
         address predicted = factory.predictLaunchVault(OWNER, p.salt);
         vm.expectRevert(); vm.prank(OWNER); factory.launch(p);
         assertEq(predicted.code.length, 0);
-        (,,PonsGameplayVault vault) = launch(); assertEq(address(vault), predicted);
+        (,,PonsHookVault vault) = launch(); assertEq(address(vault), predicted);
     }
     function testRefusesUncommittedEconomicsBuybackPauseAndChangedCode() public {
         IPonsLaunch.TokenParams memory p = draft(); p.expectedEconomics = bytes32(0);

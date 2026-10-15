@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {GameplayFixture, GameplayTestToken} from "../../../../evm/gameplay/test/GameplayFixture.sol";
-import {GameplayVault} from "../../../../evm/gameplay/GameplayVault.sol";
-import {GameplayClaim, GameplayPolicy, IGameplayFactory} from "../../../../evm/gameplay/IGameplayProtocol.sol";
+import {HookFixture, HookTestToken} from "../../../../evm/hooks/test/HookFixture.sol";
+import {HookVault} from "../../../../evm/hooks/HookVault.sol";
+import {HookClaim, HookPolicy, IHookFactory} from "../../../../evm/hooks/IHookProtocol.sol";
 import {PonsSwapAdapter} from "../PonsSwapAdapter.sol";
 import {IPonsLaunch} from "../IPonsLaunch.sol";
 import {PoolManager} from "@uniswap/v4-core/src/PoolManager.sol";
@@ -27,7 +27,7 @@ contract PonsSwapTestCurve {
     function buy(uint256 amount, uint256 minimum, address recipient) external payable returns (uint256) {
         require(msg.value == amount && amount >= minimum);
         if (refund) { (bool ok,) = msg.sender.call{value: 1}(""); require(ok); }
-        GameplayTestToken(token).mint(recipient, amount);
+        HookTestToken(token).mint(recipient, amount);
         return amount;
     }
 }
@@ -49,38 +49,38 @@ contract PonsSwapTestSource {
     address public memeHook;
     IPonsLaunch.LaunchedToken private launch;
     constructor(address manager, address token) {
-        poolManager = manager; memeHook = address(new GameplayTestToken(18));
+        poolManager = manager; memeHook = address(new HookTestToken(18));
         launch.token = token; launch.curve = address(new PonsSwapTestCurve(token));
         launch.poolFee = 0; launch.tickSpacing = 200; launch.exists = true;
     }
     function getLaunchedToken(address) external view returns (IPonsLaunch.LaunchedToken memory) { return launch; }
     function setHook(address value) external { memeHook = value; }
 }
-contract PonsSwapAdapterTest is GameplayFixture {
+contract PonsSwapAdapterTest is HookFixture {
     PonsSwapTestSource source;
     PonsSwapAdapter adapter;
     bytes route;
     function setUp() public override {
         super.setUp();
         source = new PonsSwapTestSource(address(new PoolManager(address(this))), address(project));
-        adapter = new PonsSwapAdapter(IGameplayFactory(address(factory)), IPonsLaunch(address(source)));
+        adapter = new PonsSwapAdapter(IHookFactory(address(factory)), IPonsLaunch(address(source)));
         bytes32 operation = factory.scheduleAdapter(address(adapter)); vm.warp(factory.readyAt(operation));
         factory.executeAdapter(address(adapter));
         route = abi.encode(PoolKey(Currency.wrap(address(0)), Currency.wrap(address(project)), 0, 200, IHooks(source.memeHook())), uint160(0));
     }
-    function vault() private returns (GameplayVault v) {
-        GameplayPolicy[] memory p = new GameplayPolicy[](1);
-        p[0] = GameplayPolicy(BURN, 1, address(project), address(adapter), 1 ether, route, "");
+    function vault() private returns (HookVault v) {
+        HookPolicy[] memory p = new HookPolicy[](1);
+        p[0] = HookPolicy(BURN, 1, address(project), address(adapter), 1 ether, route, "");
         v = create(address(0), p); fund(v, 1 ether);
     }
     function testCurveBuyAndBurnLeavesNoFundsInAdapter() public {
-        GameplayVault v = vault(); GameplayClaim memory c = request(v, BURN, 0.1 ether, "");
+        HookVault v = vault(); HookClaim memory c = request(v, BURN, 0.1 ether, "");
         c.minimumOutput = 0.1 ether; execute(v, c, "");
         assertEq(project.balanceOf(address(0xdead)), 0.1 ether);
         assertEq(address(adapter).balance, 0); assertEq(v.accounted(), 0.9 ether);
     }
     function testSlippageAndPartialFillRevertWithoutSpendingBudget() public {
-        GameplayVault v = vault(); GameplayClaim memory c = request(v, BURN, 0.1 ether, "");
+        HookVault v = vault(); HookClaim memory c = request(v, BURN, 0.1 ether, "");
         c.minimumOutput = 0.2 ether;
         bytes memory signature = sign(v, c);
         vm.expectRevert(); vm.prank(CALLER); v.claim(c, "", signature);
@@ -103,7 +103,7 @@ contract PonsSwapAdapterTest is GameplayFixture {
         // V4 afterSwap and afterSwapReturnDelta permission bits, with the same immutable manager.
         address hook = address(0x44); vm.etch(hook, address(feeHook).code); source.setHook(hook);
         PonsSwapTestCurve(source.getLaunchedToken(address(project)).curve).graduate();
-        adapter = new PonsSwapAdapter(IGameplayFactory(address(factory)), IPonsLaunch(address(source)));
+        adapter = new PonsSwapAdapter(IHookFactory(address(factory)), IPonsLaunch(address(source)));
         bytes32 operation = factory.scheduleAdapter(address(adapter)); vm.warp(factory.readyAt(operation));
         factory.executeAdapter(address(adapter));
         PoolKey memory key = PoolKey(Currency.wrap(address(0)), Currency.wrap(address(project)), 0, 200, IHooks(hook));
@@ -113,7 +113,7 @@ contract PonsSwapAdapterTest is GameplayFixture {
         vm.deal(address(this), 100 ether);
         liquidity.modifyLiquidity{value: 100 ether}(key, ModifyLiquidityParams(-600, 600, 1000 ether, bytes32(0)), "");
         route = abi.encode(key, uint160(0));
-        GameplayVault v = vault(); GameplayClaim memory c = request(v, BURN, 0.1 ether, "");
+        HookVault v = vault(); HookClaim memory c = request(v, BURN, 0.1 ether, "");
         c.minimumOutput = 0.095 ether;
         bytes memory signature = sign(v, c);
         vm.expectRevert(); vm.prank(CALLER); v.claim(c, "", signature);

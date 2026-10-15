@@ -4,11 +4,11 @@ pragma solidity 0.8.26;
 import {Test} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {PonsVaultFactory} from "../PonsVaultFactory.sol";
-import {PonsGameplayVault} from "../PonsGameplayVault.sol";
+import {PonsHookVault} from "../PonsHookVault.sol";
 import {PonsSwapAdapter} from "../PonsSwapAdapter.sol";
 import {IPonsLaunch, IPonsCurve, IPonsHook} from "../IPonsLaunch.sol";
-import {GameplayBuybackPlugin} from "../../../../evm/gameplay/GameplayPlugins.sol";
-import {GameplayClaim, GameplayPolicy, IGameplayFactory} from "../../../../evm/gameplay/IGameplayProtocol.sol";
+import {BuybackHook} from "../../../../evm/hooks/RevenueHooks.sol";
+import {HookClaim, HookPolicy, IHookFactory} from "../../../../evm/hooks/IHookProtocol.sol";
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {PoolSwapTest} from "@uniswap/v4-core/src/test/PoolSwapTest.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
@@ -39,8 +39,8 @@ contract PonsRevenueClaimForkTest is Test {
         vm.deal(address(this), 1 ether);
         vm.deal(CALLER, 1 ether);
         PonsVaultFactory factory = new PonsVaultFactory(address(this), vm.addr(KEY), address(0x9999), source);
-        GameplayBuybackPlugin plugin = new GameplayBuybackPlugin();
-        PonsSwapAdapter adapter = new PonsSwapAdapter(IGameplayFactory(address(factory)), source);
+        BuybackHook plugin = new BuybackHook();
+        PonsSwapAdapter adapter = new PonsSwapAdapter(IHookFactory(address(factory)), source);
         factory.schedulePlugin(BURN, address(plugin));
         bytes32 operation = factory.scheduleAdapter(address(adapter));
         vm.warp(factory.readyAt(operation));
@@ -52,11 +52,11 @@ contract PonsRevenueClaimForkTest is Test {
         draft.expectedEconomics = source.previewLaunchEconomics(0, address(0));
         draft.salt = keccak256("revenue-claim-fork");
         (address token, address curve, address vaultAddress) = factory.launch{value: source.launchFee()}(draft);
-        PonsGameplayVault vault = PonsGameplayVault(payable(vaultAddress));
+        PonsHookVault vault = PonsHookVault(payable(vaultAddress));
         IPonsLaunch.LaunchedToken memory launch = source.getLaunchedToken(token);
         PoolKey memory pool = PoolKey(Currency.wrap(address(0)), Currency.wrap(token), launch.poolFee, launch.tickSpacing, IHooks(address(hook)));
-        GameplayPolicy[] memory policies = new GameplayPolicy[](1);
-        policies[0] = GameplayPolicy(BURN, 1, token, address(adapter), 100_000_000_000, abi.encode(pool, uint160(0)), "");
+        HookPolicy[] memory policies = new HookPolicy[](1);
+        policies[0] = HookPolicy(BURN, 1, token, address(adapter), 100_000_000_000, abi.encode(pool, uint160(0)), "");
         operation = factory.schedulePolicy(vaultAddress, policies);
         vm.warp(factory.readyAt(operation)); factory.executePolicy(vaultAddress, policies);
 
@@ -86,7 +86,7 @@ contract PonsRevenueClaimForkTest is Test {
 
         uint256 amount = 100_000_000_000;
         uint256 reward = amount * 50 / 8950;
-        GameplayClaim memory claim = GameplayClaim(CALLER, BURN, amount, 1, reward, block.timestamp + 120,
+        HookClaim memory claim = HookClaim(CALLER, BURN, amount, 1, reward, block.timestamp + 120,
             vault.nonce(), vault.revision(), factory.revision(), keccak256(""));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(KEY, vault.claimDigest(claim));
         bytes memory signature = abi.encodePacked(r, s, v);
@@ -107,7 +107,7 @@ contract PonsRevenueClaimForkTest is Test {
         (,,tokenPending,needsOperator) = vault.poolRevenue();
         assertGt(tokenPending, 0); assertTrue(needsOperator);
         address operator = hook.feeSweepOperator();
-        vm.expectRevert(abi.encodeWithSelector(PonsGameplayVault.UpstreamFeeSweepRequired.selector, poolId, operator));
+        vm.expectRevert(abi.encodeWithSelector(PonsHookVault.UpstreamFeeSweepRequired.selector, poolId, operator));
         vault.collectRevenue();
         // Impersonation only on the fork verifies the upstream operator boundary without its private key.
         vm.prank(operator); hook.sweepPoolFees(poolId, 1, 0);

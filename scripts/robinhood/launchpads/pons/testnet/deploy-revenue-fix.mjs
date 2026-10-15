@@ -57,7 +57,7 @@ async function main() {
   if (!c.broadcast) {
     console.log(json({ status: 'prepared', chainId: 46630, deploymentId, deployer: c.account.address, roles,
       platformToken: previous.platformToken, journal: c.journalPath, policyDelaySeconds: 600,
-      maximumTotalCostWei: c.config.maximumTotalCostWei, contracts: ['PonsVaultFactory', 'PonsGameplayVault', 'PonsSwapAdapter'] }));
+      maximumTotalCostWei: c.config.maximumTotalCostWei, contracts: ['PonsVaultFactory', 'PonsHookVault', 'PonsSwapAdapter'] }));
     return;
   }
   mkdirSync(c.storageDir, { recursive: true, mode: 0o700 });

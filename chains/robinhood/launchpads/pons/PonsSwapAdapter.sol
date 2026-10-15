@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {GameplayV4Adapter} from "../../../evm/gameplay/adapters/GameplayV4Adapter.sol";
-import {IGameplayFactory} from "../../../evm/gameplay/IGameplayProtocol.sol";
+import {V4SwapAdapter} from "../../../evm/hooks/adapters/V4SwapAdapter.sol";
+import {IHookFactory} from "../../../evm/hooks/IHookProtocol.sol";
 import {IPonsLaunch, IPonsCurve} from "./IPonsLaunch.sol";
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 
 /// One pinned native-ETH route survives Pons graduation; project budgets remain in their Vaults.
-contract PonsSwapAdapter is GameplayV4Adapter {
+contract PonsSwapAdapter is V4SwapAdapter {
     IPonsLaunch public immutable pons;
     address public immutable hook;
     bytes32 private immutable sourceHash;
     bytes32 private immutable hookHash;
     bytes32 private immutable managerHash;
 
-    constructor(IGameplayFactory factory_, IPonsLaunch pons_)
-        GameplayV4Adapter(factory_, IPoolManager(pons_.poolManager()))
+    constructor(IHookFactory factory_, IPonsLaunch pons_)
+        V4SwapAdapter(factory_, IPoolManager(pons_.poolManager()))
     {
         pons = pons_; hook = pons_.memeHook();
         if (hook.code.length == 0) revert Invalid();

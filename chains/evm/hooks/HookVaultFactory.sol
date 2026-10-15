@@ -3,11 +3,11 @@ pragma solidity 0.8.26;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {GameplayVault} from "./GameplayVault.sol";
-import {GameplayPolicy, IGameplayFactory} from "./IGameplayProtocol.sol";
+import {HookVault} from "./HookVault.sol";
+import {HookPolicy, IHookFactory} from "./IHookProtocol.sol";
 
 /// Immutable factory/controller. Deploying a vault never changes a token or its original fee recipient.
-contract GameplayVaultFactory is IGameplayFactory, ReentrancyGuard {
+contract HookVaultFactory is IHookFactory, ReentrancyGuard {
     uint256 public constant DELAY = 48 hours;
     address public immutable admin;
     address public immutable authorizer;
@@ -37,7 +37,7 @@ contract GameplayVaultFactory is IGameplayFactory, ReentrancyGuard {
         implementation = _deployImplementation();
     }
     function _deployImplementation() internal virtual returns (address) {
-        return address(new GameplayVault(IGameplayFactory(address(this))));
+        return address(new HookVault(IHookFactory(address(this))));
     }
     modifier onlyAdmin() { if (msg.sender != admin) revert Invalid(); _; }
     function plugin(bytes32 id) external view returns (address result) {
@@ -51,18 +51,18 @@ contract GameplayVaultFactory is IGameplayFactory, ReentrancyGuard {
     function predictVault(address owner, address projectToken) public view returns (address) {
         return Clones.predictDeterministicAddress(implementation, keccak256(abi.encode(owner, projectToken)), address(this));
     }
-    function createVault(address projectToken, address asset, GameplayPolicy[] calldata selected)
+    function createVault(address projectToken, address asset, HookPolicy[] calldata selected)
         external nonReentrant returns (address vault)
     {
         if (paused || projectToken.code.length == 0 || vaultOf[msg.sender][projectToken] != address(0)) revert Invalid();
         vault = Clones.cloneDeterministic(implementation, keccak256(abi.encode(msg.sender, projectToken)));
         _registerVault(msg.sender, projectToken, vault, asset, selected);
     }
-    function _registerVault(address owner, address projectToken, address vault, address asset, GameplayPolicy[] memory selected) internal {
+    function _registerVault(address owner, address projectToken, address vault, address asset, HookPolicy[] memory selected) internal {
         if (paused || projectToken.code.length == 0 || vaultOf[owner][projectToken] != address(0) || isVault[vault]) revert Invalid();
         isVault[vault] = true;
         vaultOf[owner][projectToken] = vault;
-        GameplayVault(payable(vault)).initialize(owner, projectToken, asset, selected);
+        HookVault(payable(vault)).initialize(owner, projectToken, asset, selected);
         emit VaultCreated(owner, projectToken, vault, asset);
     }
     function _schedule(bytes32 operation) private returns (bytes32) {
@@ -105,23 +105,23 @@ contract GameplayVaultFactory is IGameplayFactory, ReentrancyGuard {
         ++revision;
         emit AdapterRegistered(next, next.codehash);
     }
-    function _vault(address vault) private view returns (GameplayVault v) {
+    function _vault(address vault) private view returns (HookVault v) {
         if (!isVault[vault]) revert Invalid();
-        return GameplayVault(payable(vault));
+        return HookVault(payable(vault));
     }
-    function _policyOperation(address vault, GameplayPolicy[] calldata selected) private view returns (bytes32) {
+    function _policyOperation(address vault, HookPolicy[] calldata selected) private view returns (bytes32) {
         return keccak256(abi.encode("policy", vault, _vault(vault).revision(), revision, selected));
     }
-    function schedulePolicy(address vault, GameplayPolicy[] calldata selected) external returns (bytes32) {
+    function schedulePolicy(address vault, HookPolicy[] calldata selected) external returns (bytes32) {
         if (msg.sender != admin && msg.sender != _vault(vault).owner()) revert Invalid();
         return _schedule(_policyOperation(vault, selected));
     }
-    function executePolicy(address vault, GameplayPolicy[] calldata selected) external nonReentrant {
+    function executePolicy(address vault, HookPolicy[] calldata selected) external nonReentrant {
         _consume(_policyOperation(vault, selected));
         _vault(vault).setPolicies(selected);
     }
     function pauseVault(address vault, bytes32 id) external {
-        GameplayVault v = _vault(vault);
+        HookVault v = _vault(vault);
         if (msg.sender != admin && msg.sender != authorizer && msg.sender != v.owner()) revert Invalid();
         v.setPaused(id, true);
     }
