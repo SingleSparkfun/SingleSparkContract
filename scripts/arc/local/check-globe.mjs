@@ -226,7 +226,7 @@ const reserveTreasury = async (requestId, showLocation, devIp) => {
 const uploadImage = async name => {
   const response = await request('/api/arc/media', { method: 'POST',
     headers: { 'Content-Type': 'image/png', Authorization: `Bearer ${session}` },
-    body: readFileSync(resolve(`SingleSparkFront/front/static/assets/tokens/${name}.png`)) });
+    body: readFileSync(resolve(`SingleSparkFront/artwork/tokens/${name}.png`)) });
   assert.equal(response.status, 201, `media ${name}: ${response.status}`);
   return (await response.json()).publicUrl;
 };
