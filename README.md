@@ -17,6 +17,8 @@ The Robinhood platform random NFT factory source supports single-use silver-key 
 
 Tests, build profiles and deployment records live alongside their owning chain.
 
+Shared EVM Hook accounting has stateful invariant tests in `chains/evm/hooks/test/HookAccountingInvariant.t.sol`: 128 sequences of 64 actions mix funding, unsynced income, inventory, payouts, policy changes, pauses, settlement and replay attempts across two ERC20 project Vaults and a native-asset Vault. Each step checks per-project conservation and reward reserves; unexpected action reverts fail the run. ARC weighted Vault tests also fuzz 32-operation sequences with swap-backed inventory and isolated project balances. NFT revenue tests fuzz staking, income, pause/resume, epoch rollover and claims against an independent quality-seconds model. Run `npm run test:evm-gameplay`, `npm run test:arc-contracts` and `npm --prefix SingleSparkContract run test:platform:nft` from the workspace. These tests use local fixtures and send no funded transactions.
+
 ## Contracts
 
 | Module | Main contracts / programs | Responsibility |
