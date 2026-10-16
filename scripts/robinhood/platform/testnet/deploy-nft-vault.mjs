@@ -33,7 +33,7 @@ const chain = defineChain({ id: 46630, name: 'Robinhood Chain Testnet', testnet:
 const transport = http(rpc, { timeout: 30000, retryCount: 2 });
 const client = createPublicClient({ chain, transport, pollingInterval: 1500, cacheTime: 0 });
 assert.equal(await client.getChainId(), 46630, 'RPC chain mismatch');
-const names = policy ? ['PlatformRandomNftFactory', 'PlatformRandomNft', 'PlatformRandomNftRevenueVault']
+const names = policy ? ['PlatformRandomNftFactory', 'PlatformRandomNft', 'PlatformRandomNftRevenueVault', 'PlatformNftSalesVault']
   : ['PlatformNftVaultFactory', 'PlatformNft', 'PlatformNftRevenueVault'];
 const artifacts = Object.fromEntries(names.map(name => [name, testnetBuild ? testnetBuild.artifacts[name] : read(resolve(root, `chains/robinhood/out/platform/${name}.sol/${name}.json`))]));
 if (policy) artifacts.OpenVRF = read(resolve(root, `chains/robinhood/data/openvrf/${openVrfPin.revision}/out/OpenVRF.sol/OpenVRF.json`));
@@ -115,8 +115,9 @@ try {
  const factory = deployment.contractAddress; assert(factory);
  const nft = await call(factory, factoryArtifact, 'nft'); const vault = await call(factory, factoryArtifact, 'vault');
  report.addresses = { factory, nft, vault, ...(router ? { router } : {}) }; report.deploymentBlock = String(deployment.blockNumber);
+ if(policy) { report.addresses.salesVault=await call(factory,factoryArtifact,'salesVault'); report.boxVersion=1; report.boxPriceWei=String(await call(factory,factoryArtifact,'BOX_PRICE')); }
  const mask = (code, references) => { let value = code.slice(2); for (const entries of Object.values(references ?? {})) for (const { start, length } of entries) value = value.slice(0, start * 2) + '0'.repeat(length * 2) + value.slice((start + length) * 2); return value.toLowerCase(); };
- for (const [name, address, artifact] of [['factory', factory, factoryArtifact], ['nft', nft, artifacts[names[1]]], ['vault', vault, vaultArtifact], ...(router ? [['router', router, artifacts.OpenVRF]] : [])]) {
+ for (const [name, address, artifact] of [['factory', factory, factoryArtifact], ['nft', nft, artifacts[names[1]]], ['vault', vault, vaultArtifact], ...(router ? [['router', router, artifacts.OpenVRF],['salesVault',report.addresses.salesVault,artifacts.PlatformNftSalesVault]] : [])]) {
   const code = await client.getCode({ address }); assert(code && code !== '0x');
   assert.equal(mask(code, artifact.deployedBytecode.immutableReferences), mask(artifact.deployedBytecode.object, artifact.deployedBytecode.immutableReferences), `${name} runtime mismatch`);
   report.codeHashes[name] = keccak256(code);

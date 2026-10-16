@@ -14,7 +14,7 @@ contract MockOpenVrf is IOpenVrf {
     mapping(uint256 => address) public consumers;
     function setFee(uint256 fee) external { requestFee = fee; }
     function requestRandomness(uint32 gasLimit) external payable returns (uint256 id) {
-        require(msg.value == requestFee && gasLimit == 150_000);
+        require(msg.value == requestFee && (gasLimit == 150_000 || gasLimit == 400_000));
         id = nextId++; consumers[id] = msg.sender;
     }
     function deliver(uint256 id, uint256 word) external { PlatformRandomNftFactory(payable(consumers[id])).rawFulfillRandomness(id, word); }
@@ -92,6 +92,74 @@ contract PlatformRandomNftTest is Test {
         uint16[8] memory odds = _odds(); uint256 lower;
         for (uint256 i; i < grade - 1; ++i) lower += odds[i];
         assertGe(word % 10_000, lower); assertLt(word % 10_000, lower + odds[grade - 1]);
+    }
+    function testBoxPoolsExactlyPreserveRelativeOddsAndExcludeOtherGrades() public view {
+        uint256[8] memory counts;
+        for (uint256 word; word < 9000; ++word) {
+            uint8 grade = factory.gradeForBoxWord(word, PlatformRandomNftFactory.BoxPool.Silver);
+            assertLe(grade, 4); ++counts[grade - 1];
+        }
+        for (uint256 word; word < 1000; ++word) {
+            uint8 grade = factory.gradeForBoxWord(word, PlatformRandomNftFactory.BoxPool.Gold);
+            assertGe(grade, 5); assertLe(grade, 8); ++counts[grade - 1];
+        }
+        uint16[8] memory odds = _odds();
+        for (uint256 i; i < 8; ++i) assertEq(counts[i], odds[i]);
+    }
+    function testFuzzBoxPoolsNeverCrossGradeBoundary(uint256 word) public view {
+        uint8 silver = factory.gradeForBoxWord(word, PlatformRandomNftFactory.BoxPool.Silver);
+        uint8 gold = factory.gradeForBoxWord(word, PlatformRandomNftFactory.BoxPool.Gold);
+        assertGe(silver, 1); assertLe(silver, 4); assertGe(gold, 5); assertLe(gold, 8);
+    }
+    function testBoxKeysLockPoolRecipientAndNonceAcrossOutOfOrderCallbacks() public {
+        bytes32 silverNonce = bytes32(uint256(20)); bytes32 goldNonce = bytes32(uint256(21));
+        vm.prank(BOB); vm.expectRevert(); factory.scheduleBoxClaim(BOB, goldNonce, PlatformRandomNftFactory.BoxPool.Gold);
+        vm.startPrank(OWNER);
+        vm.expectRevert(); factory.scheduleBoxClaim(ALICE, silverNonce, PlatformRandomNftFactory.BoxPool.Legacy);
+        factory.scheduleBoxClaim(ALICE, silverNonce, PlatformRandomNftFactory.BoxPool.Silver);
+        factory.scheduleBoxClaim(BOB, goldNonce, PlatformRandomNftFactory.BoxPool.Gold);
+        vm.expectRevert(); factory.scheduleBoxClaim(ALICE, silverNonce, PlatformRandomNftFactory.BoxPool.Gold);
+        vm.expectRevert(); factory.scheduleClaim(ALICE, silverNonce);
+        vm.stopPrank();
+        vm.prank(BOB); vm.expectRevert(); factory.requestClaim{value: 7}(silverNonce, 7);
+        uint256 silverId = _request(ALICE, silverNonce); uint256 goldId = _request(BOB, goldNonce);
+        router.deliver(goldId, 999); router.deliver(silverId, 8999);
+        uint256 goldToken = 1; uint256 silverToken = 2;
+        assertEq(nft.qualityOf(silverToken), 4); assertEq(nft.ownerOf(silverToken), ALICE);
+        assertEq(nft.qualityOf(goldToken), 8); assertEq(nft.ownerOf(goldToken), BOB);
+        assertEq(factory.reservedSupply(), 0);
+        vm.expectRevert(); factory.completeClaim(silverId);
+        vm.prank(ALICE); vm.expectRevert(); factory.requestClaim{value: 7}(silverNonce, 7);
+        vm.prank(OWNER); vm.expectRevert(); factory.scheduleBoxClaim(ALICE, silverNonce, PlatformRandomNftFactory.BoxPool.Gold);
+    }
+    function testPausedBoxCallbackCanRetryAfterResumeWithoutAnotherUserTransaction() public {
+        bytes32 nonce = bytes32(uint256(22));
+        vm.prank(OWNER); factory.scheduleBoxClaim(ALICE, nonce, PlatformRandomNftFactory.BoxPool.Silver);
+        uint256 id = _request(ALICE, nonce);
+        vm.prank(OWNER); factory.pause();
+        vm.expectRevert(); router.deliver(id, 8999);
+        (,,bool received,bool minted) = factory.results(id);
+        assertFalse(received); assertFalse(minted); assertEq(factory.reservedSupply(), 1);
+        vm.prank(OWNER); factory.scheduleResume(); vm.warp(factory.resumeAfter()); vm.prank(OWNER); factory.resume();
+        router.deliver(id, 8999);
+        assertEq(nft.ownerOf(1), ALICE); assertEq(nft.qualityOf(1), 4); assertEq(factory.reservedSupply(), 0);
+    }
+    function testPurchasePaysSeparateSalesVaultAndOpensGoldBoxInOneUserTransaction() public {
+        bytes32 nonce = bytes32(uint256(30)); uint256 price = factory.BOX_PRICE();
+        vm.prank(ALICE); uint256 id = factory.purchaseBox{value: price + 7}(nonce, 7);
+        assertEq(address(factory.salesVault()).balance, price); assertEq(factory.salesVault().totalReceived(), price);
+        assertEq(address(vault).balance, 0); assertEq(vault.totalReceived(), 0); assertEq(address(router).balance, 7);
+        router.deliver(id, 999);
+        assertEq(nft.ownerOf(1), ALICE); assertEq(nft.qualityOf(1), 8);
+        vm.prank(ALICE); vm.expectRevert(); factory.purchaseBox{value: price + 7}(nonce, 7);
+        vm.expectRevert(); factory.completeClaim(id);
+    }
+    function testInvalidPurchaseRollsBackAuthorizationAndAllPayments() public {
+        bytes32 nonce = bytes32(uint256(31)); uint256 price = factory.BOX_PRICE();
+        vm.prank(ALICE); vm.expectRevert(); factory.purchaseBox{value: price + 8}(nonce, 7);
+        vm.prank(ALICE); vm.expectRevert(); factory.purchaseBox{value: price + 7}(nonce, 6);
+        (address recipient,,,) = factory.claims(factory.claimOperation(ALICE, nonce));
+        assertEq(recipient, address(0)); assertEq(address(factory.salesVault()).balance, 0); assertEq(factory.reservedSupply(), 0);
     }
     function testImmediateEligibilityCannotBeStolenOrReplayed() public {
         vm.prank(BOB); vm.expectRevert(); factory.requestClaim{value: 7}(bytes32(uint256(1)), 7);

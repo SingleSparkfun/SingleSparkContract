@@ -41,7 +41,7 @@ report.latestAccounting = { blockNumber: String(blockNumber), totalReceivedWei: 
 if (report.openVrfRevision) {
  const factoryAbi = parseAbi(['function owner() view returns(address)', 'function nft() view returns(address)', 'function vault() view returns(address)',
   'function randomnessRouter() view returns(address)', 'function probabilities(uint256) view returns(uint16)', 'function paused() view returns(bool)',
-  'function DELAY() view returns(uint256)', 'function CLAIM_DELAY() view returns(uint256)']);
+  'function DELAY() view returns(uint256)', 'function CLAIM_DELAY() view returns(uint256)', 'function BOX_VERSION() view returns(uint256)', 'function BOX_PRICE() view returns(uint256)', 'function salesVault() view returns(address)']);
  const nftAbi = parseAbi(['function MAX_SUPPLY() view returns(uint256)', 'function issuer() view returns(address)', 'function artworkUris(uint256) view returns(string)']);
  const vaultAbi = parseAbi(['function nft() view returns(address)', 'function controller() view returns(address)', 'function owner() view returns(address)', 'function EPOCH_DURATION() view returns(uint256)',
   'function qualityWeight(uint8) view returns(uint16)']);
@@ -51,6 +51,14 @@ if (report.openVrfRevision) {
  const same = (actual, expected) => assert.equal(actual.toLowerCase(), expected.toLowerCase());
  const {factory,nft,vault,router} = report.addresses;
  same(await read(factory,factoryAbi,'owner'),report.owner);
+ if(report.boxVersion!==undefined){
+  assert.equal(report.boxVersion,1);assert.equal(await read(factory,factoryAbi,'BOX_VERSION'),1n);
+  assert.equal(await read(factory,factoryAbi,'BOX_PRICE'),BigInt(report.boxPriceWei));
+  same(await read(factory,factoryAbi,'salesVault'),report.addresses.salesVault);
+  const salesAbi=parseAbi(['function owner() view returns(address)','function DELAY() view returns(uint256)']);
+  same(await read(report.addresses.salesVault,salesAbi,'owner'),report.owner);
+  assert.equal(await read(report.addresses.salesVault,salesAbi,'DELAY'),BigInt(report.verification.policyDelaySeconds));
+ }
  assert.equal(await read(factory,factoryAbi,'DELAY'),BigInt(report.verification.policyDelaySeconds));
  if (report.claimEligibilityDelaySeconds !== undefined) {
   assert.equal(report.claimEligibilityDelaySeconds,0);

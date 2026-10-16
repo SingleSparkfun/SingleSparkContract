@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 export function testnetNftSource(path, content) {
-  if (['PlatformRandomNftFactory.sol', 'PlatformNftRevenueVault.sol'].some(name => path.endsWith(`/${name}`))) {
+  if (['PlatformRandomNftFactory.sol', 'PlatformNftRevenueVault.sol', 'PlatformNftSalesVault.sol'].some(name => path.endsWith(`/${name}`))) {
     assert.equal(content.split('DELAY = 48 hours').length, 2, 'Production delay changed');
     const delayed = content.replace('DELAY = 48 hours', 'DELAY = 10 minutes');
     if (path.endsWith('/PlatformNftRevenueVault.sol')) {
@@ -20,7 +20,7 @@ export function testnetNftSource(path, content) {
   return content;
 }
 export function buildNftTestnet(output) {
-  const names = ['PlatformRandomNftFactory', 'PlatformRandomNft', 'PlatformRandomNftRevenueVault'];
+  const names = ['PlatformRandomNftFactory', 'PlatformRandomNft', 'PlatformRandomNftRevenueVault', 'PlatformNftSalesVault'];
   const sources = {}, original = {};
   function visit(path) {
     assert(!path.startsWith('../') && !posix.isAbsolute(path)); if (sources[path]) return;
