@@ -226,7 +226,7 @@ try {
       const snapshot = await (await fetch(`${base}/api/arc/snapshot`)).json();
       assert.equal(snapshot.launch.toLowerCase(), d.launch.toLowerCase());
       assert.equal(snapshot.openingTaxToPlatform, true);
-      const bytes = readFileSync('SingleSparkFront/front/static/assets/tokens/ember-cat.png');
+      const bytes = readFileSync('SingleSparkFront/artwork/tokens/ember-cat.png');
       const imageName = `${keccak256(bytes).slice(2)}.png`;
       writeFileSync(`${dir}/runtime/media/${imageName}`, bytes);
       const metadata = stringify({ name: 'Opening Tax Test', symbol: 'OTAX', image: `${mediaBase}/${imageName}`, channels: {} });
@@ -330,7 +330,7 @@ try {
     for (const [name, symbol, image, buyFee, sellFee] of [
       ['Ember Cat Test', 'ECAT', 'ember-cat.png', 30000, 30000], ['Moon Frog Test', 'MFROG', 'moon-frog.png', 10000, 50000],
     ]) {
-      const { publicUrl } = await post('/api/arc/media', readFileSync(`SingleSparkFront/front/static/assets/tokens/${image}`), 'image/png');
+      const { publicUrl } = await post('/api/arc/media', readFileSync(`SingleSparkFront/artwork/tokens/${image}`), 'image/png');
       const { metadataURI } = await post('/api/arc/metadata', stringify({ name, symbol, image: publicUrl, channels: { website: 'https://singlespark.fun/' } }));
       const vaultReceipt = await send(`treasury-${symbol}`, d.launch, encodeFunctionData({ abi, functionName: 'createProjectTreasury' }));
       const community = parseEventLogs({ abi, eventName: 'ProjectTreasuryCreated', logs: vaultReceipt.logs })[0].args.treasury;

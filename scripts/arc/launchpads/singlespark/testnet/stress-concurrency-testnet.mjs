@@ -379,8 +379,8 @@ async function fund() {
 }
 
 const PLANS = [
-  { name: 'Load Test A', symbol: 'LTA', buyFee: 20000, sellFee: 40000, image: 'SingleSparkFront/front/static/assets/tokens/ember-cat.png' },
-  { name: 'Load Test B', symbol: 'LTB', buyFee: 50000, sellFee: 10000, image: 'SingleSparkFront/front/static/assets/tokens/moon-frog.png' },
+  { name: 'Load Test A', symbol: 'LTA', buyFee: 20000, sellFee: 40000, image: 'SingleSparkFront/artwork/tokens/ember-cat.png' },
+  { name: 'Load Test B', symbol: 'LTB', buyFee: 50000, sellFee: 10000, image: 'SingleSparkFront/artwork/tokens/moon-frog.png' },
 ];
 
 async function launch() {
