@@ -18,3 +18,14 @@ chains/solana/target/
 *.[mM][dD]
 !/README.md
 chains/robinhood/randomness/.rainbond/
+
+# Reuse owning-workspace build caches through symlinks in isolated release checkouts.
+/chains/arc/out
+/chains/arc/cache
+/chains/evm/out
+/chains/evm/cache
+/chains/evm/legacy/out
+/chains/evm/legacy/cache
+/chains/robinhood/out
+/chains/robinhood/cache
+/chains/solana/target
