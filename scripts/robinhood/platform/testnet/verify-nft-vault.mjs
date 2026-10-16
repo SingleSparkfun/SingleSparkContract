@@ -6,7 +6,10 @@ import { createPublicClient, http, keccak256, parseAbi } from 'viem';
 import { nftDeploymentReportName } from './random-nft-config.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
-const reportPath = resolve(root, 'chains/robinhood/deployments/testnet/platform', nftDeploymentReportName({
+const index = process.argv.indexOf('--deployment-id');
+const deploymentId = index < 0 ? null : process.argv[index + 1];
+assert(!deploymentId || /^[a-z0-9][a-z0-9-]{0,63}$/.test(deploymentId));
+const reportPath = resolve(root, 'chains/robinhood/deployments/testnet/platform', deploymentId ? `nft-random-${deploymentId}.json` : nftDeploymentReportName({
  random: process.argv.includes('--random'), immediateClaims: process.argv.includes('--immediate-claims') }));
 const report = JSON.parse(readFileSync(reportPath));
 assert.equal(report.chainId, 46630); assert.equal(report.environment, 'testnet');
@@ -27,7 +30,8 @@ report.finalityComplete = Object.values(report.transactions).every(tx => BigInt(
 report.status = report.finalityComplete ? 'verified' : 'verified_pending_finality';
 report.totalGasCostWei = String(Object.values(report.transactions).reduce((sum, tx) => sum + BigInt(tx.gasCostWei), 0n));
 const abi = parseAbi(['function totalReceived() view returns(uint256)', 'function accountedBalance() view returns(uint256)', 'function ownerCredit() view returns(uint256)', 'function nftReserve() view returns(uint256)', 'function totalOwnerClaimed() view returns(uint256)', 'function totalNftClaimed() view returns(uint256)']);
-const blockNumber = await client.getBlockNumber();
+// Public testnet RPC replicas can briefly disagree at the tip; retain one recent, shared state block.
+const blockNumber = (await client.getBlockNumber({ cacheTime: 0 })) - 100n;
 const [received, accounted, owner, nft, ownerPaid, nftPaid, balance] = await Promise.all([
  ...['totalReceived', 'accountedBalance', 'ownerCredit', 'nftReserve', 'totalOwnerClaimed', 'totalNftClaimed'].map(functionName => client.readContract({ address: report.addresses.vault, abi, functionName, blockNumber })),
  client.getBalance({ address: report.addresses.vault, blockNumber }),
@@ -39,7 +43,7 @@ if (report.openVrfRevision) {
   'function randomnessRouter() view returns(address)', 'function probabilities(uint256) view returns(uint16)', 'function paused() view returns(bool)',
   'function DELAY() view returns(uint256)', 'function CLAIM_DELAY() view returns(uint256)']);
  const nftAbi = parseAbi(['function MAX_SUPPLY() view returns(uint256)', 'function issuer() view returns(address)', 'function artworkUris(uint256) view returns(string)']);
- const vaultAbi = parseAbi(['function nft() view returns(address)', 'function controller() view returns(address)', 'function owner() view returns(address)',
+ const vaultAbi = parseAbi(['function nft() view returns(address)', 'function controller() view returns(address)', 'function owner() view returns(address)', 'function EPOCH_DURATION() view returns(uint256)',
   'function qualityWeight(uint8) view returns(uint16)']);
  const routerAbi = parseAbi(['function owner() view returns(address)', 'function authorizedConsumers(address) view returns(bool)',
   'function authorizedRelayers(address) view returns(bool)', 'function requestFee() view returns(uint256)']);
@@ -47,7 +51,7 @@ if (report.openVrfRevision) {
  const same = (actual, expected) => assert.equal(actual.toLowerCase(), expected.toLowerCase());
  const {factory,nft,vault,router} = report.addresses;
  same(await read(factory,factoryAbi,'owner'),report.owner);
- assert.equal(await read(factory,factoryAbi,'DELAY'),172800n);
+ assert.equal(await read(factory,factoryAbi,'DELAY'),BigInt(report.verification.policyDelaySeconds));
  if (report.claimEligibilityDelaySeconds !== undefined) {
   assert.equal(report.claimEligibilityDelaySeconds,0);
   assert.equal(await read(factory,factoryAbi,'CLAIM_DELAY'),0n);
@@ -56,6 +60,7 @@ if (report.openVrfRevision) {
  same(await read(factory,factoryAbi,'randomnessRouter'),router); same(await read(nft,nftAbi,'issuer'),factory);
  same(await read(vault,vaultAbi,'nft'),nft); same(await read(vault,vaultAbi,'controller'),factory);
  same(await read(vault,vaultAbi,'owner'),report.owner); same(await read(router,routerAbi,'owner'),report.owner);
+ assert.equal(await read(vault,vaultAbi,'EPOCH_DURATION'),BigInt(report.verification.weeklySettlementSeconds));
  assert.equal(await read(nft,nftAbi,'MAX_SUPPLY'),100_000n);
  assert.equal(await read(router,routerAbi,'authorizedConsumers',[factory]),true);
  assert.equal(await read(router,routerAbi,'authorizedRelayers',[report.relayerAddress]),true);

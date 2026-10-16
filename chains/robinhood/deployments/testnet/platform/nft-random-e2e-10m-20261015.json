@@ -1,0 +1,114 @@
+{
+  "identity": "0f226756d19e5b6ab5161ad9f8f75643da2da9a8b0cadcfe5875400c3754f148",
+  "chainId": 46630,
+  "environment": "testnet",
+  "owner": "0xe3CB759628928e584256Da687Cf837Df2cf3C116",
+  "addresses": {
+    "factory": "0x294b223af367b41db9a98dc868b25f58c6975533",
+    "nft": "0x5eBB31BED5EDFB754Ffa80511EAfecEa0200d77a",
+    "vault": "0xF98B023A1C13E0CF19eF40308BC1f87Bf37C4621",
+    "router": "0xb995eb35836967c5ab325bca8b2569154a449f93"
+  },
+  "codeHashes": {
+    "factory": "0xfd4adefc3b0bd15a4120ba4dcbc7f5eaf8c77e7f9f7b795908b313c4c1295cf6",
+    "nft": "0x4a1cca53877c8cdcd737d17854f805cbb4a9613682bd387d8aa93e25039be50b",
+    "vault": "0x5d313ef8f71ca758967e2455118b4922685ef05364ee62e20f2c3393eff2a5ea",
+    "router": "0x701b72dba2d9877afffdc660f1cb43615796b2bc900a6a61349cba556161d013"
+  },
+  "transactions": {
+    "deploy-randomness-router": {
+      "hash": "0x7e67d9ed3eb8917f6cf5cfd94c1eb8b0549a7f770ad8224a59d0db591362cee6",
+      "blockNumber": "135736890",
+      "blockHash": "0xa44fcbf1ec9e936eb25ca901f51517347614ce2500ea1ed6d9a655511ec1120e",
+      "gasCostWei": "28869530000000"
+    },
+    "deploy-platform-factory": {
+      "hash": "0xb2078c48901278b9c9fbef1e570bc7eb2c0e76b278fcdaf82f7ffcfa358ac410",
+      "blockNumber": "135736948",
+      "blockHash": "0x0ccd70e568542384e2f29f187e47e80fa08352b13d1843010a7057aa94d4348a",
+      "gasCostWei": "49764660000000"
+    },
+    "authorize-nft-randomness": {
+      "hash": "0x397bfc3e393b12bc0439e393ff28712ae712db7859bfc6cff649303656915c80",
+      "blockNumber": "135737084",
+      "blockHash": "0xa31cab9cfcaa68f6fa52dce544fb136e038915f96bb20949ce0e2772eb7f4e16",
+      "gasCostWei": "479210000000"
+    },
+    "schedule-testnet-resume": {
+      "hash": "0x27c07476882c1a45a5bc9f0a7b60a3573a6fcb3d7872e03e19650ddefc34c3b5",
+      "blockNumber": "135737151",
+      "blockHash": "0xdb5b7df85f809493e104a76cb06c41481c7174a553b9c6dd68fabcd8cd6cff35",
+      "gasCostWei": "469390000000"
+    },
+    "verify-treasury-forwarding": {
+      "hash": "0x2a0e9b95e1f69185c6864102774ae7743ce2db90e80064717f104162e0879615",
+      "blockNumber": "135737214",
+      "blockHash": "0x5aea535fb3688ebdf20f6c24e0563142ec0f815b2a464e8ed29150a5dae8b0c7",
+      "gasCostWei": "1462450000000"
+    },
+    "verify-owner-half-withdrawal": {
+      "hash": "0xed90d045959c7bd819ebfab25ffeaafed1afe286954638125112a60e5afa0aa8",
+      "blockNumber": "135737279",
+      "blockHash": "0x40d3239789e2d9546fc3e660b80d31158b07ad4dad53bc60c605a8dff24306cc",
+      "gasCostWei": "598220000000"
+    }
+  },
+  "issuance": {
+    "randomClaimsEnabled": false,
+    "xClaimsEnabled": false,
+    "referralClaimsEnabled": false
+  },
+  "openVrfRevision": "9fb960cfc4d41e38f9d3057bf547e0d9cdcd4cc2",
+  "relayerAddress": "0xF926A4A9A3630A311699E8904dccF3F756bE5A05",
+  "randomPolicy": {
+    "probabilitiesBps": [
+      4000,
+      2500,
+      1500,
+      1000,
+      600,
+      300,
+      99,
+      1
+    ],
+    "gradeWeights": [
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800
+    ],
+    "artworkUris": [
+      "https://singlespark.fun/assets/nft/01-ember-seed.png",
+      "https://singlespark.fun/assets/nft/02-verdant-flame.png",
+      "https://singlespark.fun/assets/nft/03-azure-heart.png",
+      "https://singlespark.fun/assets/nft/04-amethyst-soul.png",
+      "https://singlespark.fun/assets/nft/05-solar-crown.png",
+      "https://singlespark.fun/assets/nft/06-crimson-phoenix.png",
+      "https://singlespark.fun/assets/nft/07-astral-flame-crowned.png",
+      "https://singlespark.fun/assets/nft/08-genesis-core.png"
+    ],
+    "requestFeeWei": "0"
+  },
+  "routerDeploymentBlock": "135736890",
+  "deploymentBlock": "135736948",
+  "claimEligibilityDelaySeconds": 0,
+  "authorizationBlock": "135737084",
+  "resumeAfter": "1792058112",
+  "genesis": "1792057491",
+  "finalizedThroughBlock": "135728015",
+  "finalityComplete": false,
+  "status": "verified_pending_finality",
+  "verification": {
+    "treasuryForwarding": true,
+    "ownerHalfWithdrawal": true,
+    "nftReservePreserved": true,
+    "runtimeCodeMatched": true,
+    "weeklySettlementSeconds": 604800,
+    "policyDelaySeconds": 600,
+    "weeklyClaimLiveVerified": false
+  }
+}

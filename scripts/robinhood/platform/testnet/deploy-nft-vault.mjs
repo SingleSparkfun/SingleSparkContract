@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync, mkdirSync, renameSync, existsSync, statSyn
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { createPublicClient, createWalletClient, defineChain, http, encodeDeployData, encodeFunctionData, keccak256, parseTransaction, recoverTransactionAddress } from 'viem';
+import { createPublicClient, createWalletClient, defineChain, http, encodeDeployData, encodeFunctionData, keccak256, parseTransaction, recoverTransactionAddress, parseEventLogs } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { randomNftConfig, nftDeploymentReportName } from './random-nft-config.mjs';
 
@@ -11,6 +11,12 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const json = value => JSON.stringify(value, (_, item) => typeof item === 'bigint' ? String(item) : item, 2);
 const read = path => JSON.parse(readFileSync(path));
 const arg = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
+const testnetBuildPath = arg('--testnet-build');
+const deploymentId = arg('--deployment-id');
+assert(!deploymentId || /^[a-z0-9][a-z0-9-]{0,63}$/.test(deploymentId), 'Invalid testnet deployment ID');
+assert.equal(Boolean(testnetBuildPath), Boolean(deploymentId), 'An isolated testnet build requires its own deployment ID');
+const testnetBuild = testnetBuildPath ? read(resolve(testnetBuildPath)) : null;
+if (testnetBuild) { assert.equal(testnetBuild.chainId, 46630); assert.equal(testnetBuild.policyDelaySeconds, 600); assert.equal(testnetBuild.epochDurationSeconds, 14400); }
 const policyPath = arg('--random-config');
 const policy = policyPath ? randomNftConfig(read(policyPath)) : null;
 const openVrfPin = policy ? read(resolve(root, 'chains/robinhood/randomness/openvrf.json')) : null;
@@ -29,7 +35,7 @@ const client = createPublicClient({ chain, transport, pollingInterval: 1500, cac
 assert.equal(await client.getChainId(), 46630, 'RPC chain mismatch');
 const names = policy ? ['PlatformRandomNftFactory', 'PlatformRandomNft', 'PlatformRandomNftRevenueVault']
   : ['PlatformNftVaultFactory', 'PlatformNft', 'PlatformNftRevenueVault'];
-const artifacts = Object.fromEntries(names.map(name => [name, read(resolve(root, `chains/robinhood/out/platform/${name}.sol/${name}.json`))]));
+const artifacts = Object.fromEntries(names.map(name => [name, testnetBuild ? testnetBuild.artifacts[name] : read(resolve(root, `chains/robinhood/out/platform/${name}.sol/${name}.json`))]));
 if (policy) artifacts.OpenVRF = read(resolve(root, `chains/robinhood/data/openvrf/${openVrfPin.revision}/out/OpenVRF.sol/OpenVRF.json`));
 const owner = accounts.admin.address;
 if (policy) for (const account of Object.values(accounts)) assert.notEqual(policy.relayer.toLowerCase(), account.address.toLowerCase(), 'Use a dedicated Relayer Gas wallet');
@@ -38,7 +44,7 @@ const identity = createHash('sha256').update(json({ chainId: 46630, owner, deplo
 const privateDir = resolve(root, policy ? 'chains/robinhood/data/platform-random-nft-vault' : 'chains/robinhood/data/platform-nft-vault', identity);
 const journalPath = resolve(privateDir, 'transactions.json');
 const immediateClaims = process.argv.includes('--immediate-claims');
-const reportPath = resolve(root, 'chains/robinhood/deployments/testnet/platform', nftDeploymentReportName({ random: !!policy, immediateClaims }));
+const reportPath = resolve(root, 'chains/robinhood/deployments/testnet/platform', deploymentId ? `nft-random-${deploymentId}.json` : nftDeploymentReportName({ random: !!policy, immediateClaims }));
 const journal = existsSync(journalPath) ? read(journalPath) : { identity, steps: {} };
 assert.equal(journal.identity, identity);
 const report = existsSync(reportPath) ? read(reportPath) : { identity, chainId: 46630, environment: 'testnet', owner,
@@ -118,7 +124,7 @@ try {
  assert.equal((await call(vault, vaultArtifact, 'owner')).toLowerCase(), owner.toLowerCase());
  assert.equal((await call(vault, vaultArtifact, 'nft')).toLowerCase(), nft.toLowerCase());
  assert.equal((await call(vault, vaultArtifact, 'controller')).toLowerCase(), factory.toLowerCase());
- assert.equal(await call(vault, vaultArtifact, 'EPOCH_DURATION'), 604800n); assert.equal(await call(factory, factoryArtifact, 'DELAY'), 172800n);
+ assert.equal(await call(vault, vaultArtifact, 'EPOCH_DURATION'), BigInt(testnetBuild?.epochDurationSeconds ?? 604800)); assert.equal(await call(factory, factoryArtifact, 'DELAY'), BigInt(testnetBuild?.policyDelaySeconds ?? 172800));
  if (policy) {
   if (immediateClaims) {
    assert.equal(await call(factory, factoryArtifact, 'CLAIM_DELAY'), 0n);
@@ -135,22 +141,30 @@ try {
   report.authorizationBlock = String(authorization.blockNumber);
   assert.equal(await call(router, artifacts.OpenVRF, 'authorizedConsumers', [factory]), true);
   assert.equal(await call(router, artifacts.OpenVRF, 'authorizedRelayers', [policy.relayer]), true);
+  if (testnetBuild) {
+   await send('schedule-testnet-resume', { to: factory, data: encodeFunctionData({ abi: factoryArtifact.abi, functionName: 'scheduleResume' }) }, 'admin');
+   report.resumeAfter = String(await call(factory, factoryArtifact, 'resumeAfter'));
+   if (journal.steps['fund-testnet-relayer'] || await client.getBalance({ address: policy.relayer }) < 50_000_000_000_000n)
+    await send('fund-testnet-relayer', { to: policy.relayer, value: 50_000_000_000_000n });
+  }
  }
  report.genesis = String(await call(vault, vaultArtifact, 'genesis')); persist(reportPath, report);
  const income = 1_000_000_000_000n;
  const deposit = await send('verify-treasury-forwarding', { to: factory, value: income });
- assert.equal(await call(vault, vaultArtifact, 'totalReceived', [], deposit.blockNumber), income);
- assert.equal(await call(vault, vaultArtifact, 'ownerCredit', [], deposit.blockNumber), income / 2n);
- assert.equal(await call(vault, vaultArtifact, 'nftReserve', [], deposit.blockNumber), income / 2n);
+ const recordedIncome = parseEventLogs({ abi: vaultArtifact.abi, eventName: 'Income', logs: deposit.logs }).filter(event => event.address.toLowerCase() === vault.toLowerCase());
+ assert.equal(recordedIncome.length, 1); assert.equal(recordedIncome[0].args.amount, income);
+ assert.equal(recordedIncome[0].args.ownerAmount, income / 2n); assert.equal(recordedIncome[0].args.nftAmount, income / 2n);
  const claimed = await send('verify-owner-half-withdrawal', { to: vault, data: encodeFunctionData({ abi: vaultArtifact.abi, functionName: 'claimOwner' }) }, 'admin');
- assert.equal(await call(vault, vaultArtifact, 'ownerCredit', [], claimed.blockNumber), 0n);
- assert.equal(await call(vault, vaultArtifact, 'nftReserve', [], claimed.blockNumber), income / 2n);
- assert.equal(await client.getBalance({ address: vault, blockNumber: claimed.blockNumber }), income / 2n);
+ const recordedOwner = parseEventLogs({ abi: vaultArtifact.abi, eventName: 'OwnerClaimed', logs: claimed.logs }).filter(event => event.address.toLowerCase() === vault.toLowerCase());
+ assert.equal(recordedOwner.length, 1); assert.equal(recordedOwner[0].args.amount, income / 2n);
+ assert.equal(await call(vault, vaultArtifact, 'ownerCredit'), 0n);
+ assert.equal(await call(vault, vaultArtifact, 'nftReserve'), income / 2n);
+ assert.equal(await client.getBalance({ address: vault }), income / 2n);
  const finalized = await client.getBlock({ blockTag: 'finalized' });
  report.finalizedThroughBlock = String(finalized.number);
  report.finalityComplete = Object.values(report.transactions).every(tx => BigInt(tx.blockNumber) <= finalized.number);
  report.status = report.finalityComplete ? 'verified' : 'verified_pending_finality';
  report.verification = { treasuryForwarding: true, ownerHalfWithdrawal: true, nftReservePreserved: true, runtimeCodeMatched: true,
-  weeklySettlementSeconds: 604800, policyDelaySeconds: 172800, weeklyClaimLiveVerified: false };
+  weeklySettlementSeconds: testnetBuild?.epochDurationSeconds ?? 604800, policyDelaySeconds: testnetBuild?.policyDelaySeconds ?? 172800, weeklyClaimLiveVerified: false };
  persist(reportPath, report); console.log(json({ status: report.status, addresses: report.addresses, verification: report.verification }));
 } finally { closeSync(lock); unlinkSync(lockPath); }
