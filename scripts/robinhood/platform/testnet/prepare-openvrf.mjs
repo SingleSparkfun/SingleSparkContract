@@ -24,7 +24,7 @@ for (const entry of [pin, ...pin.dependencies]) {
 execFileSync('npm', ['ci', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: source, stdio: 'inherit' });
 execFileSync('forge', ['build'], { cwd: source, stdio: 'inherit' });
 mkdirSync(resolve(source, 'singlespark'), { recursive: true });
-for (const file of ['relayer.mjs', 'openvrf.json', 'start-relayer.sh']) {
+for (const file of ['relayer.mjs', 'finalized-code.mjs', 'openvrf.json', 'start-relayer.sh']) {
   copyFileSync(resolve(root, 'chains/robinhood/randomness', file), resolve(source, 'singlespark', file));
 }
 console.log(`Pinned OpenVRF prepared at ${source}`);

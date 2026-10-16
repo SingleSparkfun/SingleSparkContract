@@ -33,6 +33,8 @@ Tests, build profiles and deployment records live alongside their owning chain.
 
 Source code describes the implementation; network deployment records identify deployed versions. Updating this repository does not upgrade existing contracts or migrate funds.
 
+The NFT randomness Relayer retries an unavailable historical RPC state at the same finalized block up to five times. Persistent failures or mismatched runtime hashes still prevent startup; it never substitutes a latest-state read for finalized verification.
+
 ### Hook naming compatibility
 
 Shared EVM revenue implementations live in `chains/evm/hooks/`: `HookVaultFactory`, `HookVault`, `BuybackHook`, `DistributionHook` and `V4SwapAdapter`. Pons owns `PonsVaultFactory`, `PonsHookVault` and `PonsSwapAdapter`. Hooks execute only through the project Vault’s authorized Claim callbacks; this name does not turn them into Uniswap pool callbacks.
