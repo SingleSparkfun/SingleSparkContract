@@ -180,4 +180,88 @@ contract PlatformNftRevenueVaultTest is Test {
         vm.prank(OWNER); vault.claimOwner(); _conserved();
         assertLe(vault.nftReserve(), 1);
     }
+
+    function accrueWeights(uint256[2][64] memory model, bool[2] memory staked, uint256 from, uint256 to) private view {
+        while (from < to) {
+            uint256 epoch = (from - vault.genesis()) / vault.EPOCH_DURATION();
+            uint256 end = vault.epochStart(epoch + 1);
+            if (end > to) end = to;
+            assertLt(epoch, model.length);
+            for (uint256 i; i < 2; ++i) if (staked[i]) model[epoch][i] += (end - from) * (i == 0 ? 100 : 200);
+            from = end;
+        }
+    }
+    function testFuzzStakingIncomeAndEpochClaimSequences(uint256 seed) public {
+        uint256[2][64] memory weights;
+        uint256[64] memory revenue;
+        bool[2][64] memory claimed;
+        bool[2] memory staked;
+        uint256 income;
+        uint256 ownerPaid;
+        uint256 nftPaid;
+        for (uint256 step; step < 32; ++step) {
+            seed = uint256(keccak256(abi.encode(seed, step)));
+            uint256 action = seed % 9;
+            uint256 who = (seed >> 8) % 2;
+            address account = who == 0 ? ALICE : BOB;
+            uint256 beforeTime = vm.getBlockTimestamp();
+            if (action <= 1) {
+                uint256 amount = 1 + (seed >> 16) % 1 ether;
+                revenue[vault.currentEpoch()] += amount - ((income + amount) / 2 - income / 2);
+                income += amount;
+                if (action == 0) vault.deposit{value: amount}();
+                else { new ForceNative{value: amount}(payable(address(vault))); vault.sync(); }
+            } else if (action == 2 && !staked[who]) {
+                if (factory.paused()) {
+                    vm.expectRevert(); vm.prank(account); vault.stake(_ids(who + 1));
+                } else { _stake(account, who + 1); staked[who] = true; }
+            } else if (action == 3 && staked[who]) {
+                vm.prank(account); vault.unstake(_ids(who + 1), account); staked[who] = false;
+            } else if (action == 4 && vault.currentEpoch() > 0) {
+                uint256 epoch = (seed >> 16) % vault.currentEpoch();
+                uint256 total = weights[epoch][0] + weights[epoch][1];
+                uint256 expected = claimed[epoch][who] || total == 0 ? 0 : revenue[epoch] * weights[epoch][who] / total;
+                assertEq(vault.claimable(account, epoch), expected);
+                if (expected != 0) {
+                    _claim(account, epoch); claimed[epoch][who] = true; nftPaid += expected;
+                    vm.expectRevert(); vm.prank(account); vault.claimRewards(_ids(epoch), payable(account));
+                }
+            } else if (action == 5 && vault.ownerCredit() != 0) {
+                ownerPaid += vault.ownerCredit(); vm.prank(OWNER); vault.claimOwner();
+            } else if (action == 6 && vault.currentEpoch() > 0) {
+                uint256 epoch = (seed >> 16) % vault.currentEpoch();
+                if (weights[epoch][0] + weights[epoch][1] == 0 && revenue[epoch] != 0) {
+                    vault.rolloverEmptyEpoch(epoch);
+                    revenue[vault.currentEpoch()] += revenue[epoch]; revenue[epoch] = 0;
+                }
+            } else if (action == 7) {
+                if (!factory.paused()) { vm.prank(OWNER); factory.pause(); }
+                else {
+                    vm.prank(OWNER); factory.scheduleResume();
+                    vm.expectRevert(); vm.prank(OWNER); factory.resume();
+                    vm.warp(factory.resumeAfter()); vm.prank(OWNER); factory.resume();
+                }
+            } else if (action == 8) vm.warp(beforeTime + 1 + (seed >> 16) % 8 days);
+            accrueWeights(weights, staked, beforeTime, vm.getBlockTimestamp());
+            _conserved();
+            assertEq(vault.totalReceived(), income);
+            assertEq(vault.ownerCredit(), income / 2 - ownerPaid);
+            assertEq(vault.nftReserve(), income - income / 2 - nftPaid);
+            assertEq(vault.totalOwnerClaimed(), ownerPaid); assertEq(vault.totalNftClaimed(), nftPaid);
+            assertEq(OWNER.balance, ownerPaid); assertEq(ALICE.balance + BOB.balance, nftPaid);
+            for (uint256 i; i < 2; ++i) {
+                address owner = i == 0 ? ALICE : BOB;
+                assertEq(nft.ownerOf(i + 1), staked[i] ? address(vault) : owner);
+                assertEq(vault.stakedCount(owner), staked[i] ? 1 : 0);
+                assertEq(vault.currentWeight(owner), staked[i] ? (i == 0 ? 100 : 200) : 0);
+            }
+            uint256 current = vault.currentEpoch();
+            for (uint256 epoch; epoch <= current; ++epoch) {
+                assertEq(vault.epochRevenue(epoch), revenue[epoch]);
+                assertEq(vault.epochWeight(ALICE, epoch), weights[epoch][0]);
+                assertEq(vault.epochWeight(BOB, epoch), weights[epoch][1]);
+                assertEq(vault.totalEpochWeight(epoch), weights[epoch][0] + weights[epoch][1]);
+            }
+        }
+    }
 }

@@ -3,6 +3,7 @@ import { readFileSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { readFinalizedCode } from './finalized-code.mjs';
 
 async function start() {
 const directory = dirname(fileURLToPath(import.meta.url));
@@ -15,7 +16,7 @@ assert.equal(report.chainId, 46630); assert.equal(report.environment, 'testnet')
 assert.equal(report.openVrfRevision, pin.revision); assert.equal(report.status, 'verified');
 assert.equal(statSync(process.env.RELAYER_KEY_FILE).mode & 0o077, 0, 'Relayer key must be owner-only');
 const connection = new FetchRequest(process.env.RPC_URL); connection.timeout = 15_000;
-const provider = new JsonRpcProvider(connection);
+const provider = new JsonRpcProvider(connection, undefined, { batchMaxCount: 1 });
 try {
   assert.equal((await provider.getNetwork()).chainId, 46630n, 'RPC chain mismatch');
   const wallet = new Wallet(readFileSync(process.env.RELAYER_KEY_FILE, 'utf8').trim());
@@ -24,7 +25,7 @@ try {
   const finalized = await provider.getBlock('finalized');
   assert(finalized && BigInt(finalized.number) >= BigInt(report.authorizationBlock), 'Deployment authorization not finalized');
   for (const name of ['router', 'factory', 'nft', 'vault']) {
-    const code = await provider.getCode(report.addresses[name], finalized.number);
+    const code = await readFinalizedCode(provider, report.addresses[name], finalized.number);
     assert.notEqual(code, '0x'); assert.equal(keccak256(code), report.codeHashes[name], `${name} code mismatch`);
   }
   const router = new Contract(report.addresses.router, ['function authorizedConsumers(address) view returns(bool)',
@@ -43,6 +44,7 @@ await import(pathToFileURL(resolve(upstream, 'relayer/main.mjs')).href);
 }
 try { await start(); }
 catch (error) {
-  console.error(`NFT Relayer startup failed (${error.code ?? error.name ?? 'error'}); check configuration, deployment pins and authorization`);
+  console.error(`NFT Relayer startup failed (${error.code ?? error.name ?? 'error'}; RPC ${error.payload?.method ?? 'unavailable'}); check configuration, deployment pins and authorization`);
+  if (error.payload?.method === 'eth_getCode') console.error(`Finalized code unavailable: ${error.payload.params[0]} at ${error.payload.params[1]}`);
   process.exitCode = 1;
 }

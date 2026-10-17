@@ -167,4 +167,79 @@ contract WeightedPluginsTest is ArgusClaimTest {
         for (uint256 i; i < 5; ++i) sum += vault.budgets(i);
         assertEq(sum, total); assertEq(vault.accounted(), quote.balanceOf(address(vault)));
     }
+
+    function testFuzzWeightedOperationSequencesConserveProjectFunds(uint256 seed) public {
+        weighted(7); fund(300e6);
+        (ArgusRevenueVault other,) = launch(address(0x1002), bytes32(uint256(502)), 7);
+        quote.mint(address(other), 100e6); other.sync();
+        uint256 income = 300e6;
+        uint256 outgoing;
+        for (uint256 step; step < 32; ++step) {
+            seed = uint256(keccak256(abi.encode(seed, step)));
+            uint256 action = seed % 8;
+            if (action <= 1) {
+                uint256 amount = 1 + (seed >> 8) % 1000e6;
+                quote.mint(address(vault), amount); income += amount;
+                if (action == 0) vault.sync();
+            } else if (action == 2) vault.sync();
+            else if (action == 3) {
+                vault.sync();
+                uint8 bucket = uint8((seed >> 8) % 3);
+                uint8 bit = bucket == 2 ? 2 : bucket == 1 ? 4 : 1;
+                (uint8 selected, uint8 stopped,) = vault.policy();
+                uint256 available = vault.budgets(bucket);
+                if (selected & bit != 0 && stopped & bit == 0 && available != 0) {
+                    uint256 amount = 1 + (seed >> 16) % available;
+                    address[] memory empty = new address[](0);
+                    ArgusRevenueVault.Claim memory c = request(bucket, amount, empty);
+                    bytes memory sig = signature(c);
+                    vm.prank(CALLER); vault.claim(c, empty, sig);
+                    outgoing += amount + c.reward;
+                    vm.expectRevert(); vm.prank(CALLER); vault.claim(c, empty, sig);
+                }
+            } else if (action == 4) {
+                setWeights(uint8((seed >> 8) % 8), [uint16(1 + (seed >> 16) % 10), uint16(1 + (seed >> 24) % 10), uint16(1 + (seed >> 32) % 10)]);
+            } else if (action == 5) {
+                uint8 bit = uint8(1 << ((seed >> 8) % 3));
+                vm.prank(EXECUTOR); factory.pause(address(vault), bit);
+                uint8 bucket = bit == 2 ? 2 : bit == 4 ? 1 : 0;
+                address[] memory empty = new address[](0);
+                ArgusRevenueVault.Claim memory c = request(bucket, 1, empty);
+                bytes memory sig = signature(c);
+                vm.expectRevert(); vm.prank(CALLER); vault.claim(c, empty, sig);
+            } else if (action == 6) {
+                vault.sync();
+                uint256 amount = vault.budgets(4);
+                if (amount != 0) { vault.settle(true, amount); outgoing += amount; }
+            } else {
+                (uint8 selected, uint8 stopped,) = vault.policy();
+                uint256 inventory = vault.rewardTokens();
+                if (selected & 2 != 0 && stopped & 2 == 0 && inventory >= 1000e18) {
+                    address[] memory to = new address[](100);
+                    for (uint256 i; i < to.length; ++i) to[i] = address(uint160(0x100000 + step * 100 + i));
+                    ArgusRevenueVault.Claim memory c = request(5, 0, to);
+                    c.reward = vault.distributionClaimReward() * 1000e18 / inventory;
+                    bytes memory sig = signature(c);
+                    vm.prank(CALLER); vault.claim(c, to, sig);
+                    outgoing += c.reward;
+                    assertEq(vault.rewardTokens(), inventory - 1000e18);
+                    assertEq(IERC20(token).balanceOf(to[0]), 10e18);
+                    vm.expectRevert(); vm.prank(CALLER); vault.claim(c, to, sig);
+                }
+            }
+            uint256 ledger = vault.claimBudget() + vault.unallocatedPluginBudget() + vault.roundingReserve();
+            for (uint256 i; i < 5; ++i) ledger += vault.budgets(i);
+            uint256 balance = quote.balanceOf(address(vault));
+            assertEq(ledger, vault.accounted());
+            assertEq(balance + outgoing, income);
+            assertEq(vault.received() + balance - vault.accounted(), income);
+            assertLe(vault.distributionClaimReward(), vault.claimBudget());
+            assertGe(IERC20(token).balanceOf(address(vault)), vault.rewardTokens());
+            assertEq(quote.allowance(address(vault), address(router)), 0);
+            assertEq(quote.balanceOf(address(other)), 100e6);
+            assertEq(other.accounted(), 100e6); assertEq(other.received(), 100e6); assertEq(other.nonce(), 0);
+            assertEq(other.claimBudget(), 500000);
+            assertEq(other.budgets(0), 29833333); assertEq(other.budgets(1), 29833333); assertEq(other.budgets(2), 29833334);
+        }
+    }
 }

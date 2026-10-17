@@ -19,3 +19,8 @@ remappings = [
 
 [lint]
 lint_on_build = false
+
+[invariant]
+runs = 128
+depth = 64
+fail_on_revert = true

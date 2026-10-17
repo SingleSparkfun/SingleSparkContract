@@ -2,6 +2,8 @@
 
 On-chain contracts for project vaults, revenue plugins, token launches and NFTs. Project funds and plugin budgets are accounted for separately.
 
+The Robinhood platform random NFT factory source supports single-use silver-key boxes (grades 1–4) through owner-only `scheduleBoxClaim`, and gold-key boxes (grades 5–8) through `purchaseBox` (fixed 0.00002 test ETH plus the capped router fee). Buying and requesting randomness is one user transaction; new boxes mint in the verified callback without a second user mint. The owner must verify X/referral eligibility before granting a silver authorization. Keys are recipient/nonce-bound eligibility, not separately minted assets. Pools retain their configured relative odds. A failed callback retries the router's locked result. Legacy authorizations retain the eight-grade pool and manual completion. Sales proceeds enter a separate `PlatformNftSalesVault`; only offline-owner-reviewed, delayed payouts can spend them, and no payout is scheduled here. Platform fee income keeps its existing NFT reward Vault and 50/50 ledgers. Existing immutable deployments and frontend/backend pins are unchanged; public task rewards and purchases remain disabled pending verification and rollout.
+
 ## Repository structure
 
 | Directory | Contents |
@@ -14,6 +16,8 @@ On-chain contracts for project vaults, revenue plugins, token launches and NFTs.
 | [`scripts/`](scripts/) | Build, deployment and verification tools |
 
 Tests, build profiles and deployment records live alongside their owning chain.
+
+Shared EVM Hook accounting has stateful invariant tests in `chains/evm/hooks/test/HookAccountingInvariant.t.sol`: 128 sequences of 64 actions mix funding, unsynced income, inventory, payouts, policy changes, pauses, settlement and replay attempts across two ERC20 project Vaults and a native-asset Vault. Each step checks per-project conservation and reward reserves; unexpected action reverts fail the run. ARC weighted Vault tests also fuzz 32-operation sequences with swap-backed inventory and isolated project balances. NFT revenue tests fuzz staking, income, pause/resume, epoch rollover and claims against an independent quality-seconds model. Run `npm run test:evm-gameplay`, `npm run test:arc-contracts` and `npm --prefix SingleSparkContract run test:platform:nft` from the workspace. These tests use local fixtures and send no funded transactions.
 
 ## Contracts
 
@@ -30,6 +34,8 @@ Tests, build profiles and deployment records live alongside their owning chain.
 | [Solana](chains/solana/) | Revenue, DAO and timelock programs | PDA vaults, revenue operations, governance and delayed administration |
 
 Source code describes the implementation; network deployment records identify deployed versions. Updating this repository does not upgrade existing contracts or migrate funds.
+
+The NFT randomness Relayer retries an unavailable historical RPC state at the same finalized block up to five times. Persistent failures or mismatched runtime hashes still prevent startup; it never substitutes a latest-state read for finalized verification.
 
 ### Hook naming compatibility
 
