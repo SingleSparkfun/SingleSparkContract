@@ -44,6 +44,9 @@ const identity = createHash('sha256').update(json({ chainId: 46630, owner, deplo
 const privateDir = resolve(root, policy ? 'chains/robinhood/data/platform-random-nft-vault' : 'chains/robinhood/data/platform-nft-vault', identity);
 const journalPath = resolve(privateDir, 'transactions.json');
 const immediateClaims = process.argv.includes('--immediate-claims');
+const verifyIncome = !process.argv.includes('--deploy-only');
+const activate = process.argv.includes('--activate');
+assert(!activate || testnetBuild && policy && !verifyIncome, 'Activation requires an isolated random testnet build and --deploy-only');
 const reportPath = resolve(root, 'chains/robinhood/deployments/testnet/platform', deploymentId ? `nft-random-${deploymentId}.json` : nftDeploymentReportName({ random: !!policy, immediateClaims }));
 const journal = existsSync(journalPath) ? read(journalPath) : { identity, steps: {} };
 assert.equal(journal.identity, identity);
@@ -61,7 +64,7 @@ const persist = (path, value) => {
 };
 const maximumTotalCostWei = 1_000_000_000_000_000n;
 if (!process.argv.includes('--broadcast')) {
-  console.log(json({ status: 'prepared', chainId: 46630, owner, identity, maximumTotalCostWei, journalPath })); process.exit(0);
+  console.log(json({ status: 'prepared', chainId: 46630, owner, identity, maximumTotalCostWei, journalPath, verifyIncome })); process.exit(0);
 }
 mkdirSync(privateDir, { recursive: true, mode: 0o700 });
 const lockPath = resolve(privateDir, 'run.lock'); const lock = openSync(lockPath, 'wx', 0o600);
@@ -132,7 +135,7 @@ try {
    report.claimEligibilityDelaySeconds = 0;
   }
   assert.equal((await call(factory, factoryArtifact, 'randomnessRouter')).toLowerCase(), router.toLowerCase());
-  assert.equal(await call(factory, factoryArtifact, 'paused'), true);
+  assert(await call(factory, factoryArtifact, 'paused') || journal.steps['resume-testnet-draws'], 'Unexpected activation; preserve the deployment journal');
   for (let i = 0; i < 8; i++) {
    assert.equal(Number(await call(factory, factoryArtifact, 'probabilities', [BigInt(i)])), policy.probabilities[i]);
    assert.equal(Number(await call(vault, vaultArtifact, 'qualityWeight', [i + 1])), policy.weights[i]);
@@ -148,8 +151,19 @@ try {
    if (journal.steps['fund-testnet-relayer'] || await client.getBalance({ address: policy.relayer }) < 50_000_000_000_000n)
     await send('fund-testnet-relayer', { to: policy.relayer, value: 50_000_000_000_000n });
   }
+  if (activate) {
+   const finalized = await client.getBlock({blockTag:'finalized'});
+   assert(finalized.number >= BigInt(report.authorizationBlock), 'Wait for finalized randomness authorization');
+   assert((await client.getBlock()).timestamp >= BigInt(report.resumeAfter), 'Wait for the testnet policy delay');
+   await send('resume-testnet-draws', {to:factory,data:encodeFunctionData({abi:factoryArtifact.abi,functionName:'resume'})}, 'admin');
+   report.activation = report.transactions['resume-testnet-draws'];
+   delete report.transactions['resume-testnet-draws'];
+   assert.equal(await call(factory,factoryArtifact,'paused'),false);
+   report.issuance.randomClaimsEnabled = true;
+  }
  }
  report.genesis = String(await call(vault, vaultArtifact, 'genesis')); persist(reportPath, report);
+ if (verifyIncome) {
  const income = 1_000_000_000_000n;
  const deposit = await send('verify-treasury-forwarding', { to: factory, value: income });
  const recordedIncome = parseEventLogs({ abi: vaultArtifact.abi, eventName: 'Income', logs: deposit.logs }).filter(event => event.address.toLowerCase() === vault.toLowerCase());
@@ -161,11 +175,12 @@ try {
  assert.equal(await call(vault, vaultArtifact, 'ownerCredit'), 0n);
  assert.equal(await call(vault, vaultArtifact, 'nftReserve'), income / 2n);
  assert.equal(await client.getBalance({ address: vault }), income / 2n);
+ }
  const finalized = await client.getBlock({ blockTag: 'finalized' });
  report.finalizedThroughBlock = String(finalized.number);
  report.finalityComplete = Object.values(report.transactions).every(tx => BigInt(tx.blockNumber) <= finalized.number);
  report.status = report.finalityComplete ? 'verified' : 'verified_pending_finality';
- report.verification = { treasuryForwarding: true, ownerHalfWithdrawal: true, nftReservePreserved: true, runtimeCodeMatched: true,
+ report.verification = { treasuryForwarding: verifyIncome, ownerHalfWithdrawal: verifyIncome, nftReservePreserved: verifyIncome, runtimeCodeMatched: true,
   weeklySettlementSeconds: testnetBuild?.epochDurationSeconds ?? 604800, policyDelaySeconds: testnetBuild?.policyDelaySeconds ?? 172800, weeklyClaimLiveVerified: false };
  persist(reportPath, report); console.log(json({ status: report.status, addresses: report.addresses, verification: report.verification }));
 } finally { closeSync(lock); unlinkSync(lockPath); }
