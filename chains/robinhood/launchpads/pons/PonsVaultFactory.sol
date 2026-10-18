@@ -31,7 +31,7 @@ contract PonsVaultFactory is HookVaultFactory {
         escrowCodeHash = address(escrow).codehash;
         hookCodeHash = address(hook).codehash;
     }
-    function _deployImplementation() internal override returns (address) {
+    function _deployImplementation() internal virtual override returns (address) {
         return address(new PonsHookVault(IHookFactory(address(this))));
     }
     function checkPons() public view {

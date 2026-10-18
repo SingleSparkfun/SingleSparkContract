@@ -37,7 +37,7 @@ export async function verifyHooks(deploymentId) {
   const codeAt = address => client.getCode({address,blockNumber:block.number});
   for (const pin of Object.values(pins.contracts))
     assert.equal(keccak256(await codeAt(pin.address)),pin.codeHash,'Reviewed current/historical executable changed');
-  const names={factory:['PonsVaultFactory',pins.vaultFactory],vault:['PonsHookVault',pins.vaultImplementation],
+  const names={factory:[build.policyActivation === 'timestamp' ? 'PonsDelayedVaultFactory' : 'PonsVaultFactory',pins.vaultFactory],vault:[build.policyActivation === 'timestamp' ? 'PonsDelayedVault' : 'PonsHookVault',pins.vaultImplementation],
     adapter:['PonsSwapAdapter',pins.swapAdapter],buyback:['BuybackHook',pins.buybackPlugin],distribution:['DistributionHook',pins.distributionPlugin]};
   const contracts={};
   for(const [key,[name,address]] of Object.entries(names)) {
@@ -49,6 +49,10 @@ export async function verifyHooks(deploymentId) {
   const roles=readJson(resolve(root,`chains/robinhood/deployments/testnet/pons/${deploymentId}-roles.json`));
   for(const field of ['admin','authorizer','treasury']) assert.equal((await read(pins.vaultFactory,build.artifacts.factory.abi,field)).toLowerCase(),roles[field].toLowerCase());
   assert.equal(await read(pins.vaultFactory,build.artifacts.factory.abi,'DELAY'),600n);
+  if (build.policyActivation === 'timestamp') {
+    assert.equal(pins.policyActivation,'timestamp');
+    assert.equal(await read(pins.vaultFactory,build.artifacts.factory.abi,'automaticPolicyActivation'),true);
+  }
   assert.equal((await read(pins.vaultFactory,build.artifacts.factory.abi,'implementation')).toLowerCase(),pins.vaultImplementation);
   assert.equal(await read(pins.vaultImplementation,build.artifacts.vault.abi,'permanentPayoutDeduplication'),false);
   for(const [id,address] of [['buyback-burn@1',pins.buybackPlugin],['platform-buyback@1',pins.buybackPlugin],['distribution@1',pins.distributionPlugin]])

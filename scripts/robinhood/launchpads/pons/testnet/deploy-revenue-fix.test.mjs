@@ -18,6 +18,11 @@ test('revenue rollout preserves platform-token, old custody and recovery pins un
   assert.deepEqual(pins.contracts.historical_33, previous.contracts.swapAdapter);
   assert.equal(pins.vaultFactory, '0x66'); assert.equal(pins.deploymentBlock, 200);
   assert.equal(previous.vaultFactory, '0x11');
+  assert.equal(pins.policyActivation, 'transaction');
+  const automatic = revenueFixPins(previous, {...report, policyActivation:'timestamp'});
+  assert.equal(automatic.policyActivation, 'timestamp');assert.equal(automatic.policyDelaySeconds,600);
+  assert.deepEqual(automatic.legacyFactories,pins.legacyFactories);
+  assert.throws(()=>revenueFixPins(previous,{...report,policyActivation:'unchecked'}));
   assert.throws(() => revenueFixPins(previous, { ...report, finalityComplete: false }));
   assert.throws(() => revenueFixPins(previous, { ...report, status: 'revenue_registry_timelock_pending' }));
   assert.throws(() => revenueFixPins({ ...previous, chainId: 4663 }, report));

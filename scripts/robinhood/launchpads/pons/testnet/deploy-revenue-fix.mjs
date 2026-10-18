@@ -13,6 +13,7 @@ export function revenueFixPins(previous, report) {
   assert.equal(previous.chainId, 46630);
   assert.equal(report.status, 'revenue_registry_verified');
   assert.equal(report.finalityComplete, true);
+  assert([undefined, 'transaction', 'timestamp'].includes(report.policyActivation), 'Unverified policy activation mode');
   const contracts = { ...previous.contracts };
   const freshHooks = report.addresses.buybackPlugin !== undefined || report.addresses.distributionPlugin !== undefined;
   const names = ['vaultFactory', 'vaultImplementation', 'swapAdapter'];
@@ -28,7 +29,7 @@ export function revenueFixPins(previous, report) {
   }
   const historical = [{ factory: previous.vaultFactory, implementation: previous.vaultImplementation, block: previous.deploymentBlock }, ...previous.legacyFactories];
   const legacyFactories = [...new Map(historical.map(pin => [pin.factory.toLowerCase(), pin])).values()];
-  return { ...previous, payoutPolicy: 'repeat', contracts, legacyFactories,
+  return { ...previous, policyActivation: report.policyActivation ?? 'transaction', payoutPolicy: 'repeat', contracts, legacyFactories,
     vaultFactory: contracts.vaultFactory.address, vaultImplementation: contracts.vaultImplementation.address,
     swapAdapter: contracts.swapAdapter.address,
     ...(freshHooks ? { buybackPlugin: contracts.buybackPlugin.address, distributionPlugin: contracts.distributionPlugin.address } : {}),
@@ -66,7 +67,7 @@ async function main() {
   if (!c.broadcast) {
     console.log(json({ status: 'prepared', chainId: 46630, deploymentId, deployer: c.account.address, roles,
       platformToken: previous.platformToken, journal: c.journalPath, policyDelaySeconds: 600,
-      maximumTotalCostWei: c.config.maximumTotalCostWei, contracts: ['PonsVaultFactory', 'PonsHookVault', 'PonsSwapAdapter', ...(freshHooks ? ['BuybackHook', 'DistributionHook'] : [])] }));
+      maximumTotalCostWei: c.config.maximumTotalCostWei, policyActivation: build.policyActivation ?? 'transaction', contracts: [build.policyActivation === 'timestamp' ? 'PonsDelayedVaultFactory' : 'PonsVaultFactory', build.policyActivation === 'timestamp' ? 'PonsDelayedVault' : 'PonsHookVault', 'PonsSwapAdapter', ...(freshHooks ? ['BuybackHook', 'DistributionHook'] : [])] }));
     return;
   }
   mkdirSync(c.storageDir, { recursive: true, mode: 0o700 });
@@ -90,6 +91,8 @@ async function main() {
     for (const [field, expected] of [['admin', roles.admin], ['authorizer', roles.authorizer], ['treasury', roles.treasury], ['pons', previous.ponsFactory], ['escrow', previous.escrow], ['hook', previous.contracts.hook.address]])
       assert.equal((await c.read(f.address, a.factory.abi, field)).toLowerCase(), expected.toLowerCase());
     assert.equal(await c.read(f.address, a.factory.abi, 'DELAY'), 600n);
+    if (build.policyActivation === 'timestamp') assert.equal(await c.read(f.address, a.factory.abi, 'automaticPolicyActivation'), true);
+    c.report.policyActivation = build.policyActivation ?? 'transaction';
     assert.equal((await c.read(implementation, a.vault.abi, 'factory')).toLowerCase(), f.address);
     assert.equal(await c.read(implementation, a.vault.abi, 'permanentPayoutDeduplication'), false);
     await c.read(f.address, a.factory.abi, 'checkPons');
