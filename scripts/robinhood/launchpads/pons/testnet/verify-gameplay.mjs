@@ -96,7 +96,7 @@ try {
     c.report.policies=policies; c.report.platformPolicies=platformPolicies; c.save();
     const policySchedules=[];
     for(const[label,p,selected]of[['project',project,policies],['platform',platform,platformPolicies]]) {
-      const receipt=await call(`schedule-policy-${label}`,factory,a.factory.abi,build.policyActivation==='timestamp'?'activatePlugins':'schedulePolicy',[p.vault,selected],0n,'deployer');
+      const receipt=await call(`schedule-policy-${label}`,factory,a.factory.abi,build.policyActivation==='timestamp'?'activatePlugins':'schedulePolicy',[p.vault,selected],0n,build.policyActivation==='timestamp'?'deployer':'admin');
       policySchedules.push(parseEventLogs({abi:a.factory.abi,eventName:'Scheduled',logs:receipt.logs})[0].args);
     }
     const ready=policySchedules.reduce((m,o)=>o.readyAt>m?o.readyAt:m,0n);
