@@ -4,6 +4,7 @@ pragma solidity 0.8.26;
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {HookPolicy, IHookFactory} from "../../../evm/hooks/IHookProtocol.sol";
 import {PonsHookVault} from "./PonsHookVault.sol";
+import {IPonsLaunch, IPonsVaultFactory} from "./IPonsLaunch.sol";
 
 interface IPonsDelayedFactory {
     function completeActivation(bytes32 operation) external;
@@ -18,7 +19,12 @@ contract PonsDelayedVault is PonsHookVault {
     constructor(IHookFactory factory_) PonsHookVault(factory_) {}
 
     function initialize(address owner_, address project_, address asset_, HookPolicy[] calldata selected) public override {
-        if (selected.length != 0) revert Invalid();
+        if (selected.length != 0) {
+            IPonsVaultFactory source = IPonsVaultFactory(address(factory));
+            IPonsLaunch.LaunchedToken memory launch = source.pons().getLaunchedToken(project_);
+            if (asset_ != address(0) || !launch.exists || launch.token != project_
+                || launch.creatorFeeRecipient != address(this) || launch.curve != address(source.curveOf(project_))) revert Invalid();
+        }
         super.initialize(owner_, project_, asset_, selected);
     }
     function pendingActivation() external view returns (bytes32 operation, uint256 effectiveAt, HookPolicy[] memory selected) {

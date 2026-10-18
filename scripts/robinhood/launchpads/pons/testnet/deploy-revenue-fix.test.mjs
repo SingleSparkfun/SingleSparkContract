@@ -21,6 +21,11 @@ test('revenue rollout preserves platform-token, old custody and recovery pins un
   assert.equal(pins.policyActivation, 'transaction');
   const automatic = revenueFixPins(previous, {...report, policyActivation:'timestamp'});
   assert.equal(automatic.policyActivation, 'timestamp');assert.equal(automatic.policyDelaySeconds,600);
+  const initial = revenueFixPins(previous, {...report, policyActivation:'timestamp', initialPluginActivation:true});
+  assert.equal(initial.legacyGameplay.length,1);assert.equal(initial.legacyGameplay[0].vaultFactory,previous.vaultFactory);assert.equal(initial.legacyGameplay[0].swapAdapter,previous.swapAdapter);
+  assert.equal(initial.initialPluginActivation,true);assert.equal(initial.platformToken,previous.platformToken);
+  assert.equal(pins.initialPluginActivation,false);
+  assert.throws(()=>revenueFixPins(previous,{...report,initialPluginActivation:true}),/Unverified initial/);
   assert.deepEqual(automatic.legacyFactories,pins.legacyFactories);
   assert.throws(()=>revenueFixPins(previous,{...report,policyActivation:'unchecked'}));
   assert.throws(() => revenueFixPins(previous, { ...report, finalityComplete: false }));

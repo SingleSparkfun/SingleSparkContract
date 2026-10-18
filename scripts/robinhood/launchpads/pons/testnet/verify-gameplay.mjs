@@ -35,7 +35,7 @@ try {
     assert.equal(maskImmutables(code,a[name].runtime.immutableReferences),maskImmutables(a[name].runtime.object,a[name].runtime.immutableReferences));
     c.report.addresses[name] = address; c.report.codeHashes[name] = keccak256(code); c.save(); return address;
   }
-  const factory = await create('factory',[roles.admin,roles.authorizer,roles.treasury,source]);
+  const factory = await create('factory',[roles.admin,roles.authorizer,roles.treasury,source,...(build.initialPluginActivation ? [readJson(resolve(root,'../SingleSparkBackend/api/src/chains/robinhood/launchpads/pons/deployment.json')).platformToken] : [])]);
   const vaultImpl = await c.read(factory,a.factory.abi,'implementation');
   const implCode = await c.client.getCode({address:vaultImpl});
   assert.equal(maskImmutables(implCode,a.vault.runtime.immutableReferences),maskImmutables(a.vault.runtime.object,a.vault.runtime.immutableReferences));
@@ -43,6 +43,7 @@ try {
   for (const [field,expected] of Object.entries({admin:roles.admin,authorizer:roles.authorizer,treasury:roles.treasury,pons:source,escrow:foundation.report.addresses.escrow})) same(await c.read(factory,a.factory.abi,field),expected);
   assert.equal(await c.read(factory,a.factory.abi,'DELAY'),600n);
   if(build.policyActivation==='timestamp')assert.equal(await c.read(factory,a.factory.abi,'automaticPolicyActivation'),true);
+  if(build.initialPluginActivation)assert.equal(await c.read(factory,a.factory.abi,'initialPluginActivation'),true);
   if (build.payoutPolicy === 'repeat') assert.equal(await c.read(vaultImpl,a.vault.abi,'permanentPayoutDeduplication'),false);
   const buyback = await create('buyback',[]), distribution = await create('distribution',[]), adapter = await create('adapter',[factory,source]);
   const ids = ['buyback-burn@1','platform-buyback@1','distribution@1'].map(name=>keccak256(toHex(name)));

@@ -52,6 +52,11 @@ export async function verifyHooks(deploymentId) {
   if (build.policyActivation === 'timestamp') {
     assert.equal(pins.policyActivation,'timestamp');
     assert.equal(await read(pins.vaultFactory,build.artifacts.factory.abi,'automaticPolicyActivation'),true);
+    if (build.initialPluginActivation) {
+      assert.equal(pins.initialPluginActivation,true);
+      assert.equal(await read(pins.vaultFactory,build.artifacts.factory.abi,'initialPluginActivation'),true);
+      assert.equal((await read(pins.vaultFactory,build.artifacts.factory.abi,'platformToken')).toLowerCase(),pins.platformToken.toLowerCase());
+    }
   }
   assert.equal((await read(pins.vaultFactory,build.artifacts.factory.abi,'implementation')).toLowerCase(),pins.vaultImplementation);
   assert.equal(await read(pins.vaultImplementation,build.artifacts.vault.abi,'permanentPayoutDeduplication'),false);

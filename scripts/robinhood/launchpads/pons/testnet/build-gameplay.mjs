@@ -55,7 +55,7 @@ export function buildGameplay(deploymentId = '', automaticActivation = false) {
     const a = compiled[file][contract]; assert(a.evm.deployedBytecode.object.length / 2 <= 24576);
     return [name, { abi: a.abi, bytecode: `0x${a.evm.bytecode.object}`, runtime: a.evm.deployedBytecode }];
   }));
-  const build = { chainId: 46630, policyDelaySeconds: 600, payoutPolicy: 'repeat', ...(automaticActivation ? { policyActivation: 'timestamp' } : {}), productionSourcesSha256, artifacts,
+  const build = { chainId: 46630, policyDelaySeconds: 600, payoutPolicy: 'repeat', ...(automaticActivation ? { policyActivation: 'timestamp', initialPluginActivation: true } : {}), productionSourcesSha256, artifacts,
     testnetChanges: ['Isolated Robinhood Testnet controller: 10 minutes. Production source remains 48 hours.'] };
   mkdirSync(dirname(paths.output), { recursive: true });
   writeFileSync(paths.compilerInput, json(input)); writeFileSync(paths.output, json(build));

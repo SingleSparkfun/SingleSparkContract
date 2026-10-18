@@ -49,6 +49,14 @@ contract PonsVaultFactory is HookVaultFactory {
     function launch(IPonsLaunch.TokenParams calldata draft) external payable nonReentrant
         returns (address token, address curve, address vault)
     {
+        (token, curve, vault) = _launch(draft);
+        // Legacy launches retain their empty initial policy and original activation lifecycle.
+        _registerVault(msg.sender, token, vault, address(0), new HookPolicy[](0));
+        emit ProjectLaunched(msg.sender, token, vault, curve, draft.salt);
+    }
+    function _launch(IPonsLaunch.TokenParams calldata draft) internal
+        returns (address token, address curve, address vault)
+    {
         checkPons();
         if (paused || !pons.canLaunch(msg.sender) || draft.expectedEconomics == bytes32(0)
             || draft.buybackEnabled) revert Invalid();
@@ -62,8 +70,5 @@ contract PonsVaultFactory is HookVaultFactory {
         (token, curve) = pons.launchToken{value: msg.value}(params, 0, address(0), exemptions);
         if (curve.code.length == 0) revert Invalid();
         curveOf[token] = IPonsCurve(curve);
-        // No plugin executes before registration and its unchanged 48-hour activation delay.
-        _registerVault(msg.sender, token, vault, address(0), new HookPolicy[](0));
-        emit ProjectLaunched(msg.sender, token, vault, curve, draft.salt);
     }
 }
