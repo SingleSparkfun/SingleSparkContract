@@ -1,0 +1,68 @@
+{
+  "status": "hooks_verified_new_testnet_deployment",
+  "chainId": 46630,
+  "contracts": {
+    "PonsDelayedVaultFactory": {
+      "address": "0x7c9caaad277da0d05a2157b9ecd612fa68a78387",
+      "codeHash": "0xaf956e1f45b4cc473018c149303738cbc5eb5f4e3277403789952d985fc0d4c9",
+      "runtimeVerified": true
+    },
+    "PonsDelayedVault": {
+      "address": "0x0dec471f705fc266121ea27091fb3e3b68f70b6c",
+      "codeHash": "0x334cf118f4542cace09fb61050ee0bf539ca5c7f663a58b131fba89813427084",
+      "runtimeVerified": true
+    },
+    "PonsSwapAdapter": {
+      "address": "0xe3246397c0ed878f9a8f5bdba9873e5872d63841",
+      "codeHash": "0x2fe91a47848355a91d644fac198d9da47ee7efedf65c8b9bb83f47ec3fcfd00e",
+      "runtimeVerified": true
+    },
+    "BuybackHook": {
+      "address": "0xfd70cc451031f9ad940581c89cc1d9e028a99691",
+      "codeHash": "0xf4f540efef3c7c6276b04662e5b032a7c28bb382c59e602e29c36a30a507ab12",
+      "runtimeVerified": true
+    },
+    "DistributionHook": {
+      "address": "0x6b38bcf5bad0c1ca4a6b145989250022d5385e1c",
+      "codeHash": "0x9dc88044877d1999de39ea00396304c2e9845927de0b82453716d62f44a4d74d",
+      "runtimeVerified": true
+    }
+  },
+  "productionSourcesSha256": "3118197637905d244fdb2272175869d96226f17d46421c107eb7ba9853301e2e",
+  "stateBlock": "137997124",
+  "finalizedThroughBlock": "137988005",
+  "factoryDeploymentFinalized": true,
+  "finalityComplete": true,
+  "policyDelaySeconds": 600,
+  "platformToken": "0x79133018bf9cfd9049a428b5b16469c10c038a58",
+  "legacyFactories": [
+    {
+      "factory": "0xe0bf0a4415e5cbee5671c36a1df85b4cacea078e",
+      "implementation": "0xb04121ab60d760a451ea09b3ae279fff79d3c11c",
+      "block": 135740455
+    },
+    {
+      "factory": "0x82ab44690efff93c2d85272b8fbb21cddeb264d6",
+      "implementation": "0x92a6c3d68a0fea5b9967d33cc6afeb46745cb441",
+      "block": 135613815
+    },
+    {
+      "factory": "0x38fb2f4c748ab5d35c2f21afa5103fa68f25bdf1",
+      "implementation": "0xeb25f0ef1a6a3d071a50a487e5dbf73035026abc",
+      "block": 134975860
+    },
+    {
+      "factory": "0xee540b1ab519a2f8076591e4db2380a965f0bf88",
+      "implementation": "0xb153cdb47c38c8fcf12a1f67cfd25ef94e77ba02",
+      "block": 132864729
+    },
+    {
+      "factory": "0xc27f99ca0fb8e4ee79dff8ba36f77effbe52e42b",
+      "implementation": "0x2e399e259d7f2cdfa0d49a198837cd2e3272da5a",
+      "block": 132747827
+    }
+  ],
+  "reusedDeployment": false,
+  "transactionsBroadcast": 10,
+  "verifiedAt": "2026-10-18T11:10:03.791Z"
+}

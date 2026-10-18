@@ -1,0 +1,25 @@
+{
+  "chainId": 46630,
+  "contracts": {
+    "router": {
+      "address": "0x8876789976decbfcbbbe364623c63652db8c0904",
+      "codeHash": "0xfdd90802f39ce5fc8bac4c2f1b3ac7bac530fd17ff46b0630f1bd00f1e14082f"
+    },
+    "quoter": {
+      "address": "0x8dc178efb8111bb0973dd9d722ebeff267c98f94",
+      "codeHash": "0xd707b1da8cb165e5ea35a3b4450d971eb562ec171e23492aa117036b78a868f6"
+    },
+    "permit2": {
+      "address": "0x000000000022d473030f116ddee9f6b43ac78ba3",
+      "codeHash": "0x0117e0ed818bc3f2a8729ffc336c837e63e965f04b473047b39b35ad86aac259"
+    }
+  },
+  "source": "Verified Uniswap source; executable and immutable bindings checked separately on Robinhood Testnet",
+  "permit2": "0x000000000022d473030f116ddee9f6b43ac78ba3",
+  "verifiedAt": "2026-10-18T10:53:23Z",
+  "verification": [
+    "Recompiled verified Uniswap UniversalRouter and V4Quoter source; runtime matches after immutable masking",
+    "Testnet constructor binds Permit2, PoolManager and PositionManager to the existing reviewed dependencies",
+    "Router and quoter poolManager getters match the existing reviewed testnet PoolManager"
+  ]
+}

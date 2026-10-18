@@ -11,7 +11,8 @@ export function gameplayPaths(deploymentId = '') {
   return { journal: resolve(journalDirectory, 'transactions.json'), output: resolve(outputDirectory, 'gameplay-build.json'),
     compilerInput: resolve(outputDirectory, 'gameplay-compiler-input.json') };
 }
-export function buildGameplay(deploymentId = '') {
+export function buildGameplay(deploymentId = '', automaticActivation = false) {
+  assert(!automaticActivation || deploymentId, 'Automatic activation requires a separate --deployment-id; preserve existing journals');
   const paths = gameplayPaths(deploymentId);
   const sources = {};
   const remappings = { '@openzeppelin/': 'arc/lib/openzeppelin-contracts/', '@uniswap/v4-core/': 'arc/lib/v4-core/', 'solmate/': 'arc/lib/solmate/' };
@@ -34,6 +35,10 @@ export function buildGameplay(deploymentId = '') {
     buyback: ['chains/evm/hooks/RevenueHooks.sol', 'BuybackHook'],
     distribution: ['chains/evm/hooks/RevenueHooks.sol', 'DistributionHook'],
   };
+  if (automaticActivation) {
+    owned.factory = ['chains/robinhood/launchpads/pons/PonsDelayedVaultFactory.sol', 'PonsDelayedVaultFactory'];
+    owned.vault = ['chains/robinhood/launchpads/pons/PonsDelayedVault.sol', 'PonsDelayedVault'];
+  }
   for (const [path] of Object.values(owned)) visit(path);
   const productionSourcesSha256 = hash(sources);
   if (existsSync(paths.journal))
@@ -41,7 +46,7 @@ export function buildGameplay(deploymentId = '') {
   const factory = sources['chains/evm/hooks/HookVaultFactory.sol'];
   assert.equal(factory.content.split('DELAY = 48 hours').length, 2);
   factory.content = factory.content.replace('DELAY = 48 hours', 'DELAY = 10 minutes');
-  assert(sources[owned.factory[0]].content.includes('block.chainid != 46630'));
+  assert(sources['chains/robinhood/launchpads/pons/PonsVaultFactory.sol'].content.includes('block.chainid != 46630'));
   const input = { language: 'Solidity', sources, settings: { optimizer: { enabled: true, runs: 200 }, viaIR: true,
     evmVersion: 'cancun', metadata: { bytecodeHash: 'none' }, remappings: Object.entries(remappings).map(([a,b]) => `${a}=${b}`),
     outputSelection: { '*': { '*': ['abi', 'evm.bytecode', 'evm.deployedBytecode'] } } } };
@@ -50,7 +55,7 @@ export function buildGameplay(deploymentId = '') {
     const a = compiled[file][contract]; assert(a.evm.deployedBytecode.object.length / 2 <= 24576);
     return [name, { abi: a.abi, bytecode: `0x${a.evm.bytecode.object}`, runtime: a.evm.deployedBytecode }];
   }));
-  const build = { chainId: 46630, policyDelaySeconds: 600, payoutPolicy: 'repeat', productionSourcesSha256, artifacts,
+  const build = { chainId: 46630, policyDelaySeconds: 600, payoutPolicy: 'repeat', ...(automaticActivation ? { policyActivation: 'timestamp', initialPluginActivation: true } : {}), productionSourcesSha256, artifacts,
     testnetChanges: ['Isolated Robinhood Testnet controller: 10 minutes. Production source remains 48 hours.'] };
   mkdirSync(dirname(paths.output), { recursive: true });
   writeFileSync(paths.compilerInput, json(input)); writeFileSync(paths.output, json(build));
@@ -65,5 +70,5 @@ export function sourcePath(path) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const index = process.argv.indexOf('--deployment-id');
   assert(index < 0 || process.argv[index + 1], 'Missing --deployment-id');
-  console.log(json({ ...buildGameplay(index < 0 ? '' : process.argv[index + 1]), artifacts: 'saved locally' }));
+  console.log(json({ ...buildGameplay(index < 0 ? '' : process.argv[index + 1], process.argv.includes('--automatic-policy-activation')), artifacts: 'saved locally' }));
 }

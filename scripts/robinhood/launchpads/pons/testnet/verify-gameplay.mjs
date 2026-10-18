@@ -35,13 +35,15 @@ try {
     assert.equal(maskImmutables(code,a[name].runtime.immutableReferences),maskImmutables(a[name].runtime.object,a[name].runtime.immutableReferences));
     c.report.addresses[name] = address; c.report.codeHashes[name] = keccak256(code); c.save(); return address;
   }
-  const factory = await create('factory',[roles.admin,roles.authorizer,roles.treasury,source]);
+  const factory = await create('factory',[roles.admin,roles.authorizer,roles.treasury,source,...(build.initialPluginActivation ? [readJson(resolve(root,'../SingleSparkBackend/api/src/chains/robinhood/launchpads/pons/deployment.json')).platformToken] : [])]);
   const vaultImpl = await c.read(factory,a.factory.abi,'implementation');
   const implCode = await c.client.getCode({address:vaultImpl});
   assert.equal(maskImmutables(implCode,a.vault.runtime.immutableReferences),maskImmutables(a.vault.runtime.object,a.vault.runtime.immutableReferences));
   c.report.addresses.vaultImplementation = vaultImpl; c.report.codeHashes.vaultImplementation = keccak256(implCode); c.save();
   for (const [field,expected] of Object.entries({admin:roles.admin,authorizer:roles.authorizer,treasury:roles.treasury,pons:source,escrow:foundation.report.addresses.escrow})) same(await c.read(factory,a.factory.abi,field),expected);
   assert.equal(await c.read(factory,a.factory.abi,'DELAY'),600n);
+  if(build.policyActivation==='timestamp')assert.equal(await c.read(factory,a.factory.abi,'automaticPolicyActivation'),true);
+  if(build.initialPluginActivation)assert.equal(await c.read(factory,a.factory.abi,'initialPluginActivation'),true);
   if (build.payoutPolicy === 'repeat') assert.equal(await c.read(vaultImpl,a.vault.abi,'permanentPayoutDeduplication'),false);
   const buyback = await create('buyback',[]), distribution = await create('distribution',[]), adapter = await create('adapter',[factory,source]);
   const ids = ['buyback-burn@1','platform-buyback@1','distribution@1'].map(name=>keccak256(toHex(name)));
@@ -95,7 +97,7 @@ try {
     c.report.policies=policies; c.report.platformPolicies=platformPolicies; c.save();
     const policySchedules=[];
     for(const[label,p,selected]of[['project',project,policies],['platform',platform,platformPolicies]]) {
-      const receipt=await call(`schedule-policy-${label}`,factory,a.factory.abi,'schedulePolicy',[p.vault,selected],0n,'admin');
+      const receipt=await call(`schedule-policy-${label}`,factory,a.factory.abi,build.policyActivation==='timestamp'?'activatePlugins':'schedulePolicy',[p.vault,selected],0n,build.policyActivation==='timestamp'?'deployer':'admin');
       policySchedules.push(parseEventLogs({abi:a.factory.abi,eventName:'Scheduled',logs:receipt.logs})[0].args);
     }
     const ready=policySchedules.reduce((m,o)=>o.readyAt>m?o.readyAt:m,0n);
@@ -103,8 +105,13 @@ try {
       await assert.rejects(c.client.simulateContract({address:factory,abi:a.factory.abi,functionName:'executePolicy',args:[project.vault,policies],account:c.account.address}));
       c.report.status='policy_timelock_pending';c.report.readyAt=String(ready);c.save();console.log(json({status:c.report.status,readyAt:String(ready)}));
     } else {
-      await call('activate-policy-project',factory,a.factory.abi,'executePolicy',[project.vault,policies]);
-      await call('activate-policy-platform',factory,a.factory.abi,'executePolicy',[platform.vault,platformPolicies]);
+      if(build.policyActivation==='timestamp') {
+        for(const p of [project,platform])for(const id of ids)
+          assert.equal((await c.read(p.vault,a.vault.abi,'policy',[id])).weight,1,'Settings must be effective before any second transaction');
+      }else{
+        await call('activate-policy-project',factory,a.factory.abi,'executePolicy',[project.vault,policies]);
+        await call('activate-policy-platform',factory,a.factory.abi,'executePolicy',[platform.vault,platformPolicies]);
+      }
       const value=1_000_000_000_000n;
       const funded=await call('deposit-native',project.vault,a.vault.abi,'deposit',[value],value);
       const at = (functionName,args=[],blockNumber=funded.blockNumber)=>c.client.readContract({address:project.vault,abi:a.vault.abi,functionName,args,blockNumber});

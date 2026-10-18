@@ -1,0 +1,257 @@
+{
+  "identity": "7d8c48806c78501a8d675e1cf34aeed2a7a22b695d5f50b19e123d6fd220eeac",
+  "status": "revenue_registry_verified",
+  "chainId": 46630,
+  "local": false,
+  "independentDeployment": true,
+  "officialPonsDeployment": false,
+  "deployer": "0x696b8b3fd9528Bea1cBBD1f3746CB3E5E44ED3C9",
+  "addresses": {
+    "vaultFactory": "0x7c9caaad277da0d05a2157b9ecd612fa68a78387",
+    "vaultImplementation": "0x0dec471f705fc266121ea27091fb3e3b68f70b6c",
+    "swapAdapter": "0xe3246397c0ed878f9a8f5bdba9873e5872d63841"
+  },
+  "codeHashes": {
+    "vaultFactory": "0xaf956e1f45b4cc473018c149303738cbc5eb5f4e3277403789952d985fc0d4c9",
+    "vaultImplementation": "0x334cf118f4542cace09fb61050ee0bf539ca5c7f663a58b131fba89813427084",
+    "swapAdapter": "0x2fe91a47848355a91d644fac198d9da47ee7efedf65c8b9bb83f47ec3fcfd00e"
+  },
+  "transactions": {
+    "deploy-revenue-factory": {
+      "hash": "0xedb34a205050d8bb6fdea246cd23ded8fe1135a9e37f5e3619189533e38d5d41",
+      "blockNumber": "137981334",
+      "blockHash": "0x8276f9f388b9bf4674a223bc71aae990a59491f2c0f77db38c5e811656981f6a",
+      "gasCostWei": "74572140000000"
+    },
+    "deploy-revenue-adapter": {
+      "hash": "0xcfd49b46e17905e9a785641d0f9b2bb6fb490353f874bcd3b647964c23d0736f",
+      "blockNumber": "137981416",
+      "blockHash": "0x7dcd83ed2705fbe51848127875738dbefd4bec94f69976103ca9f264fd617112",
+      "gasCostWei": "14234150000000"
+    },
+    "schedule-revenue-plugin-0": {
+      "hash": "0xe4bd55d6339733a7357efc78fa3d1bd424d266b50b011e660c62ce33ac5c5f18",
+      "blockNumber": "137981473",
+      "blockHash": "0xa984b53f66c4b69548bfb2e0ca09a4aeaf3ba47053e06fd08c28aeeffd196cbf",
+      "gasCostWei": "542910000000"
+    },
+    "schedule-revenue-plugin-1": {
+      "hash": "0x8cf5a80f4a1ad359b31712a90887205dcd12d8447496b1e944ea5d6d29655ba2",
+      "blockNumber": "137981507",
+      "blockHash": "0x79a27a41227ffa64c4f06f60bd8b94409d4410edb012dd3fac8c4b268c4754fd",
+      "gasCostWei": "542910000000"
+    },
+    "schedule-revenue-plugin-2": {
+      "hash": "0x6fd289b7407995f071446d762610704a5279ae660a760fbbc411da650894b9a3",
+      "blockNumber": "137981546",
+      "blockHash": "0xf4861fb5d400a5e610364081e4c40f3144ea51a1591952a52e807c1def606dbe",
+      "gasCostWei": "542790000000"
+    },
+    "schedule-revenue-adapter": {
+      "hash": "0x1695c30fcefd4c6d0652ef0a81eb9e03e9857c6d9ab4d4d21a3cb93feff11665",
+      "blockNumber": "137981583",
+      "blockHash": "0x4e8a2a7d27b990af4b2eaddfb3e721f47ad4104265f962dfbf1d283f0824379c",
+      "gasCostWei": "519660000000"
+    },
+    "activate-revenue-plugin-0": {
+      "hash": "0xdf8ea58a802c2deb0ca2a20989c18500fd59181501a71b8f1c51577e9b0fd3ad",
+      "blockNumber": "137987482",
+      "blockHash": "0x87d60e339f9272728e1312dae317a0f800e7db789b49fdae0997705860c9807a",
+      "gasCostWei": "953140000000"
+    },
+    "activate-revenue-plugin-1": {
+      "hash": "0x2506a2efd48a2497829717e9ab63a3d74c1feff346b16b3021648d6f89b89a15",
+      "blockNumber": "137987524",
+      "blockHash": "0xefa2ac82e9603d9606ab9549e3c969190fd1b88116b9ff5a25b85ac6787b5077",
+      "gasCostWei": "782140000000"
+    },
+    "activate-revenue-plugin-2": {
+      "hash": "0xca6914b736166dd507e60b1e976ea456398c607a7dbacd0d098c96419968a3cb",
+      "blockNumber": "137987572",
+      "blockHash": "0x2dc3cde42e1fb9d3189138666f363405e07775171b723b26b6823aa9f04821f8",
+      "gasCostWei": "782020000000"
+    },
+    "activate-revenue-adapter": {
+      "hash": "0x3e9af65f6eac75bfb7d19e024857c41d9f09158c4be4f494d8466f0abd9619ce",
+      "blockNumber": "137987613",
+      "blockHash": "0x75bae3165974fcf981d354730b5f1d8de248c8bb871ea548b2159521e52c2ac2",
+      "gasCostWei": "545460000000"
+    }
+  },
+  "testnetDifferences": [
+    "Reuse an existing third-party testnet deployment, not an officially published Pons testnet.",
+    "Native phantom reserve 0.000008 ETH, graduation threshold 0.00002 ETH, launch fee zero.",
+    "External administrator can change launch availability and policies; every run rechecks the recorded state."
+  ],
+  "previousPins": {
+    "chainId": 46630,
+    "payoutPolicy": "repeat",
+    "ponsFactory": "0xec987ceb5f08d6bde2871e78ab67af145746bc8c",
+    "escrow": "0x7e637b4760549fe8d815d640bffbaaeb93b722e4",
+    "vaultFactory": "0xe0bf0a4415e5cbee5671c36a1df85b4cacea078e",
+    "vaultImplementation": "0xb04121ab60d760a451ea09b3ae279fff79d3c11c",
+    "contracts": {
+      "factory": {
+        "address": "0xEc987cEb5F08D6bdE2871E78AB67Af145746BC8c",
+        "codeHash": "0x8610636d8e26ebda6a9fccdd4913d12eb19e0db8463422d137794ac9a7bfd394",
+        "match": true,
+        "executableMatch": true
+      },
+      "escrow": {
+        "address": "0x7e637b4760549fE8d815D640bFfBaAEB93b722E4",
+        "codeHash": "0xf25f75cfbc1637ba068dc34f69098fa4e8a80f8ee8fe7bf7820594e0b3fed2f1",
+        "match": false,
+        "executableMatch": true
+      },
+      "hook": {
+        "address": "0x975a2B6c9B769cB065431445Ff554845D28E2044",
+        "codeHash": "0xafc4875f7c3528e18c90ef69f5d90d7021f8e82769f945867414f48c5fc5cab4",
+        "match": false,
+        "executableMatch": true
+      },
+      "buyback": {
+        "address": "0x5AFcAfb36e774c05D3F8a7484dccD9E3Deca44A1",
+        "codeHash": "0xa5a6bfd9af88147889a525d72af5ba58dc48a013bd0da349a4b965f70c4706db",
+        "match": false,
+        "executableMatch": true
+      },
+      "locker": {
+        "address": "0xd2B8C094b1c8f154d88b4305539A80909e752ab0",
+        "codeHash": "0x58455f80b3773871d601a025e56ec27c71ab3bbb8e2ca6b17828954450742025",
+        "match": false,
+        "executableMatch": true
+      },
+      "deployer": {
+        "address": "0xD428999b375fA665f5Ed86403B041253441e8a4e",
+        "codeHash": "0xff18cf1dfb239ca17170e006dcd2e411dddf2195b7a53af307e7f2629cd193a1",
+        "match": true,
+        "executableMatch": true
+      },
+      "graduation": {
+        "address": "0x49AB005469AA6B293fdF3C3c2e6779fbaf5e12BD",
+        "codeHash": "0x680ca9a52dd3272f69120bd88eae0889dfb7c89ecb96c866cebf77adf6fe3ca1",
+        "match": false,
+        "executableMatch": true
+      },
+      "vaultFactory": {
+        "address": "0xe0bf0a4415e5cbee5671c36a1df85b4cacea078e",
+        "codeHash": "0xa9300d084a59696fb4f30f07166c9ed6d717bc869b773d91f42ddc1e5c2dac83"
+      },
+      "vaultImplementation": {
+        "address": "0xb04121ab60d760a451ea09b3ae279fff79d3c11c",
+        "codeHash": "0x6740bf31ef4efe6601c22b86582821164f3da03721e38dc217ad825e65860a35"
+      },
+      "legacyFactory": {
+        "address": "0xc27f99ca0fb8e4ee79dff8ba36f77effbe52e42b",
+        "codeHash": "0x53de2fc01744ced7225e4d7782fa6a76ec1a2d4a5afe9bd317e4091826205dbe"
+      },
+      "legacyImplementation": {
+        "address": "0x2e399e259d7f2cdfa0d49a198837cd2e3272da5a",
+        "codeHash": "0xe3a91690f6ab7f0a2d8c63721491eef2e42718cc94adb3bc6f89e2a746b102a8"
+      },
+      "swapAdapter": {
+        "address": "0x2472aacc6df284bb48139b59e9488b09a39eac86",
+        "codeHash": "0xbfba41121f21516429393c93123595279480ea64a4e31b25ece4796ccdc978ff"
+      },
+      "buybackPlugin": {
+        "address": "0xfd70cc451031f9ad940581c89cc1d9e028a99691",
+        "codeHash": "0xf4f540efef3c7c6276b04662e5b032a7c28bb382c59e602e29c36a30a507ab12"
+      },
+      "distributionPlugin": {
+        "address": "0x6b38bcf5bad0c1ca4a6b145989250022d5385e1c",
+        "codeHash": "0x9dc88044877d1999de39ea00396304c2e9845927de0b82453716d62f44a4d74d"
+      },
+      "historical_ee540b1ab519a2f8076591e4db2380a965f0bf88": {
+        "address": "0xee540b1ab519a2f8076591e4db2380a965f0bf88",
+        "codeHash": "0x8d5161a2ffbaca5a529afb192ea0c0217cd1e07c1a7277a54ca51251b04bfc62"
+      },
+      "historical_b153cdb47c38c8fcf12a1f67cfd25ef94e77ba02": {
+        "address": "0xb153cdb47c38c8fcf12a1f67cfd25ef94e77ba02",
+        "codeHash": "0x8b2bee1529d923e27808e60f85444f74392a1ba454a900814fee7a94b50fb644"
+      },
+      "historical_c26b4cae05cae344038ea599fe4ba376bdf4b56e": {
+        "address": "0xc26b4cae05cae344038ea599fe4ba376bdf4b56e",
+        "codeHash": "0xe2d7f120b41b6a618db01aaf6ef98641952b78aeaeb81eb2c367fb3ef699b14b"
+      },
+      "historical_38fb2f4c748ab5d35c2f21afa5103fa68f25bdf1": {
+        "address": "0x38fb2f4c748ab5d35c2f21afa5103fa68f25bdf1",
+        "codeHash": "0x83e6a38da4d82be1999a0ca6087a76a267b2561f3ab40bb6e8134209d9dc7d41"
+      },
+      "historical_eb25f0ef1a6a3d071a50a487e5dbf73035026abc": {
+        "address": "0xeb25f0ef1a6a3d071a50a487e5dbf73035026abc",
+        "codeHash": "0x63be217c9db65e32f9d4e1b8ea9d82aaa3c9ee7c7acea3b6f263196a71429aa8"
+      },
+      "historical_1f8685a732236388d0ef7b4bc8f0a746f755b072": {
+        "address": "0x1f8685a732236388d0ef7b4bc8f0a746f755b072",
+        "codeHash": "0x4bc98bd85cfba039936a6745f5c8870fa0cd7c6372f5ad640c7299d39b2d1851"
+      },
+      "historical_ee5b8a7dbb4b10d1de5d84690d8abd45031dc2a9": {
+        "address": "0xee5b8a7dbb4b10d1de5d84690d8abd45031dc2a9",
+        "codeHash": "0xf4f540efef3c7c6276b04662e5b032a7c28bb382c59e602e29c36a30a507ab12"
+      },
+      "historical_9cab78eccad6954f0209675709ebf381137acbde": {
+        "address": "0x9cab78eccad6954f0209675709ebf381137acbde",
+        "codeHash": "0x9dc88044877d1999de39ea00396304c2e9845927de0b82453716d62f44a4d74d"
+      },
+      "historical_82ab44690efff93c2d85272b8fbb21cddeb264d6": {
+        "address": "0x82ab44690efff93c2d85272b8fbb21cddeb264d6",
+        "codeHash": "0xd31fbb34a412d1163f4ccd3c110e32bde1cd87c45cbe13bfd86dca5ea6496fc3"
+      },
+      "historical_92a6c3d68a0fea5b9967d33cc6afeb46745cb441": {
+        "address": "0x92a6c3d68a0fea5b9967d33cc6afeb46745cb441",
+        "codeHash": "0x95777c014c9fef585a483561ed7dc5861e90044f715fde477f5556a06bbc5014"
+      },
+      "historical_54dc0fb52b8d121e7b4e063f33305e0d09f70f59": {
+        "address": "0x54dc0fb52b8d121e7b4e063f33305e0d09f70f59",
+        "codeHash": "0x17b395542982fd4f1f33f0bcde42a305371fa7846c93a77a5453d5e41b4f051a"
+      }
+    },
+    "poolManager": "0x8366a39CC670B4001A1121B8F6A443A643e40951",
+    "legacyFactories": [
+      {
+        "factory": "0x82ab44690efff93c2d85272b8fbb21cddeb264d6",
+        "implementation": "0x92a6c3d68a0fea5b9967d33cc6afeb46745cb441",
+        "block": 135613815
+      },
+      {
+        "factory": "0x38fb2f4c748ab5d35c2f21afa5103fa68f25bdf1",
+        "implementation": "0xeb25f0ef1a6a3d071a50a487e5dbf73035026abc",
+        "block": 134975860
+      },
+      {
+        "factory": "0xee540b1ab519a2f8076591e4db2380a965f0bf88",
+        "implementation": "0xb153cdb47c38c8fcf12a1f67cfd25ef94e77ba02",
+        "block": 132864729
+      },
+      {
+        "factory": "0xc27f99ca0fb8e4ee79dff8ba36f77effbe52e42b",
+        "implementation": "0x2e399e259d7f2cdfa0d49a198837cd2e3272da5a",
+        "block": 132747827
+      }
+    ],
+    "deploymentBlock": 135740455,
+    "platformToken": "0x79133018bf9cfd9049a428b5b16469c10c038a58",
+    "policyDelaySeconds": 600,
+    "swapAdapter": "0x2472aacc6df284bb48139b59e9488b09a39eac86",
+    "buybackPlugin": "0xfd70cc451031f9ad940581c89cc1d9e028a99691",
+    "distributionPlugin": "0x6b38bcf5bad0c1ca4a6b145989250022d5385e1c"
+  },
+  "initialPluginActivation": true,
+  "policyActivation": "timestamp",
+  "platformToken": "0x79133018bf9cfd9049a428b5b16469c10c038a58",
+  "readyAt": "1792320701",
+  "finalizedThroughBlock": "137988005",
+  "finalityComplete": true,
+  "verification": {
+    "checks": [
+      "reviewed executable bytecode",
+      "pinned Pons Hook and escrow bindings",
+      "separate admin and authorizer",
+      "10-minute testnet registry delay",
+      "three registered plugins",
+      "factory-bound swap adapter",
+      "existing platform token preserved"
+    ],
+    "production": false
+  }
+}

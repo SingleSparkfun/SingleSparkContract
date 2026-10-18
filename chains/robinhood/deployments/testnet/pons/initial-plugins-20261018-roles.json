@@ -1,0 +1,7 @@
+{
+  "chainId": 46630,
+  "admin": "0xe3CB759628928e584256Da687Cf837Df2cf3C116",
+  "authorizer": "0xe36aa094c070b3aB3475c6C2Af0071E8438A71C1",
+  "treasury": "0x985bf99675Cfc58d4fD1551A489f67307f202310",
+  "description": "Initial plugin activation fix; preserve the current reviewed Robinhood Testnet roles, platform-token identity and historical custody. Deployment and pin switch remain pending."
+}

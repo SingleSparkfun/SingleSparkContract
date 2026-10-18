@@ -17,19 +17,19 @@ contract HookVault is ReentrancyGuard, IHookVault {
     address public projectToken;
     address public asset;
     bool public paused;
-    uint256 public revision;
+    uint256 internal policyRevision;
     uint256 public nonce;
     uint256 public accounted;
     uint256 public received;
     uint256 public platformBudget;
     uint256 public claimBudget;
     uint256 public reservedClaim;
-    uint256 public unallocated;
-    bytes32[] private ids;
-    mapping(bytes32 => bool) private known;
-    mapping(bytes32 => HookPolicy) private policies;
+    uint256 internal unallocatedBudget;
+    bytes32[] internal ids;
+    mapping(bytes32 => bool) internal known;
+    mapping(bytes32 => HookPolicy) internal policies;
     mapping(bytes32 => bool) public pluginPaused;
-    mapping(bytes32 => uint256) public budget;
+    mapping(bytes32 => uint256) internal budgets;
     mapping(bytes32 => uint256) public inventory;
     mapping(bytes32 => uint256) public inventoryReward;
     mapping(address => bool) public paid;
@@ -59,31 +59,34 @@ contract HookVault is ReentrancyGuard, IHookVault {
         _;
     }
 
-    function initialize(address owner_, address project_, address asset_, HookPolicy[] calldata selected) external onlyFactory {
+    function initialize(address owner_, address project_, address asset_, HookPolicy[] calldata selected) public virtual onlyFactory {
         if (owner != address(0) || owner_ == address(0) || project_.code.length == 0
             || (asset_ != address(0) && asset_.code.length == 0)) revert Invalid();
         owner = owner_; projectToken = project_; asset = asset_;
         _setPolicies(selected);
     }
 
-    function pluginIds() external view returns (bytes32[] memory) { return ids; }
+    function revision() public view virtual returns (uint256) { return policyRevision; }
+    function budget(bytes32 id) public view virtual returns (uint256) { return budgets[id]; }
+    function unallocated() public view virtual returns (uint256) { return unallocatedBudget; }
+    function pluginIds() public view virtual returns (bytes32[] memory) { return ids; }
     function permanentPayoutDeduplication() public pure virtual returns (bool) { return true; }
-    function policy(bytes32 id) external view returns (HookPolicy memory) { return policies[id]; }
+    function policy(bytes32 id) public view virtual returns (HookPolicy memory) { return policies[id]; }
     function activePolicy() external view returns (HookPolicy memory) {
         if (active.implementation == address(0)) revert Invalid();
         return policies[active.id];
     }
-    function setPolicies(HookPolicy[] calldata selected) external onlyFactory nonReentrant {
+    function setPolicies(HookPolicy[] calldata selected) external virtual onlyFactory nonReentrant {
         _sync();
         _setPolicies(selected);
         // Unallocated funds have no prior plugin owner. Existing plugin balances never move.
         _allocate(0);
     }
-    function _setPolicies(HookPolicy[] calldata selected) private {
+    function _validatePolicies(HookPolicy[] memory selected) internal view {
         if (selected.length > 16) revert Invalid();
-        for (uint256 i; i < ids.length; ++i) policies[ids[i]].weight = 0;
+        uint256 count = ids.length;
         for (uint256 i; i < selected.length; ++i) {
-            HookPolicy calldata p = selected[i];
+            HookPolicy memory p = selected[i];
             if (p.id == bytes32(0) || p.route.length > 4096 || p.rules.length > 4096
                 || (p.targetAsset != address(0) && p.targetAsset.code.length == 0)) revert Invalid();
             for (uint256 j; j < i; ++j) if (selected[j].id == p.id) revert Invalid();
@@ -94,20 +97,33 @@ contract HookVault is ReentrancyGuard, IHookVault {
                 factory.checkAdapter(p.adapter);
                 IHookSwapAdapter(p.adapter).validate(asset, p.targetAsset, p.route);
             } else if (p.adapter != address(0) || p.route.length != 0) revert Invalid();
+            if (!known[p.id]) ++count;
+            if (count > 16) revert Invalid();
+        }
+    }
+    function _setPolicies(HookPolicy[] memory selected) internal {
+        _validatePolicies(selected);
+        _writePolicies(selected);
+    }
+    function _writePolicies(HookPolicy[] memory selected) internal {
+        for (uint256 i; i < ids.length; ++i) policies[ids[i]].weight = 0;
+        for (uint256 i; i < selected.length; ++i) {
+            HookPolicy memory p = selected[i];
             if (!known[p.id]) { known[p.id] = true; ids.push(p.id); }
-            if (ids.length > 16) revert Invalid();
             policies[p.id] = p;
             pluginPaused[p.id] = false;
         }
-        emit PolicyChanged(++revision);
+        emit PolicyChanged(++policyRevision);
     }
+    function _applyPendingPolicies() internal virtual {}
     function setPaused(bytes32 id, bool stopped) external onlyFactory {
+        _applyPendingPolicies();
         if (id == bytes32(0)) paused = stopped;
         else {
             if (!known[id]) revert Invalid();
             pluginPaused[id] = stopped;
         }
-        emit PauseChanged(id, stopped, ++revision);
+        emit PauseChanged(id, stopped, ++policyRevision);
     }
 
     /// Approval is required for ERC20 deposits. Direct transfers are recognized by sync().
@@ -129,6 +145,7 @@ contract HookVault is ReentrancyGuard, IHookVault {
     function sync() external nonReentrant { _sync(); }
     function _sync() internal {
         if (owner == address(0)) revert Invalid();
+        _applyPendingPolicies();
         uint256 balance = HookAsset.balance(asset, address(this));
         if (balance < accounted) revert Invalid();
         uint256 income = balance - accounted;
@@ -150,19 +167,19 @@ contract HookVault is ReentrancyGuard, IHookVault {
         uint256 base = allocationRemainder;
         return base - base * 1000 / 10000 - base * 50 / 10000 - base * 8950 / 10000;
     }
-    function _allocate(uint256 amount) private {
-        amount += unallocated;
+    function _allocate(uint256 amount) internal {
+        amount += unallocatedBudget;
         uint256 totalWeight;
         uint256 last;
         for (uint256 i; i < ids.length; ++i) if (policies[ids[i]].weight != 0) {
             totalWeight += policies[ids[i]].weight; last = i;
         }
-        if (totalWeight == 0) { unallocated = amount; return; }
-        unallocated = 0;
+        if (totalWeight == 0) { unallocatedBudget = amount; return; }
+        unallocatedBudget = 0;
         uint256 remaining = amount;
         for (uint256 i; i < ids.length; ++i) if (policies[ids[i]].weight != 0) {
             uint256 share = i == last ? remaining : Math.mulDiv(amount, policies[ids[i]].weight, totalWeight);
-            budget[ids[i]] += share; remaining -= share;
+            budgets[ids[i]] += share; remaining -= share;
         }
     }
     function settlePlatform() external nonReentrant {
@@ -181,9 +198,10 @@ contract HookVault is ReentrancyGuard, IHookVault {
         return keccak256(abi.encodePacked("\x19\x01", domain, keccak256(abi.encode(CLAIM_TYPEHASH, request))));
     }
     function claim(HookClaim calldata request, bytes calldata data, bytes calldata signature) external nonReentrant {
+        _applyPendingPolicies();
         HookPolicy storage p = policies[request.pluginId];
         if (paused || factory.paused() || pluginPaused[request.pluginId] || p.weight == 0
-            || request.caller != msg.sender || request.nonce != nonce || request.policyRevision != revision
+            || request.caller != msg.sender || request.nonce != nonce || request.policyRevision != revision()
             || request.registryRevision != factory.revision() || request.deadline < block.timestamp
             || request.deadline > block.timestamp + 300 || request.dataHash != keccak256(data)
             || request.amount > p.maxSpend || ECDSA.recover(claimDigest(request), signature) != factory.authorizer()) revert Invalid();
@@ -194,7 +212,7 @@ contract HookVault is ReentrancyGuard, IHookVault {
         IHookPlugin(active.implementation).validate(projectToken, asset, p);
         IHookPlugin(active.implementation).execute(data);
         if (active.phase != 2 || request.reward > active.reward || request.reward > claimBudget - reservedClaim
-            || request.policyRevision != revision || request.registryRevision != factory.revision()) revert Invalid();
+            || request.policyRevision != revision() || request.registryRevision != factory.revision()) revert Invalid();
         delete active;
         if (request.reward != 0) {
             claimBudget -= request.reward; accounted -= request.reward;
@@ -207,9 +225,9 @@ contract HookVault is ReentrancyGuard, IHookVault {
     function pluginAcquire() external onlyPlugin(0) returns (uint256 output) {
         HookPolicy storage p = policies[active.id];
         uint256 amount = active.amount;
-        if (amount == 0 || amount > budget[active.id] || active.minimumOutput == 0) revert Invalid();
+        if (amount == 0 || amount > budgets[active.id] || active.minimumOutput == 0) revert Invalid();
         active.phase = 1;
-        budget[active.id] -= amount;
+        budgets[active.id] -= amount;
         if (p.targetAsset == asset) {
             output = amount;
             if (output < active.minimumOutput) revert Invalid();

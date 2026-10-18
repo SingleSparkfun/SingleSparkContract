@@ -76,7 +76,7 @@ contract HookVaultFactory is IHookFactory, ReentrancyGuard {
         if (when == 0 || block.timestamp < when) revert Invalid();
         delete readyAt[operation];
     }
-    function cancel(bytes32 operation) external onlyAdmin {
+    function cancel(bytes32 operation) external virtual onlyAdmin {
         delete readyAt[operation]; emit Cancelled(operation);
     }
     function _pluginOperation(bytes32 id, address next) private view returns (bytes32) {
@@ -112,11 +112,11 @@ contract HookVaultFactory is IHookFactory, ReentrancyGuard {
     function _policyOperation(address vault, HookPolicy[] calldata selected) private view returns (bytes32) {
         return keccak256(abi.encode("policy", vault, _vault(vault).revision(), revision, selected));
     }
-    function schedulePolicy(address vault, HookPolicy[] calldata selected) external returns (bytes32) {
+    function schedulePolicy(address vault, HookPolicy[] calldata selected) external virtual returns (bytes32) {
         if (msg.sender != admin && msg.sender != _vault(vault).owner()) revert Invalid();
         return _schedule(_policyOperation(vault, selected));
     }
-    function executePolicy(address vault, HookPolicy[] calldata selected) external nonReentrant {
+    function executePolicy(address vault, HookPolicy[] calldata selected) external virtual nonReentrant {
         _consume(_policyOperation(vault, selected));
         _vault(vault).setPolicies(selected);
     }

@@ -13,6 +13,8 @@ export function revenueFixPins(previous, report) {
   assert.equal(previous.chainId, 46630);
   assert.equal(report.status, 'revenue_registry_verified');
   assert.equal(report.finalityComplete, true);
+  assert([undefined, 'transaction', 'timestamp'].includes(report.policyActivation), 'Unverified policy activation mode');
+  assert(report.initialPluginActivation === undefined || report.initialPluginActivation === true && report.policyActivation === 'timestamp', 'Unverified initial plugin activation');
   const contracts = { ...previous.contracts };
   const freshHooks = report.addresses.buybackPlugin !== undefined || report.addresses.distributionPlugin !== undefined;
   const names = ['vaultFactory', 'vaultImplementation', 'swapAdapter'];
@@ -28,7 +30,13 @@ export function revenueFixPins(previous, report) {
   }
   const historical = [{ factory: previous.vaultFactory, implementation: previous.vaultImplementation, block: previous.deploymentBlock }, ...previous.legacyFactories];
   const legacyFactories = [...new Map(historical.map(pin => [pin.factory.toLowerCase(), pin])).values()];
-  return { ...previous, payoutPolicy: 'repeat', contracts, legacyFactories,
+  const legacyGameplay = report.initialPluginActivation ? [
+    { vaultFactory:previous.vaultFactory, vaultImplementation:previous.vaultImplementation, swapAdapter:previous.swapAdapter, buybackPlugin:previous.buybackPlugin, distributionPlugin:previous.distributionPlugin,
+      deploymentBlock:previous.deploymentBlock, policyActivation:previous.policyActivation ?? 'transaction',
+      policyDelaySeconds:previous.policyDelaySeconds ?? 600, payoutPolicy:previous.payoutPolicy },
+    ...(previous.legacyGameplay ?? []),
+  ].filter((pin,index,all)=>all.findIndex(value=>value.vaultFactory.toLowerCase()===pin.vaultFactory.toLowerCase())===index) : previous.legacyGameplay ?? [];
+  return { ...previous, legacyGameplay, initialPluginActivation: report.initialPluginActivation === true, policyActivation: report.policyActivation ?? 'transaction', payoutPolicy: 'repeat', contracts, legacyFactories,
     vaultFactory: contracts.vaultFactory.address, vaultImplementation: contracts.vaultImplementation.address,
     swapAdapter: contracts.swapAdapter.address,
     ...(freshHooks ? { buybackPlugin: contracts.buybackPlugin.address, distributionPlugin: contracts.distributionPlugin.address } : {}),
@@ -66,7 +74,7 @@ async function main() {
   if (!c.broadcast) {
     console.log(json({ status: 'prepared', chainId: 46630, deploymentId, deployer: c.account.address, roles,
       platformToken: previous.platformToken, journal: c.journalPath, policyDelaySeconds: 600,
-      maximumTotalCostWei: c.config.maximumTotalCostWei, contracts: ['PonsVaultFactory', 'PonsHookVault', 'PonsSwapAdapter', ...(freshHooks ? ['BuybackHook', 'DistributionHook'] : [])] }));
+      maximumTotalCostWei: c.config.maximumTotalCostWei, policyActivation: build.policyActivation ?? 'transaction', contracts: [build.policyActivation === 'timestamp' ? 'PonsDelayedVaultFactory' : 'PonsVaultFactory', build.policyActivation === 'timestamp' ? 'PonsDelayedVault' : 'PonsHookVault', 'PonsSwapAdapter', ...(freshHooks ? ['BuybackHook', 'DistributionHook'] : [])] }));
     return;
   }
   mkdirSync(c.storageDir, { recursive: true, mode: 0o700 });
@@ -83,13 +91,20 @@ async function main() {
       assert.equal(maskImmutables(code, artifact.runtime.immutableReferences), maskImmutables(artifact.runtime.object, artifact.runtime.immutableReferences));
       return { address: receipt.contractAddress.toLowerCase(), codeHash: keccak256(code) };
     }
-    const f = await create('deploy-revenue-factory', a.factory, [roles.admin, roles.authorizer, roles.treasury, previous.ponsFactory]);
+    const f = await create('deploy-revenue-factory', a.factory, [roles.admin, roles.authorizer, roles.treasury, previous.ponsFactory, ...(build.initialPluginActivation ? [previous.platformToken] : [])]);
     const implementation = await c.read(f.address, a.factory.abi, 'implementation');
     const implementationCode = await c.client.getCode({ address: implementation });
     assert.equal(maskImmutables(implementationCode, a.vault.runtime.immutableReferences), maskImmutables(a.vault.runtime.object, a.vault.runtime.immutableReferences));
     for (const [field, expected] of [['admin', roles.admin], ['authorizer', roles.authorizer], ['treasury', roles.treasury], ['pons', previous.ponsFactory], ['escrow', previous.escrow], ['hook', previous.contracts.hook.address]])
       assert.equal((await c.read(f.address, a.factory.abi, field)).toLowerCase(), expected.toLowerCase());
     assert.equal(await c.read(f.address, a.factory.abi, 'DELAY'), 600n);
+    if (build.policyActivation === 'timestamp') assert.equal(await c.read(f.address, a.factory.abi, 'automaticPolicyActivation'), true);
+    if (build.initialPluginActivation) {
+      assert.equal(await c.read(f.address, a.factory.abi, 'initialPluginActivation'), true);
+      assert.equal((await c.read(f.address, a.factory.abi, 'platformToken')).toLowerCase(), previous.platformToken.toLowerCase());
+    }
+    c.report.initialPluginActivation = build.initialPluginActivation;
+    c.report.policyActivation = build.policyActivation ?? 'transaction';
     assert.equal((await c.read(implementation, a.vault.abi, 'factory')).toLowerCase(), f.address);
     assert.equal(await c.read(implementation, a.vault.abi, 'permanentPayoutDeduplication'), false);
     await c.read(f.address, a.factory.abi, 'checkPons');
