@@ -32,6 +32,7 @@ services:
       NFT_RANDOM_DEPLOYMENT_FILE: /run/config/nft-random-vault.json
       RELAYER_KEY_FILE: /run/secrets/relayer-key
       RPC_URL: ${RPC_URL:?Set RPC_URL}
+      ARCHIVE_RPC_URL: ${ARCHIVE_RPC_URL:-}
       WS_URL: ${WS_URL:-}
       DATABASE_URL: postgresql://openvrf:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/openvrf
       RECEIPT_CONFIRMATIONS: '2'

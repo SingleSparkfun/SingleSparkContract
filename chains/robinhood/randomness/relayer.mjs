@@ -15,7 +15,7 @@ const report = JSON.parse(readFileSync(process.env.NFT_RANDOM_DEPLOYMENT_FILE));
 assert.equal(report.chainId, 46630); assert.equal(report.environment, 'testnet');
 assert.equal(report.openVrfRevision, pin.revision); assert.equal(report.status, 'verified');
 assert.equal(statSync(process.env.RELAYER_KEY_FILE).mode & 0o077, 0, 'Relayer key must be owner-only');
-const connection = new FetchRequest(process.env.RPC_URL); connection.timeout = 15_000;
+const connection = new FetchRequest(process.env.ARCHIVE_RPC_URL || process.env.RPC_URL); connection.timeout = 15_000;
 const provider = new JsonRpcProvider(connection, undefined, { batchMaxCount: 1 });
 try {
   assert.equal((await provider.getNetwork()).chainId, 46630n, 'RPC chain mismatch');

@@ -33,6 +33,7 @@
       ],
       "env": {
         "RPC_URL": "https://rpc.testnet.chain.robinhood.com",
+        "ARCHIVE_RPC_URL": "",
         "OPENVRF_DIR": "/app",
         "NFT_RANDOM_DEPLOYMENT_FILE": "/run/config/nft-random-vault.json",
         "RELAYER_KEY_SOURCE_FILE": "/run/config/relayer-key",

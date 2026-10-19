@@ -35,7 +35,7 @@ Shared EVM Hook accounting has stateful invariant tests in `chains/evm/hooks/tes
 
 Source code describes the implementation; network deployment records identify deployed versions. Updating this repository does not upgrade existing contracts or migrate funds.
 
-The NFT randomness Relayer retries an unavailable historical RPC state at the same finalized block up to five times. Persistent failures or mismatched runtime hashes still prevent startup; it never substitutes a latest-state read for finalized verification.
+The NFT randomness Relayer retries an unavailable historical RPC state at the same finalized block up to five times. Optional `ARCHIVE_RPC_URL` supplies the startup verification provider while `RPC_URL` retains request scanning, receipts and broadcasting; both providers must identify Robinhood Testnet (46630). Persistent failures or mismatched runtime hashes still prevent startup; it never substitutes a latest-state read for finalized verification.
 
 ### Hook naming compatibility
 
